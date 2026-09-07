@@ -1,0 +1,10 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hostinger → 新竹縣資料連線實驗</title><link rel="stylesheet" href="/style.css"></head><body><main>
+<p class="eyebrow">世外高人 / 部署前連線實驗</p><h1>這台主機，能拿到新竹的資料嗎？</h1><p>按下測試後，由部署這個服務的 Node.js 主機連到縣府。你的瀏覽器只接收測試報告，不直接呼叫縣府 API。</p>
+<section><h2>1. 確認執行環境</h2><p id="environment">正在讀取主機狀態…</p><p class="muted">地區請以 Hostinger 控制台為準，環境名稱由你設定，程式不會猜測主機所在國家。</p></section>
+<section><h2>2. 選擇測試</h2><label>預設目標<select id="target"></select></label><label>或貼上縣府公開 JSON 網址<input id="url" type="url" placeholder="https://dip.hsinchu.gov.tw/…"></label><p class="muted">留空即使用預設。只接受 dip、www、ws.hsinchu.gov.tw，僅 GET；不接受金鑰、任意外站或內網網址。數據平台介面以官方頁面實際使用者為準，可能改版。</p>
+<div class="row"><label>IP 模式<select id="family"><option value="0">系統預設（第一個公開 DNS 位址）</option><option value="4">IPv4</option><option value="6">IPv6</option></select></label><label>測試密碼（若已設定）<input id="token" type="password" autocomplete="off"></label></div>
+<div class="actions"><button id="run" disabled>從主機測試</button><button id="all" disabled>依序測試全部預設</button><button id="download" disabled>下載本次紀錄 JSON</button></div><p id="status" role="status">準備中</p></section>
+<section><h2>3. 測試結果</h2><p class="muted">HTTP 200 可能只是登入或封鎖 HTML。只有「收到 JSON」代表取得可解析的資料；仍須另確認欄位、資料新鮮度與業務錯誤。主機端不受瀏覽器 CORS 規則限制。</p><div id="results"></div></section>
+<section><h2>如何判讀</h2><ul><li>首頁與 JSON 都失敗：先檢查 DNS、TLS、路由與主機出站連線。</li><li>首頁成功、JSON 回 HTML：可能需正常工作階段，或被導向登入／錯誤頁。比較直接呼叫與工作階段版本。</li><li>403／429：可能是權限、WAF 或限流；不是海外封鎖的充分證據。</li><li>本機成功、Hostinger 同網址失敗：保存兩份 JSON 與主機地區，再查 IP／WAF／路由限制。</li><li>某個 JSON 成功：只證明該端點此刻可用；實際遊戲要用的每個來源仍須逐一測試。</li></ul></section>
+<footer>AI 共創 · GPT-6 Astra ｜ 本工具不建立資料庫；先驗證主機出站連線，再決定資料匯入方式。</footer>
+</main><script src="/client.js"></script></body></html>

@@ -20,6 +20,10 @@
 
 覆蓋可通關路線、亂放終招失敗、印記消耗、連攜與修復、10,000 場固定種子的隨機策略。這是遊戲規則測試，不等同真人使用者測試。
 
-## AI 使用
+## Hostinger 主機端 API 連線實驗
+
+repo 根目錄新增可獨立啟動的 Node.js 服務，用於驗證 Hostinger 主機能否取得新竹縣公開資料。使用 `npm start`，部署入口 `server.js`；完整步驟與結果判讀見 [api-probe/README.md](api-probe/README.md)。GitHub Pages 仍只發布 `docs/` 遊戲。
+
+## AI 使用與署名
 
 AI 共創：**GPT-6 Astra（透過 OpenAI Codex）**。本靜態原型的遊戲規則草案、核心程式、介面、固定文案與測試由 GPT-6 Astra 協助生成；張建文提供提案、創意方向與成果確認。參賽者需檢核並依競賽簡章如實揭露。規劃文件與含個人資料的報名附件不在本次公開發布範圍。
