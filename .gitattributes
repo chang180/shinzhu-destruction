@@ -1,0 +1,2 @@
+# Preserve downloaded source assets and license bytes for manifest SHA-256 checks.
+assets/third-party/** -text

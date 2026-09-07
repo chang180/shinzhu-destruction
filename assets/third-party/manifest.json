@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "purpose": "Small candidate subset for future game effects; not production assets yet",
+  "packs": [
+    {
+      "id": "kenney-impact-sounds",
+      "author": "Kenney",
+      "version": "1.0",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "download_url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "downloaded_on": "2026-09-08",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution": "Kenney (https://kenney.nl); original notices preserved in License.txt",
+      "archive_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+      "archive_bytes": 800850,
+      "status": "downloaded-not-integrated",
+      "review": "Publisher page and packaged license checked; audio listening, loudness and browser playback QA pending.",
+      "files": [
+        {
+          "path": "assets/third-party/kenney-impact-sounds/impactGeneric_light_000.ogg",
+          "archive_entry": "Audio/impactGeneric_light_000.ogg",
+          "bytes": 5827,
+          "sha256": "f0e982611e97512fee5f777986b67e8b435434b601f94992ec044f7e89fb5acb",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-impact-sounds/impactMetal_heavy_000.ogg",
+          "archive_entry": "Audio/impactMetal_heavy_000.ogg",
+          "bytes": 6110,
+          "sha256": "e07045693e4a2b3d165c424e3dab4c781d9ff8880a386880ac89a51315d7f831",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-impact-sounds/impactGlass_heavy_000.ogg",
+          "archive_entry": "Audio/impactGlass_heavy_000.ogg",
+          "bytes": 7403,
+          "sha256": "b44b39a940e8948e74b9bd3776bff980df43cf220abdaf0d467dc4c43c0244a5",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-impact-sounds/impactBell_heavy_000.ogg",
+          "archive_entry": "Audio/impactBell_heavy_000.ogg",
+          "bytes": 13915,
+          "sha256": "94b8bb5f2d43ab65e4bcc32b28562416e9bc2c51d9fd4be1e333660ee52f977f",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-impact-sounds/License.txt",
+          "archive_entry": "License.txt",
+          "bytes": 608,
+          "sha256": "b49aa9c56b04528b95913de13e506a0f7c5e807b9925db9bfef86af1f91120db",
+          "role": "license",
+          "modified": false
+        }
+      ]
+    },
+    {
+      "id": "kenney-particle-pack",
+      "author": "Kenney",
+      "version": "1.1 (archive License.txt)",
+      "source_page": "https://kenney.nl/assets/particle-pack",
+      "download_url": "https://kenney.nl/media/pages/assets/particle-pack/f8fe0f8cb8-1677578741/kenney_particle-pack.zip",
+      "downloaded_on": "2026-09-08",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution": "Kenney (https://kenney.nl); original notices preserved in License.txt",
+      "archive_sha256": "b631d4b07f7002549fdcf155f01141ad482f79f3440e4e301eed49ce5f1d8958",
+      "archive_bytes": 15001764,
+      "status": "downloaded-not-integrated",
+      "review": "Publisher page and packaged license checked; all four PNGs visually inspected as abstract effects; in-game visual QA pending.",
+      "files": [
+        {
+          "path": "assets/third-party/kenney-particle-pack/circle_01.png",
+          "archive_entry": "PNG (Transparent)/circle_01.png",
+          "bytes": 69755,
+          "sha256": "4b2d03683bf0fe4a946567adc3bd86b8ba045da84cee58dc2cf8aef63bbfaa06",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-particle-pack/smoke_03.png",
+          "archive_entry": "PNG (Transparent)/smoke_03.png",
+          "bytes": 39737,
+          "sha256": "a71f8abcac64f8d73a94625cc9a10033dbeafa7eaea750560cba0daa73fe8752",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-particle-pack/spark_07.png",
+          "archive_entry": "PNG (Transparent)/spark_07.png",
+          "bytes": 40968,
+          "sha256": "216101e7b54c627b4aa780649a21f0ef9146d2566f52699284d091ef00825a26",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-particle-pack/light_01.png",
+          "archive_entry": "PNG (Transparent)/light_01.png",
+          "bytes": 93470,
+          "sha256": "caedcc5df5bcac4470244d2520d6a64b45b20c1ccf4d918da516c55e3fa365a6",
+          "role": "candidate-source",
+          "modified": false
+        },
+        {
+          "path": "assets/third-party/kenney-particle-pack/License.txt",
+          "archive_entry": "License.txt",
+          "bytes": 651,
+          "sha256": "f9e70b81d8cc07c4e07c9f2eff1d94fd371a06070b18cb67c651c41158ec2975",
+          "role": "license",
+          "modified": false
+        }
+      ]
+    }
+  ]
+}
