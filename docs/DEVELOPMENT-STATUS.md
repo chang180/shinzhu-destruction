@@ -2,7 +2,7 @@
 
 更新：2026-09-08。狀態只能使用 `未開始`、`進行中`、`待驗收`、`完成`、`受阻`。
 
-目前已完成 P00 本機基線與 P01 Laravel + Vue + SQLite + Boost 基礎；資料 adapter、13 關引擎、正式視聽與 Hostinger 實機驗證仍依後續階段進行。
+目前已完成 P00 本機基線、P01 Laravel + Vue + SQLite + Boost 基礎，以及 P02 三個部會資料 adapter 與快照備援；13 關引擎、正式視聽與 Hostinger 實機驗證仍依後續階段進行。
 
 | 階段 | 狀態 | 驗收依據／下一步 |
 |---|---|---|
@@ -10,8 +10,8 @@
 | 初批開放素材候選下載 | 完成 | 4 圖＋4 音效、兩份授權、manifest；圖片已目視，音效待試聽，尚未整合，不代表 P04／P06 完成 |
 | P00 版本與環境 | 完成 | [P00 報告](phase-reports/P00.md)：本機版本、PHP 擴充、遷移邊界與 Pages 保護已驗證；Hostinger 實機能力保留至 P09 |
 | P01 框架與 Boost | 完成 | [P01 報告](phase-reports/P01.md)、[Boost 紀錄](BOOST-SETUP.md)：Laravel/Vue/SQLite、lockfile、測試、建置與 Boost 全選驗證通過 |
-| P02 資料轉接 | 未開始 | 使用 README 指定的三個部會來源 |
-| P03 戰鬥引擎 | 未開始 | 固定規則與可重播事件契約 |
+| P02 資料轉接 | 待驗收 | [P02 報告](phase-reports/P02.md)、[資料契約](DATA-CONTRACT.md)：三來源本機實連成功，逾時／403／429／HTML 假成功／缺欄位／過期／零值缺值均有測試；正式主機解析樣本待 P09 前補齊 |
+| P03 戰鬥引擎 | 未開始 | 固定規則與可重播事件契約；開局綁定 `snapshot_id` 後凍結 |
 | P04 第 1 關切片 | 未開始 | 首批實際圖片、音效及完整遊玩 |
 | P05 全 13 關 | 未開始 | 差異機制、存檔與逐關可解證據 |
 | P06 正式視聽 | 未開始 | 全部必要素材、來源與演出 |
@@ -21,6 +21,10 @@
 
 ## 最新實作基線
 
+- `config/opendata.php` 是三個部會來源的唯一清單；resource URL 由 `data.gov.tw` 資料集 API 的 `distribution` 取得，不在程式內拼湊。
+- `data_snapshots` 只存正規化結果（實測 2.2–5.7 KB／筆，上游原始為 0.8–283 KB）；發布為原子操作，失敗保留最近有效快照。
+- 無有效快照時使用 `database/fixtures/opendata/*.demo.json`，`quality` 固定 `demo`，UI 必須顯示「示範情境」。
+- 排程走 `routes/console.php` 三條 `withoutOverlapping` 定義，Hostinger 只需一條 cron 呼叫 `schedule:run`。
 - Laravel `13.30.1`、Vue `3.5.42`、Vite `8.2.2`、TypeScript `5.9.3`、Laravel Boost `2.7.1` 已安裝並提交 lockfile；TypeScript 使用 5.9.3 是因 Vue 型別檢查工具目前與 TypeScript 7 不相容。
 - 根目錄 `public/` 是 Laravel 入口；`resources/js/app.ts` 是新版 Vue mount point；`public/build/` 是本機／正式建置產物並被 Git 忽略。
 - `api-probe/` 已有自己的 package 設定；Node 探測測試仍可用，不能把探測器當正式部署服務。
@@ -37,13 +41,13 @@
 
 | 項目 | 內容 |
 |---|---|
-| 本次指派階段 | 待填 |
-| 執行者及日期 | 待填 |
-| 基準／交付 commit 或未提交變更 | 待填 |
-| 階段報告相對路徑 | 待填 |
-| 已通過項目 | 待填 |
-| 尚未驗證／受阻原因 | 待填 |
-| 下一位執行者第一步 | 待填 |
+| 本次指派階段 | P02 資料轉接、快照與備援 |
+| 執行者及日期 | Claude Opus 5（透過 Claude Code），2026-09-08 |
+| 基準／交付 commit 或未提交變更 | 基準 `0d94b5b`；變更尚未提交 |
+| 階段報告相對路徑 | `docs/phase-reports/P02.md` |
+| 已通過項目 | 三來源實連抓取、47 個 PHPUnit 測試、Pint、typecheck、build、probe、Pages 與 Laravel 殼瀏覽器檢查 |
+| 尚未驗證／受阻原因 | Hostinger 正式主機解析樣本、水庫名稱對照的機器驗證、情境修正公式（屬 P03） |
+| 下一位執行者第一步 | 讀 `docs/DATA-CONTRACT.md` 與 P02 報告，執行 `php artisan opendata:refresh` 後開始 P03 |
 
 ## 決策變更紀錄
 
@@ -56,3 +60,6 @@
 | 2026-09-08 | 根目錄改為 Laravel 13 + Vue TypeScript，Node 探測器移至 `api-probe/` | 正式目標是 Hostinger PHP 共享空間；保留舊探測器作為資料來源與主機能力證據 |
 | 2026-09-08 | Vite 產物固定在 `public/build`，GitHub Pages 繼續使用 `docs/` | 避免新版框架建置破壞初階文件審查入口 |
 | 2026-09-08 | Boost 2.7.1 所有可偵測 agent、guidelines、skills、MCP 與 Cloud skill 非互動全選 | `scripts/configure-boost.php` 會檢查版本、路徑安全、渲染失敗與實際產物 |
+| 2026-09-08 | 水庫水情不輸出蓄水百分比，改用同水庫自我比較的 `storage_index` | 45501 資源沒有滿水位容量與蓄水百分比欄位；不得捏造蓄水率 |
+| 2026-09-08 | 年度／月報型來源以資料涵蓋年度判定 stale，不套 48 小時門檻 | 園區用水落後 > 1 民國年、國土利用落後 > 2 民國年；避免把正常年報當壞資料 |
+| 2026-09-08 | `SnapshotRepository::prune()` 保留但不排程 | `runs` 表在 P03 才建立，清理前必須排除仍被對局引用的 `snapshot_id`，否則破壞重播 |

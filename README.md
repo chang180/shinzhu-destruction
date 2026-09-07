@@ -4,15 +4,16 @@
 
 ## 新版開發計畫（2026-09-08）
 
-預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **13 關原創使徒策略遊戲**。Phase 1 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；完整遊戲、資料串接與正式主機驗證仍按階段進行。
+預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **13 關原創使徒策略遊戲**。P01 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；P02 已完成三個中央部會資料 adapter、正規化快照與示範情境備援。13 關引擎、正式視聽與 Hostinger 實機驗證仍按階段進行。
 
 - [分階段開發計畫](docs/DEVELOPMENT-PLAN.md)：P00～P09 依賴、交付與驗收，可逐階段派給其他 AI。
 - [技術規格](docs/TECHNICAL-SPEC.md)：版本、Boost 非互動全選、SQLite、資料來源及 Hostinger 部署。
+- [資料契約](docs/DATA-CONTRACT.md)：三個部會來源的正規化快照欄位、單位、品質門檻、失敗分類與備援。
 - [13 關遊戲設計](docs/GAME-DESIGN.md)：策略難度、施招、城市防守及玩家勝利複盤。
 - [美術與音效規格](docs/ART-AUDIO-SPEC.md)、[素材來源與下載紀錄](docs/ASSET-SOURCES.md)：原創生成與免費開放素材搭配。
 - [AI 派工與交接](docs/AI-HANDOFF.md)、[開發進度](docs/DEVELOPMENT-STATUS.md)：可複製派工文字與實際狀態。
 - [Boost 安裝紀錄](docs/BOOST-SETUP.md)：非互動全選的版本、agent 矩陣、產物核對與限制。
-- [P00 基線報告](docs/phase-reports/P00.md)、[P01 基礎報告](docs/phase-reports/P01.md)：本階段可重現的驗收證據。
+- [P00 基線報告](docs/phase-reports/P00.md)、[P01 基礎報告](docs/phase-reports/P01.md)、[P02 資料報告](docs/phase-reports/P02.md)：各階段可重現的驗收證據。
 
 ## Phase 1 已完成的新版基礎
 
@@ -21,12 +22,21 @@
 - Laravel Boost 2.7.1 已用 `scripts/configure-boost.php` 非互動安裝所有可偵測 agent、guidelines、skills、MCP 與 Cloud skill；生產環境仍須 `composer install --no-dev` 並設定 `BOOST_ENABLED=false`。
 - 舊 Node 連線探測器已隔離到 `api-probe/`，原本的資料來源報告與測試仍可重現；它不是正式 Laravel 佈署入口。
 
+## Phase 2 已完成的資料串接
+
+- 三個 adapter 位於 `app/Services/OpenData/`，對應水利署水庫水情、國科會園區用水、內政部國土利用；下載網址由 `data.gov.tw` 資料集 API 的 `distribution` 取得，寫在 `config/opendata.php`。
+- 正規化快照存進 SQLite 的 `data_snapshots`，只保留遊戲需要的欄位與單位，每筆 2～6 KB；發布是原子操作，抓取失敗保留最近一次有效快照。
+- 品質分為 `fresh`／`stale`／`demo`／`unavailable` 並逐來源顯示；沒有有效快照時使用 `database/fixtures/opendata/` 的示範情境，必須標示為示範情境。
+- 資料是有限幅度的遊戲情境輸入，**不是災害預測**：不推算水庫蓄水率、不把公園綠地面積當熱島量測、不把園區用水當全縣即時用水。詳見[資料契約](docs/DATA-CONTRACT.md)。
+- 更新命令：`php artisan opendata:refresh`、`php artisan opendata:status`；排程由 `routes/console.php` 定義，Hostinger 只需一條 cron 呼叫 `php artisan schedule:run`。
+
 ### 新版本機驗證
 
 ```sh
 composer install
 npm ci
 php artisan migrate --force
+php artisan opendata:refresh
 npm run typecheck
 npm run build
 php artisan test --compact
@@ -56,7 +66,7 @@ npm run probe:build
 
 `php artisan test --compact`、`npm run typecheck`、`npm run build`、`npm run probe:test`、`npm run probe:build`
 
-覆蓋可通關路線、亂放終招失敗、印記消耗、連攜與修復、10,000 場固定種子的隨機策略。這是遊戲規則測試，不等同真人使用者測試。
+PHP 測試涵蓋三個資料 adapter 的正規化、缺值與零值處理、過期判定，以及逾時、403、429、HTML 假成功、超量回應等受控失敗與備援。`tests/*.test.cjs` 則涵蓋靜態原型的可通關路線、亂放終招失敗、印記消耗、連攜與修復、10,000 場固定種子的隨機策略。這些是規則與資料處理測試，不等同真人使用者測試。
 
 ## Hostinger 主機端 API 連線實驗
 
@@ -68,4 +78,4 @@ repo 的 `api-probe/` 保留可獨立啟動的 Node.js 服務，用於驗證 Hos
 
 ## AI 使用與署名
 
-AI 共創：**GPT-6 Astra（透過 OpenAI Codex）**。本靜態原型的遊戲規則草案、核心程式、介面、固定文案與測試由 GPT-6 Astra 協助生成；**Claude Sonnet 5（透過 Claude Code）** 協助完成 Hostinger 主機連線實測、`data.gov.tw` 資料來源可行性盤點，以及遊戲頁面（`docs/`）的視覺改版；新版開發文件與開放素材來源整理由 OpenAI Codex 協助完成。張建文提供提案、創意方向與成果確認。參賽者需檢核並依競賽簡章如實揭露。本次開發文件放在 `docs/`，與既有 Pages 發布樹共存；含個人資料的報名附件及私密設定不納入公開文件。
+AI 共創：**GPT-6 Astra（透過 OpenAI Codex）**。本靜態原型的遊戲規則草案、核心程式、介面、固定文案與測試由 GPT-6 Astra 協助生成；**Claude Sonnet 5（透過 Claude Code）** 協助完成 Hostinger 主機連線實測、`data.gov.tw` 資料來源可行性盤點，以及遊戲頁面（`docs/`）的視覺改版；新版開發文件與開放素材來源整理由 OpenAI Codex 協助完成；**Claude Opus 5（透過 Claude Code）** 協助完成 P02 的三個中央部會資料 adapter、正規化快照契約、備援 fixture 與相關測試。張建文提供提案、創意方向與成果確認。參賽者需檢核並依競賽簡章如實揭露。本次開發文件放在 `docs/`，與既有 Pages 發布樹共存；含個人資料的報名附件及私密設定不納入公開文件。

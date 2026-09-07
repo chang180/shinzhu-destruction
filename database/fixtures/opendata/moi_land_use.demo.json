@@ -1,0 +1,218 @@
+{
+    "snapshot_id": "demo-moi-land-use-v1",
+    "source_id": "moi.land_use",
+    "schema_version": "1.0.0",
+    "resource_url": "fixture://database/fixtures/opendata/moi_land_use.demo.json",
+    "content_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "fetched_at": "2026-09-08T00:00:00+00:00",
+    "observed_at": null,
+    "period": {
+        "start": "2024-01-01T00:00:00+00:00",
+        "end": "2025-12-31T23:59:59+00:00",
+        "label": "示範情境（不對應任何實際調查期間）",
+        "calendar": "demo"
+    },
+    "quality": "demo",
+    "quality_reason": "版本化示範情境，面積為人工設定，不是國土利用現況調查成果",
+    "scope": {
+        "kind": "township",
+        "authority": "示範情境（非內政部國土測繪中心實際資料）",
+        "dataset_page": "https://data.gov.tw/dataset/178038",
+        "county": "新竹縣",
+        "township_count": 13,
+        "survey_label": "示範情境",
+        "classification": "示範情境（不對應 108 年版分級分類系統表）",
+        "administrative_codes_available": false,
+        "fixture_version": "1.0.0"
+    },
+    "metrics": {
+        "竹北市": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "竹東鎮": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "新埔鎮": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "關西鎮": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "湖口鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "新豐鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "芎林鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "橫山鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "北埔鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "寶山鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "峨眉鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "尖石鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "五峰鄉": {
+            "total_area": 10000.0,
+            "agriculture_area": 2000.0,
+            "forest_area": 5000.0,
+            "built_up_area": 1500.0,
+            "park_green_area": 100.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01,
+            "missing_category_cells": 0
+        },
+        "_county": {
+            "name": "新竹縣",
+            "township_count": 13,
+            "total_area": 130000.0,
+            "agriculture_area": 26000.0,
+            "forest_area": 65000.0,
+            "built_up_area": 19500.0,
+            "park_green_area": 1300.0,
+            "agriculture_ratio": 0.2,
+            "forest_ratio": 0.5,
+            "built_up_ratio": 0.15,
+            "park_green_ratio": 0.01
+        }
+    },
+    "units": {
+        "total_area": "公頃（示範情境）",
+        "agriculture_area": "公頃（示範情境）",
+        "forest_area": "公頃（示範情境）",
+        "built_up_area": "公頃（示範情境）",
+        "park_green_area": "公頃（示範情境）",
+        "agriculture_ratio": "比例（同列互斥分類面積 ÷ 同列總面積）",
+        "forest_ratio": "比例（同上）",
+        "built_up_ratio": "比例（同上）",
+        "park_green_ratio": "比例（同上）"
+    },
+    "warnings": [
+        {
+            "code": "demo_fixture",
+            "message": "示範情境：13 個鄉鎮市使用相同的中性面積配置，僅供上游不可用時維持可玩，不得當作土地利用統計",
+            "context": {}
+        }
+    ],
+    "byte_size": null
+}

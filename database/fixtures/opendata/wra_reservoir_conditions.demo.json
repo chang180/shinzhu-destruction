@@ -1,0 +1,65 @@
+{
+    "snapshot_id": "demo-wra-reservoir-conditions-v1",
+    "source_id": "wra.reservoir_conditions",
+    "schema_version": "1.0.0",
+    "resource_url": "fixture://database/fixtures/opendata/wra_reservoir_conditions.demo.json",
+    "content_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "fetched_at": "2026-09-08T00:00:00+00:00",
+    "observed_at": null,
+    "period": null,
+    "quality": "demo",
+    "quality_reason": "版本化示範情境，數值為人工設定，不是任何一次真實觀測",
+    "scope": {
+        "kind": "reservoir",
+        "authority": "示範情境（非經濟部水利署實際資料）",
+        "dataset_page": "https://data.gov.tw/dataset/45501",
+        "reservoir_ids": ["10405", "10501"],
+        "observation_window_hours": 24,
+        "source_timezone": "Asia/Taipei",
+        "fixture_version": "1.0.0"
+    },
+    "metrics": {
+        "10405": {
+            "name": "寶山第二水庫",
+            "county": "新竹縣",
+            "relation": "located_in_hsinchu_county",
+            "observed_at": null,
+            "sample_count": 24,
+            "effective_storage_latest": 3000.0,
+            "effective_storage_median": 3000.0,
+            "storage_index": 1.0,
+            "water_level_latest": 150.0,
+            "catchment_rainfall_latest": 0.0,
+            "total_outflow_latest": 2.0
+        },
+        "10501": {
+            "name": "永和山水庫",
+            "county": "苗栗縣",
+            "relation": "supplies_hsinchu_area",
+            "observed_at": null,
+            "sample_count": 24,
+            "effective_storage_latest": 2800.0,
+            "effective_storage_median": 2800.0,
+            "storage_index": 1.0,
+            "water_level_latest": 84.0,
+            "catchment_rainfall_latest": 0.0,
+            "total_outflow_latest": 2.0
+        }
+    },
+    "units": {
+        "effective_storage_latest": "萬立方公尺（示範情境）",
+        "effective_storage_median": "萬立方公尺（示範情境）",
+        "storage_index": "比值（最新值 ÷ 同水庫觀測視窗中位數）",
+        "water_level_latest": "公尺",
+        "catchment_rainfall_latest": "毫米",
+        "total_outflow_latest": "立方公尺／秒"
+    },
+    "warnings": [
+        {
+            "code": "demo_fixture",
+            "message": "示範情境：所有指標為中性值，僅供上游不可用時維持可玩，不得當作水情資訊",
+            "context": {}
+        }
+    ],
+    "byte_size": null
+}
