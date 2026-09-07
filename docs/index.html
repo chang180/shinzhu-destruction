@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#121018"><meta name="description" content="我的反派學院：超認真毀滅新竹計畫。12 回合地獄難度，浮誇技能對上城市永續防線。">
+<title>我的反派學院｜超認真毀滅新竹計畫</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="masthead"><a class="brand" href="./"><span class="brand-icon">惡</span><span>我的反派學院<small>HSINCHU VILLAIN ACADEMY</small></span></a><span class="edition">新竹分部 <b>第 001 次入學試煉</b></span><button class="quiet" id="rules">作戰須知 ↗</button></header>
+<main>
+<section class="intro"><div><p class="eyebrow"><span class="dot"></span> 難度：地獄 / HELL MODE</p><h1>超認真<span>毀滅新竹</span>計畫<span class="period">。</span></h1><p class="subtitle">招式要帥，傷害隨緣。你有 12 回合，證明自己不是來搞笑的。</p></div><div class="stamp">反派招生中<span>失敗也是一種入學方式</span></div></section>
+<div class="game-layout">
+<section class="arena" aria-label="作戰狀態">
+<div class="panel-top"><span>01 / 城市防禦核心</span><span class="live">虛構情境演練</span></div>
+<div class="city-heading"><div><p class="eyebrow">TARGET / 目標</p><h2>新竹縣</h2></div><div class="round"><strong id="turn">01</strong><span>/ 12 回合</span></div></div>
+<div class="core" id="core"><div class="orbit o1"></div><div class="orbit o2"></div><div class="core-inner"><span>城市韌性</span><strong id="hp">100<span>%</span></strong><span id="core-status">防禦系統：正常運作</span></div><span class="coordinate">H C H · S A N D B O X</span></div>
+<div class="health-track" role="progressbar" aria-label="城市韌性" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="health"><div id="health-fill"></div></div>
+<div class="stat-row"><span>累計傷害 <b id="damage">0</b></span><span>城市修復 <b id="repair">0</b></span><span>剩餘行動 <b id="remaining">12</b></span></div>
+<div class="defenses"><span>城市的底牌</span><b>水資源韌性</b><b>綠地保留</b><b>公民協作</b></div>
+<div class="professor"><span class="avatar">教<br>授</span><div><b>反派教授 <span>／不負責鼓掌</span></b><p id="remark" aria-live="polite">你以為招式名字越長，傷害就越高？很好，先挑一招試試。</p></div></div>
+</section>
+<section class="arsenal" aria-label="技能選單"><div class="panel-top"><span>02 / 選擇你的邪惡技能</span><span>每招消耗 1 回合</span></div>
+<div class="skill-grid" id="skills"></div>
+<div class="combo"><div><span class="eyebrow">禁術充能 / 印記不會自然消失</span><b>三系各集滿 3 枚，終招才會認真。</b></div><div class="sigils" id="sigils"></div></div>
+<button class="ultimate" id="ultimate"><span class="ult-icon">✳</span><span><small>終極禁術 / 每次施放消耗全部印記</small><strong>全縣歸零・終焉大合奏</strong><span id="ult-hint">未完成共鳴：現在放，只會很尷尬。</span></span><b>施放 ↗</b></button>
+<div class="hint-row"><button id="hint" class="quiet">教授，給個提示 ＋</button><button id="reset" class="quiet">重新入學 ↻</button></div>
+<p class="hint-text" id="hint-text" hidden>不要急著放終招。水、熱、土地各施放三次，九回合後再用終焉大合奏。輪流施放三系還有額外共鳴傷害。真正的考題是耐心與組合。</p>
+</section>
+</div>
+<section class="battle-log"><div class="panel-top"><span>03 / 反派作戰紀錄</span><span>最新事件在最上方</span></div><ol id="log" aria-live="polite"><li><span>00</span><p>入學試煉開始。城市韌性 100，反派自信 999。</p><b>準備就緒</b></li></ol></section>
+<section class="footnote"><div><span class="eyebrow">看似毀滅，實為理解。</span><h2>為什麼新竹這麼難打？</h2><p>遊戲把資源管理、綠地與社會協作變成防線。失敗時，看看是什麼守住城市；成功時，想想該如何把防線補回來。</p></div><div class="data-note"><b>原型說明與公開資料</b><p>本版為可玩的靜態遊戲，數值皆為遊戲平衡設定；未串接即時資料、AI 或科學預測模型。「毀滅」僅指遊戲韌性歸零，不代表真實災害風險。以下為後續資料整合來源。</p><nav aria-label="資料來源"><a href="https://data.gov.tw/dataset/41280" target="_blank" rel="noopener noreferrer">園區用水 ↗</a><a href="https://data.gov.tw/dataset/45501" target="_blank" rel="noopener noreferrer">水庫水情 ↗</a><a href="https://data.gov.tw/dataset/178038" target="_blank" rel="noopener noreferrer">土地利用 ↗</a></nav></div></section>
+</main><footer><span>世外高人 · 張建文<br>AI 共創 · GPT-6 Astra</span><span>2026 新竹縣智慧沙盒創新計畫參賽原型 · 非官方網站<br>GPT-6 Astra 協作：遊戲規則、核心程式、介面、文案與測試</span><a href="https://github.com/chang180/shinzhu-destruction">專案原始碼 ↗</a></footer>
+<dialog id="result"><div class="result-content"><p class="eyebrow">入學試煉 / 結業戰報</p><h2 id="result-title"></h2><p id="result-copy"></p><div class="result-stats" id="result-stats"></div><h3>這次守住城市的，是什麼？</h3><p id="lesson"></p><p class="disclaimer">遊戲平衡數值，不代表真實環境風險或政策成效。</p><div class="dialog-actions"><button id="again" class="primary">再試一次 ↗</button><button id="close-result" class="quiet">返回戰報</button></div></div></dialog>
+<dialog id="instructions"><div class="result-content"><p class="eyebrow">WELCOME, VILLAIN.</p><h2>名字很猛，真的很難。</h2><p>12 回合內讓城市韌性降到 0。普通技能只有 1–2 點基礎傷害；每三回合城市會修復 3 點韌性。</p><p>每招累積對應印記，上限 3 枚。連續三招使用不同系別會觸發額外 3 點共鳴傷害。三系印記全部集滿後，終招造成 108 點傷害；未集滿只有 4 點，並消耗所有印記。</p><p>沒有隨機必敗。你可以靠觀察、規劃與重試通關。遊戲中的技能都是虛構魔法，勝敗用來引出永續討論。</p><button class="primary" id="close-rules">了解，讓我來 ↗</button></div></dialog>
+<script src="game.js"></script><script src="app.js"></script>
+</body></html>
