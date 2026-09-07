@@ -1,12 +1,12 @@
 # 分階段開發計畫
 
-更新日期：2026-09-08｜需求版本：1.0｜現況基準：`09a08e4`
+更新日期：2026-09-08｜需求版本：1.0｜規劃基準：`333a34c`｜目前已完成：P00、P01
 
 ## 1. 文件目的與目前狀態
 
 將《我的反派學院：超認真毀滅新竹計畫》重製為 Laravel + Vue 的 13 關策略遊戲。本文件供不同 AI 或開發者依階段接手，必須交付可執行成果及驗收證據，不能以「完成規劃」代替功能完成。
 
-**本次交付是開發文件。Laravel／Vue 遷移、Boost 安裝、API 串接、圖片生成及正式部署尚未執行。** 現有 `docs/index.html` 遊戲繼續保留，直到新版通過遷移驗收。
+**P00、P01 已交付本機可重現的 Laravel／Vue／SQLite／Boost 基礎；API 串接、圖片生成、13 關引擎及正式部署尚未執行。** 現有 `docs/index.html` 遊戲繼續保留，直到新版通過遷移驗收。
 
 閱讀順序：本文件 → [技術規格](TECHNICAL-SPEC.md) → [遊戲設計](GAME-DESIGN.md) → [美術音效規格](ART-AUDIO-SPEC.md) → [素材來源](ASSET-SOURCES.md) → [AI 交接規範](AI-HANDOFF.md) → [進度表](DEVELOPMENT-STATUS.md)。
 
@@ -80,9 +80,9 @@
 - 按技術規格完成 Boost 非互動全選、產物驗證與 MCP 實際呼叫；安裝後先讀生成的開發指示，再開始應用功能。
 - 將本專案約束加入 `.ai/guidelines/`，保留 Boost 管理的指引；驗證更新指引不會遺失專案要求。
 
-**交付：** 可啟動的 Laravel + Vue、SQLite migrations、lockfiles、可重跑的 Boost 設定腳本、`docs/phase-reports/P01.md`、`docs/BOOST-SETUP.md`。
+**交付：** ✅ 已完成。可啟動的 Laravel + Vue、SQLite migrations、lockfiles、可重跑的 Boost 設定腳本、`docs/phase-reports/P01.md`、`docs/BOOST-SETUP.md`。
 
-**驗收：** 乾淨安裝可載入 Vue；測試資料庫為 SQLite；正式建置成功；Boost 完成條件全部有證據。此時只驗證頁面殼，不宣稱完整遊戲完成。
+**驗收：** ✅ 已通過本機驗收：乾淨依賴安裝可載入 Vue；測試資料庫為 SQLite；正式建置成功；Boost 完成條件有矩陣與產物證據。此時只驗證頁面殼，不宣稱完整遊戲完成。
 
 ### P02｜資料轉接、快照與備援
 

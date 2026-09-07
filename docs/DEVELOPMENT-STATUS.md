@@ -2,14 +2,14 @@
 
 更新：2026-09-08。狀態只能使用 `未開始`、`進行中`、`待驗收`、`完成`、`受阻`。
 
-目前只完成需求整理與本組規劃文件；**尚未安裝 Laravel、Vue 或 Boost，尚未生成正式素材，尚未部署新版。**
+目前已完成 P00 本機基線與 P01 Laravel + Vue + SQLite + Boost 基礎；資料 adapter、13 關引擎、正式視聽與 Hostinger 實機驗證仍依後續階段進行。
 
 | 階段 | 狀態 | 驗收依據／下一步 |
 |---|---|---|
 | 文件基線 | 完成 | 七份文件與 README 入口；後續以使用者補充持續修訂 |
 | 初批開放素材候選下載 | 完成 | 4 圖＋4 音效、兩份授權、manifest；圖片已目視，音效待試聽，尚未整合，不代表 P04／P06 完成 |
-| P00 版本與環境 | 未開始 | 已有版本查閱與本機工具初查；仍須完整基線報告與主機能力盤點 |
-| P01 框架與 Boost | 未開始 | 先完成 P00 本機門檻，依技術規格實際安裝 |
+| P00 版本與環境 | 完成 | [P00 報告](phase-reports/P00.md)：本機版本、PHP 擴充、遷移邊界與 Pages 保護已驗證；Hostinger 實機能力保留至 P09 |
+| P01 框架與 Boost | 完成 | [P01 報告](phase-reports/P01.md)、[Boost 紀錄](BOOST-SETUP.md)：Laravel/Vue/SQLite、lockfile、測試、建置與 Boost 全選驗證通過 |
 | P02 資料轉接 | 未開始 | 使用 README 指定的三個部會來源 |
 | P03 戰鬥引擎 | 未開始 | 固定規則與可重播事件契約 |
 | P04 第 1 關切片 | 未開始 | 首批實際圖片、音效及完整遊玩 |
@@ -19,11 +19,18 @@
 | P08 全面驗收 | 未開始 | 策略矩陣、真人試玩與主機前驗證 |
 | P09 正式部署 | 未開始 | Hostinger 實測、備份還原及 README 切換 |
 
+## 最新實作基線
+
+- Laravel `13.30.1`、Vue `3.5.42`、Vite `8.2.2`、TypeScript `5.9.3`、Laravel Boost `2.7.1` 已安裝並提交 lockfile；TypeScript 使用 5.9.3 是因 Vue 型別檢查工具目前與 TypeScript 7 不相容。
+- 根目錄 `public/` 是 Laravel 入口；`resources/js/app.ts` 是新版 Vue mount point；`public/build/` 是本機／正式建置產物並被 Git 忽略。
+- `api-probe/` 已有自己的 package 設定；Node 探測測試仍可用，不能把探測器當正式部署服務。
+- `docs/` 四個 GitHub Pages 核心檔案的 SHA-256 已於 P00／P01 報告記錄，且本階段未改動。
+
 ## 規劃當日已取得的事實
 
-- 工作樹基準 commit：`09a08e4`；現有程式是靜態遊戲及 Node API 探測器。
-- 查閱到 Laravel `13.30.1`、Vue `3.5.42`、Laravel Boost `2.7.1`；這是版本基線，**不是安裝證據**。來源見[技術規格](TECHNICAL-SPEC.md)。P00 應重新查最新穩定版。
-- 本機 PATH 可用 PHP `8.4.22`、Composer `2.8.5`、Node `24.16.0`；尚未確認全部 PHP 擴充及新專案依賴相容性。
+- 工作樹基準 commit：`333a34c`；現有程式是靜態遊戲及 Node API 探測器。本階段新增的 Laravel 骨架與 Vue shell 以未來里程碑 commit 記錄。
+- 查閱並安裝 Laravel `13.30.1`、Vue `3.5.42`、Laravel Boost `2.7.1`；來源及鎖定策略見[技術規格](TECHNICAL-SPEC.md)與[P01 報告](phase-reports/P01.md)。
+- 本機 PATH 可用 PHP `8.4.25`、Composer `2.8.5`、Node `24.16.0`；`pdo_sqlite`、`sqlite3`、`curl`、`mbstring`、`openssl` 等必要擴充已確認。
 - Hostinger 部會資料可連結論引用 2026-09-07 repo 調查；本次沒有遠端主機工作階段，沒有重新宣稱正式 Laravel adapter 已驗證成功。
 
 ## 每次交接必填
@@ -46,3 +53,6 @@
 | 2026-09-08 | SQLite + file cache/session + PHP cron | 配合儲存量小與 Hostinger 共享空間；取代舊 API 報告的 Redis 建議 |
 | 2026-09-08 | 13 使徒採原創虛構災變意象 | 保留致敬概念並建立可辨識的自有美術；不引用既有使徒名錄／造型 |
 | 2026-09-08 | 加入免費開源／開放授權素材搜尋及下載 | 使用者追加授權；已下載 Kenney CC0 特效圖與音效小型候選，保留原創圖片要求 |
+| 2026-09-08 | 根目錄改為 Laravel 13 + Vue TypeScript，Node 探測器移至 `api-probe/` | 正式目標是 Hostinger PHP 共享空間；保留舊探測器作為資料來源與主機能力證據 |
+| 2026-09-08 | Vite 產物固定在 `public/build`，GitHub Pages 繼續使用 `docs/` | 避免新版框架建置破壞初階文件審查入口 |
+| 2026-09-08 | Boost 2.7.1 所有可偵測 agent、guidelines、skills、MCP 與 Cloud skill 非互動全選 | `scripts/configure-boost.php` 會檢查版本、路徑安全、渲染失敗與實際產物 |

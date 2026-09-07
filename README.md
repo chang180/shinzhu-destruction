@@ -4,13 +4,39 @@
 
 ## 新版開發計畫（2026-09-08）
 
-預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **13 關原創使徒策略遊戲**。目前已建立開發文件及少量開放素材候選，框架遷移、Laravel Boost 安裝與新版遊戲尚未實作；以下靜態 MVP 說明仍是現況。
+預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **13 關原創使徒策略遊戲**。Phase 1 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；完整遊戲、資料串接與正式主機驗證仍按階段進行。
 
 - [分階段開發計畫](docs/DEVELOPMENT-PLAN.md)：P00～P09 依賴、交付與驗收，可逐階段派給其他 AI。
 - [技術規格](docs/TECHNICAL-SPEC.md)：版本、Boost 非互動全選、SQLite、資料來源及 Hostinger 部署。
 - [13 關遊戲設計](docs/GAME-DESIGN.md)：策略難度、施招、城市防守及玩家勝利複盤。
 - [美術與音效規格](docs/ART-AUDIO-SPEC.md)、[素材來源與下載紀錄](docs/ASSET-SOURCES.md)：原創生成與免費開放素材搭配。
 - [AI 派工與交接](docs/AI-HANDOFF.md)、[開發進度](docs/DEVELOPMENT-STATUS.md)：可複製派工文字與實際狀態。
+- [Boost 安裝紀錄](docs/BOOST-SETUP.md)：非互動全選的版本、agent 矩陣、產物核對與限制。
+- [P00 基線報告](docs/phase-reports/P00.md)、[P01 基礎報告](docs/phase-reports/P01.md)：本階段可重現的驗收證據。
+
+## Phase 1 已完成的新版基礎
+
+- Laravel 13.30.1 位於 repo 根目錄，使用 SQLite、file cache、file session、sync queue；`.env.example` 不含秘密，正式主機的資料庫檔案須放在 `public` 之外的持久路徑。
+- Vue 3.5.42 + TypeScript 5.9.3 + Vite 8.2.2 已接到 Laravel Blade 頁面殼；`public/build` 是新版 Laravel 入口的建置輸出，沒有寫入 `docs/`。
+- Laravel Boost 2.7.1 已用 `scripts/configure-boost.php` 非互動安裝所有可偵測 agent、guidelines、skills、MCP 與 Cloud skill；生產環境仍須 `composer install --no-dev` 並設定 `BOOST_ENABLED=false`。
+- 舊 Node 連線探測器已隔離到 `api-probe/`，原本的資料來源報告與測試仍可重現；它不是正式 Laravel 佈署入口。
+
+### 新版本機驗證
+
+```sh
+composer install
+npm ci
+php artisan migrate --force
+npm run typecheck
+npm run build
+php artisan test --compact
+npm run probe:test
+npm run probe:build
+```
+
+### 兩個發布入口
+
+正式 Laravel 應用使用根目錄的 `public/` 與 `public/build/`，後續依 Hostinger PHP 共享空間能力部署。GitHub Pages 仍固定發布 `main:/docs`；`docs/index.html`、`docs/app.js`、`docs/game.js`、`docs/style.css` 是獨立的初階審查 MVP，Vite 不會覆蓋或依賴它。
 
 ## 靜態遊戲 MVP
 
@@ -18,7 +44,7 @@
 
 所有數值為遊戲平衡設定，非官方風險、真實環境預測或政策成效。本版未串接即時資料或 AI；教授解說採固定文本。來源連結列在頁面底部，作為後續資料整合方向。
 
-介面為純 CSS／原生 JS 呈現，無圖片素材與框架依賴：核心區塊為 HP 環形進度與粒子軌道、技能卡依水／熱／土地三系配色、終招印記滿載時有動態光效，深色風格搭配漸層背景與玻璃感面板。
+介面為純 CSS／原生 JS 呈現，無圖片素材與框架依賴：核心區塊為 HP 環形進度與粒子軌道、技能卡依水／熱／土地三系配色、終招印記滿載時有動態光效，深色風格搭配漸層背景與玻璃感面板。這段內容描述 GitHub Pages 的歷史審查版本，不代表新版 Laravel 遊戲已完成。
 
 ## GitHub Pages
 
@@ -28,13 +54,13 @@
 
 ## 驗證
 
-`node --test tests/game.test.cjs`
+`php artisan test --compact`、`npm run typecheck`、`npm run build`、`npm run probe:test`、`npm run probe:build`
 
 覆蓋可通關路線、亂放終招失敗、印記消耗、連攜與修復、10,000 場固定種子的隨機策略。這是遊戲規則測試，不等同真人使用者測試。
 
 ## Hostinger 主機端 API 連線實驗
 
-repo 根目錄新增可獨立啟動的 Node.js 服務，用於驗證 Hostinger 主機能否取得新竹縣公開資料。使用 `npm start`，部署入口 `server.js`；完整步驟與結果判讀見 [api-probe/README.md](api-probe/README.md)。GitHub Pages 仍只發布 `docs/` 遊戲。
+repo 的 `api-probe/` 保留可獨立啟動的 Node.js 服務，用於驗證 Hostinger 主機能否取得新竹縣公開資料。使用 `npm --prefix api-probe start`，入口仍是根目錄 `server.js`；完整步驟與結果判讀見 [api-probe/README.md](api-probe/README.md)。GitHub Pages 仍只發布 `docs/` 遊戲。
 
 **實測結論（2026-09-07，見 [api-probe/HOSTINGER-RESULT.md](api-probe/HOSTINGER-RESULT.md)）：** 新竹縣政府自有機房（`dip.hsinchu.gov.tw`、`ws.hsinchu.gov.tw`、`www.hsinchu.gov.tw`）從 Hostinger 主機連線逾時，型態指向該機房對海外來源 IP 有邊界限制；同一台主機呼叫中央氣象署開放資料平台（`opendata.cwa.gov.tw`）則連線正常，證明並非 Hostinger 出站被擋，也不是串接方式的問題，差異在目的地網路。
 

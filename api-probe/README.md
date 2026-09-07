@@ -19,9 +19,10 @@ Hostinger 官方文件列出 Business／Cloud 的受管 Node.js Web App，以及
 ## 本機對照
 
 ```sh
-npm ci
-npm test
-npm start
+npm --prefix api-probe install
+npm run probe:test
+npm run probe:build
+npm --prefix api-probe start
 ```
 
 開啟 `http://localhost:3000`，執行相同目標、相同 IP 模式，下載本機結果。再與 Hostinger 的結果比對。

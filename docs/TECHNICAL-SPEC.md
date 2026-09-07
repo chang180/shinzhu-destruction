@@ -1,18 +1,18 @@
 # 技術架構、資料與部署規格
 
-更新：2026-09-08。這是待實作契約；實際完成狀態以[進度表](DEVELOPMENT-STATUS.md)及階段報告為準。
+更新：2026-09-08。P00／P01 的版本與基礎已實作；資料、戰鬥、視聽與部署仍是待實作契約。實際完成狀態以[進度表](DEVELOPMENT-STATUS.md)及階段報告為準。
 
 ## 1. 版本基線與更新方式
 
 | 項目 | 本次查閱結果 | 執行要求／官方來源 |
 |---|---|---|
-| Laravel | 最新穩定 release `13.30.1` | [官方 release](https://github.com/laravel/framework/releases/tag/v13.30.1)；P00 再查，採當時最新穩定版 |
-| Vue | npm `latest` 為 `3.5.42` | [官方套件 metadata](https://registry.npmjs.org/vue/latest)、[發布政策](https://vuejs.org/about/releases)；不採 alpha／beta／RC |
-| Laravel Boost | 最新穩定 release `2.7.1` | [官方 release](https://github.com/laravel/boost/releases/tag/v2.7.1)；P01 安裝前再確認 |
+| Laravel | 已安裝 `13.30.1` | [官方 release](https://github.com/laravel/framework/releases/tag/v13.30.1)；版本鎖在 `composer.lock` |
+| Vue | 已安裝 `3.5.42` | [官方套件 metadata](https://registry.npmjs.org/vue/latest)、[發布政策](https://vuejs.org/about/releases)；版本鎖在 `package-lock.json` |
+| Laravel Boost | 已安裝 `2.7.1` | [官方 release](https://github.com/laravel/boost/releases/tag/v2.7.1)；版本及選項矩陣見 [Boost 紀錄](BOOST-SETUP.md) |
 | PHP | Laravel 13 至少 PHP 8.3 | [Laravel 13 發布說明](https://laravel.com/docs/13.x/releases)；主機 Web／CLI 皆須符合最終 lockfile 要求 |
 | Node／Vite／TypeScript | 依當時穩定版本的 engines／peerDependencies | Node 只供本機或 CI 建置；前端相關套件一併核對相容性，不硬搬舊版 lockfile |
 
-上述版本是規劃當日觀測值，不是「已安裝」。P00 記錄查詢來源、日期及版本；P01 提交 `composer.lock` 與 `package-lock.json`。後續 `install`／`npm ci` 應重現鎖定版本，不在每次部署執行無約束 update。需要升版時更新鎖檔、Boost 指引及受影響測試。
+上述版本已於 2026-09-08 在本機安裝並由 P01 測試；後續 `composer install`／`npm ci` 應重現鎖定版本，不在每次部署執行無約束 update。需要升版時更新鎖檔、Boost 指引及受影響測試。
 
 ## 2. 應用架構與遷移邊界
 
@@ -60,7 +60,7 @@ php artisan boost:install --guidelines --skills --mcp --no-interaction
 
 ### 3.2 全選範圍與可重跑設定腳本
 
-P01 要建立專案內的 `scripts/configure-boost.php` 或同等可重跑命令；下列是實作要求，**目前尚無此腳本**：
+P01 已建立專案內的 `scripts/configure-boost.php`；下列要求已落實，後續升版須重新核對：
 
 1. 啟動 Laravel console kernel；核對實際 vendor 版本、`boost:install --help` 及安裝器原始碼，再決定參數與設定格式。版本不同先調整腳本，不直接改 vendor。
 2. 列舉安裝器所有已註冊且具 guidelines／skills／MCP 任一能力的 AI agents，寫入全部選項，不只本機偵測到的一個 AI。
