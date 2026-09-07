@@ -163,6 +163,31 @@ class OpenDataRefreshTest extends TestCase
         $this->assertNotNull(app(SnapshotRepository::class)->find($current->snapshot_id));
     }
 
+    public function test_pruning_never_deletes_the_current_snapshot(): void
+    {
+        $this->fakeUpstream($this->fixture('wra_reservoir_conditions.sample.json'));
+
+        foreach (range(1, 3) as $ignored) {
+            $this->refresher()->refresh(self::SOURCE_ID);
+        }
+
+        $current = app(SnapshotRepository::class)->current(self::SOURCE_ID);
+
+        // keep=0 會被夾成 1；即使排序把生效快照排到後面也不能刪掉它。
+        app(SnapshotRepository::class)->prune(self::SOURCE_ID, 0);
+
+        $this->assertNotNull(app(SnapshotRepository::class)->current(self::SOURCE_ID));
+        $this->assertSame(
+            $current->snapshot_id,
+            app(SnapshotRepository::class)->current(self::SOURCE_ID)->snapshot_id,
+        );
+    }
+
+    public function test_pruning_a_source_with_no_snapshots_deletes_nothing(): void
+    {
+        $this->assertSame(0, app(SnapshotRepository::class)->prune('moi.land_use', 5));
+    }
+
     private function refresher(): OpenDataRefresher
     {
         return app(OpenDataRefresher::class);

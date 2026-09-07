@@ -15,10 +15,12 @@ final readonly class CsvTable
     /**
      * @param  list<string>  $header
      * @param  list<array<string, string>>  $rows
+     * @param  int  $skippedRows  欄數與標題列不符而略過的資料列數；呼叫端必須記成警告，不可靜默丟棄
      */
     private function __construct(
         public array $header,
         public array $rows,
+        public int $skippedRows,
     ) {}
 
     /**
@@ -40,6 +42,7 @@ final readonly class CsvTable
 
         $header = array_map(static fn (?string $column): string => trim((string) $column), $header);
         $rows = [];
+        $skipped = 0;
 
         while (($row = fgetcsv($handle, escape: '')) !== false) {
             if ($row === [null] || $row === []) {
@@ -47,6 +50,8 @@ final readonly class CsvTable
             }
 
             if (count($row) !== count($header)) {
+                $skipped++;
+
                 continue;
             }
 
@@ -59,7 +64,7 @@ final readonly class CsvTable
             throw DataSourceException::payloadUnparsable($sourceId, 'CSV 沒有任何資料列');
         }
 
-        return new self($header, $rows);
+        return new self($header, $rows, $skipped);
     }
 
     /**

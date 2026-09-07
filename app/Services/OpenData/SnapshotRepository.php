@@ -133,9 +133,15 @@ class SnapshotRepository
             ->limit(max($keep, 1))
             ->pluck('id');
 
+        if ($keepIds->isEmpty()) {
+            return 0;
+        }
+
         return DataSnapshot::query()
             ->where('source_id', $sourceId)
             ->whereNotIn('id', $keepIds)
+            // 目前生效的快照永遠不刪，即使排序因時鐘誤差把它排到後面。
+            ->where('is_current', false)
             ->delete();
     }
 }

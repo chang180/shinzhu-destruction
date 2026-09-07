@@ -83,6 +83,20 @@ class ScienceParkWaterAdapterTest extends TestCase
         $this->assertSame(110, $snapshot->metrics['新竹園區']['roc_year']);
     }
 
+    public function test_it_warns_instead_of_silently_dropping_a_malformed_row(): void
+    {
+        $csv = self::HEADER.'
+'
+            .'新竹園區,114年用水量(單位：CMD),165344,163352,168554,173734,179396,185609,191153,193431,197228,196985,189497,186988'.'
+'
+            .'生醫園區,114年用水量(單位：CMD),1248,1204';
+
+        $snapshot = $this->adapterFor(self::SOURCE_ID)->normalize($this->payload(self::SOURCE_ID, $csv));
+
+        $this->assertArrayNotHasKey('生醫園區', $snapshot->metrics);
+        $this->assertContains('malformed_rows_skipped', array_column($snapshot->warnings, 'code'));
+    }
+
     public function test_it_rejects_a_csv_without_the_month_columns(): void
     {
         $csv = "園區名稱,年度\n新竹園區,114年用水量(單位：CMD)";

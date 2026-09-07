@@ -52,6 +52,15 @@ class LandUseAdapter extends AbstractAdapter
         }
 
         $warnings = [];
+
+        if ($table->skippedRows > 0) {
+            $warnings[] = $this->warning(
+                'malformed_rows_skipped',
+                "有 {$table->skippedRows} 列的欄數與標題列不符，已略過",
+                ['skipped_rows' => $table->skippedRows],
+            );
+        }
+
         $expected = (int) $this->source['expected_township_count'];
 
         if (count($rows) !== $expected) {

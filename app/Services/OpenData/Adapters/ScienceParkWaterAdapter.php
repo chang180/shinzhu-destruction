@@ -40,6 +40,15 @@ class ScienceParkWaterAdapter extends AbstractAdapter
         }
 
         $warnings = [];
+
+        if ($table->skippedRows > 0) {
+            $warnings[] = $this->warning(
+                'malformed_rows_skipped',
+                "有 {$table->skippedRows} 列的欄數與標題列不符，已略過",
+                ['skipped_rows' => $table->skippedRows],
+            );
+        }
+
         $metrics = [];
         $rocYears = [];
         $unit = null;

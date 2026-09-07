@@ -4,6 +4,7 @@ namespace Tests\Feature\OpenData;
 
 use App\Services\OpenData\Exceptions\DataSourceException;
 use App\Services\OpenData\Snapshot\SnapshotQuality;
+use Carbon\CarbonImmutable;
 use Tests\TestCase;
 
 class ReservoirConditionsAdapterTest extends TestCase
@@ -89,6 +90,61 @@ class ReservoirConditionsAdapterTest extends TestCase
         $this->assertSame(3390.0, $snapshot->metrics['10405']['effective_storage_latest']);
     }
 
+    public function test_it_windows_each_reservoir_against_its_own_latest_observation(): void
+    {
+        // 10501 落後 10405 三天。視窗若錨定全體最新，10501 的好資料會整批被丟掉。
+        $rows = [];
+
+        for ($hour = 0; $hour < 8; $hour++) {
+            $rows[] = $this->observation('10405', $this->time('2026-09-07T22:00:00', $hour), storage: (string) (3390 - $hour));
+            $rows[] = $this->observation('10501', $this->time('2026-09-04T22:00:00', $hour), storage: (string) (2960 - $hour));
+        }
+
+        $snapshot = $this->adapterFor(self::SOURCE_ID)->normalize(
+            $this->payload(self::SOURCE_ID, json_encode($rows), '2026-09-07T23:00:00Z'),
+        );
+
+        $this->assertSame(8, $snapshot->metrics['10501']['sample_count']);
+        $this->assertSame(2960.0, $snapshot->metrics['10501']['effective_storage_latest']);
+        $this->assertNotNull($snapshot->metrics['10501']['storage_index']);
+        $this->assertSame(8, $snapshot->metrics['10405']['sample_count']);
+    }
+
+    public function test_a_lagging_reservoir_makes_the_whole_snapshot_stale_and_is_named(): void
+    {
+        $rows = [];
+
+        for ($hour = 0; $hour < 8; $hour++) {
+            $rows[] = $this->observation('10405', $this->time('2026-09-07T22:00:00', $hour), storage: (string) (3390 - $hour));
+            $rows[] = $this->observation('10501', $this->time('2026-09-04T22:00:00', $hour), storage: (string) (2960 - $hour));
+        }
+
+        $snapshot = $this->adapterFor(self::SOURCE_ID)->normalize(
+            $this->payload(self::SOURCE_ID, json_encode($rows), '2026-09-07T23:00:00Z'),
+        );
+
+        $this->assertSame(SnapshotQuality::Stale, $snapshot->quality);
+        $this->assertContains('reservoir_observation_stale', array_column($snapshot->warnings, 'code'));
+
+        $stale = array_values(array_filter(
+            $snapshot->warnings,
+            static fn (array $warning): bool => $warning['code'] === 'reservoir_observation_stale',
+        ));
+
+        $this->assertCount(1, $stale);
+        $this->assertSame('10501', $stale[0]['context']['reservoir_id']);
+    }
+
+    public function test_it_warns_when_a_tracked_reservoir_is_absent_upstream(): void
+    {
+        $body = json_encode([$this->observation('10405', '2026-09-07T22:00:00', storage: '3390.0')]);
+
+        $snapshot = $this->adapterFor(self::SOURCE_ID)->normalize($this->payload(self::SOURCE_ID, $body));
+
+        $this->assertContains('reservoir_missing', array_column($snapshot->warnings, 'code'));
+        $this->assertNull($snapshot->metrics['10501']['effective_storage_latest']);
+    }
+
     public function test_it_rejects_a_payload_that_is_missing_required_fields(): void
     {
         $body = json_encode([['reservoiridentifier' => '10405', 'observationtime' => '2026-09-07T22:00:00']]);
@@ -119,6 +175,11 @@ class ReservoirConditionsAdapterTest extends TestCase
         } catch (DataSourceException $exception) {
             $this->assertSame('payload_unparsable', $exception->reasonCode);
         }
+    }
+
+    private function time(string $anchor, int $hoursBefore): string
+    {
+        return CarbonImmutable::parse($anchor)->subHours($hoursBefore)->format('Y-m-d\TH:i:s');
     }
 
     /**

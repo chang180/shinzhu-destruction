@@ -40,8 +40,6 @@ class ReservoirConditionsAdapter extends AbstractAdapter
         $windowHours = (int) $this->source['observation_window_hours'];
         $minimumSamples = (int) $this->source['minimum_samples'];
 
-        $newestOverall = $this->newestObservationTime($rows);
-
         foreach ($tracked as $identifier => $meta) {
             $reservoirRows = $this->rowsFor($rows, (string) $identifier);
 
@@ -57,10 +55,15 @@ class ReservoirConditionsAdapter extends AbstractAdapter
                 continue;
             }
 
-            $windowStart = $newestOverall?->subHours($windowHours);
+            /*
+             * 視窗錨定在「這座水庫自己」的最新觀測，不是全體最新。
+             * 各水庫管理單位的上傳頻率不同，用全體最新當基準會讓落後的水庫
+             * 整批落在視窗外，好資料被靜默丟成缺值。
+             */
+            $windowStart = $this->newestObservationTime($reservoirRows)->subHours($windowHours);
             $windowed = array_values(array_filter(
                 $reservoirRows,
-                static fn (array $row): bool => $windowStart === null || $row['observed_at']->greaterThanOrEqualTo($windowStart),
+                static fn (array $row): bool => $row['observed_at']->greaterThanOrEqualTo($windowStart),
             ));
 
             usort(
@@ -68,13 +71,7 @@ class ReservoirConditionsAdapter extends AbstractAdapter
                 static fn (array $a, array $b): int => $a['observed_at']->getTimestamp() <=> $b['observed_at']->getTimestamp(),
             );
 
-            $latest = $windowed === [] ? null : $windowed[count($windowed) - 1];
-
-            if ($latest === null) {
-                $metrics[(string) $identifier] = $this->emptyReservoirMetrics($meta);
-
-                continue;
-            }
+            $latest = $windowed[count($windowed) - 1];
 
             $storageSamples = array_values(array_filter(
                 array_map(static fn (array $row): ?float => $row['effective_storage'], $windowed),
@@ -96,6 +93,19 @@ class ReservoirConditionsAdapter extends AbstractAdapter
                     'insufficient_samples',
                     "水庫 {$identifier} 在 {$windowHours} 小時視窗內少於 {$minimumSamples} 筆有效蓄水量，不計算相對指標",
                     ['reservoir_id' => (string) $identifier, 'samples' => count($storageSamples)],
+                );
+            }
+
+            $staleAfter = (int) $this->source['stale_after_hours'];
+
+            if ($latest['observed_at']->diffInHours($payload->fetchedAt, absolute: true) > $staleAfter) {
+                $warnings[] = $this->warning(
+                    'reservoir_observation_stale',
+                    "水庫 {$identifier} 最新觀測超過 {$staleAfter} 小時",
+                    [
+                        'reservoir_id' => (string) $identifier,
+                        'observed_at' => $latest['observed_at']->utc()->toIso8601String(),
+                    ],
                 );
             }
 
@@ -129,7 +139,11 @@ class ReservoirConditionsAdapter extends AbstractAdapter
             '本資源未提供蓄水百分比與滿水位容量欄位，不推算蓄水率',
         );
 
-        $observedAt = max($latestObservations);
+        /*
+         * 快照的 observed_at 取「追蹤水庫中最舊的一筆最新觀測」。
+         * 取最新會讓其中一座落後時整份快照仍標成 fresh，等於用新資料掩蓋舊資料。
+         */
+        $observedAt = min($latestObservations);
         [$quality, $reason] = $this->assessQuality($observedAt, $payload->fetchedAt);
 
         return new NormalizedSnapshot(
@@ -246,13 +260,11 @@ class ReservoirConditionsAdapter extends AbstractAdapter
     }
 
     /**
-     * @param  list<array<string, mixed>>  $rows
+     * @param  non-empty-list<array<string, mixed>>  $rows
      */
-    private function newestObservationTime(array $rows): ?CarbonImmutable
+    private function newestObservationTime(array $rows): CarbonImmutable
     {
-        $times = array_map(static fn (array $row): CarbonImmutable => $row['observed_at'], $rows);
-
-        return $times === [] ? null : max($times);
+        return max(array_map(static fn (array $row): CarbonImmutable => $row['observed_at'], $rows));
     }
 
     /**

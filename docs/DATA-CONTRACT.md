@@ -87,7 +87,11 @@ UI 必須逐來源顯示品質。一個來源新鮮不代表整局可以標成�
 | `catchment_rainfall_latest` | 毫米 | 集水區累積降雨量 |
 | `total_outflow_latest` | 立方公尺／秒 | |
 
-觀測視窗為最新觀測往前 24 小時。`storage_index` 需要至少 6 筆有效樣本，否則為 `null`，並記 `insufficient_samples` 警告——不得填 `1.0` 假裝有資料。
+觀測視窗是**每座水庫各自**最新觀測往前 24 小時。各水庫管理單位的上傳頻率不同，用全體最新觀測當基準會讓落後的水庫整批落在視窗外，好資料被靜默丟成缺值。
+
+`storage_index` 需要至少 6 筆有效樣本，否則為 `null`，並記 `insufficient_samples` 警告——不得填 `1.0` 假裝有資料。
+
+快照層級的 `observed_at` 取**追蹤水庫中最舊的那一筆最新觀測**，品質判定跟著它走。取最新會讓其中一座落後三天時整份快照仍標成 `fresh`，等於用新資料掩蓋舊資料。落後的水庫另外以 `reservoir_observation_stale` 警告點名。
 
 **不提供蓄水百分比。** 這份資源的 payload 只有 `effectivewaterstoragecapacity`，沒有滿水位容量欄位，也沒有上游說明提到的「蓄水百分比」。每次正規化都會附上 `storage_percentage_unavailable` 警告。資料集頁面另外要求不要用綠／黃／橙／紅表達蓄水率，原始資料面板一律使用中性色與數值，與虛構戰鬥血條分開。
 
@@ -148,6 +152,23 @@ CSV 只有縣市／鄉鎮市名稱，**沒有行政區代碼**；`scope.administ
 | `missing_required_fields` | 缺少必要欄位、找不到目標行政區或水庫 |
 | `budget_exhausted` | 單來源總工作預算用盡 |
 
+warnings 使用的 `code`（不中斷正規化，但必須保留給 UI 與稽核）：
+
+| code | 意義 |
+|---|---|
+| `storage_percentage_unavailable` | 水庫來源固定附帶，說明不推算蓄水率 |
+| `not_a_heat_measurement` | 國土利用來源固定附帶，說明綠地面積不是熱島量測 |
+| `reservoir_missing` | 追蹤的水庫代碼在本次回應中完全沒有觀測列 |
+| `reservoir_observation_stale` | 個別水庫最新觀測超過 48 小時 |
+| `missing_effective_storage` | 最新觀測沒有有效蓄水量 |
+| `insufficient_samples` | 樣本數低於門檻，相對指標留 `null` |
+| `missing_month` | 園區某月缺值 |
+| `missing_category_cells` | 國土利用某列有分類欄位缺值，未計入分母 |
+| `malformed_rows_skipped` | CSV 有欄數不符的資料列被略過 |
+| `township_count_mismatch` | 取得的鄉鎮市數與預期不同 |
+| `unmapped_park` / `unparsable_year` | 設定沒有該園區歸屬／年度欄無法解析 |
+| `demo_fixture` | 示範情境專用 |
+
 **任何失敗都不會覆蓋既有快照。** 抓取與清洗都在交易外完成，只有通過驗證的正規化結果才進交易；發布時在同一交易內把同來源舊列的 `is_current` 關掉再插入新列。
 
 ## 5. 傳輸防護
@@ -183,7 +204,7 @@ CSV 只有縣市／鄉鎮市名稱，**沒有行政區代碼**；`scope.administ
 | `nstc.science_park_water` | 818 bytes | 3,290 bytes |
 | `moi.land_use` | 155,896 bytes | 5,689 bytes |
 
-`SnapshotRepository::prune()` 可依來源保留最近 N 筆，但預設不執行。**P03 加入 `runs` 之後，必須先排除仍被對局引用的 `snapshot_id` 才能啟用定期清理**，否則會破壞重播。
+`SnapshotRepository::prune()` 可依來源保留最近 N 筆（`is_current` 的那一筆永遠不刪），但預設不執行。**P03 加入 `runs` 之後，必須先排除仍被對局引用的 `snapshot_id` 才能啟用定期清理**，否則會破壞重播。
 
 ## 8. 排程
 
