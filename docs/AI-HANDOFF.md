@@ -22,18 +22,18 @@
 
 ## 可直接複製的派工文字
 
-目前 P00、P01 已完成，P02 已交付待驗收；下一個可派工階段是 **P03 可重播的戰鬥引擎與平衡初稿**。每次派工仍從本文件開始，再依指定階段讀取開發計畫、狀態、相關規格及上一階段報告。不要只把「繼續開發」交給 AI，必須在派工文字中寫明階段代號與交付物。
+目前 P00、P01、P02 已完成，P03 已交付待驗收；下一個可派工階段是 **P04 一關完整體驗切片**。每次派工仍從本文件開始，再依指定階段讀取開發計畫、狀態、相關規格及上一階段報告。不要只把「繼續開發」交給 AI，必須在派工文字中寫明階段代號與交付物。
 
 ```text
-請依 docs/DEVELOPMENT-PLAN.md 執行 P03（可替換成指定階段）。
+請依 docs/DEVELOPMENT-PLAN.md 執行 P04（可替換成指定階段）。
 先讀 README.md、docs/DEVELOPMENT-STATUS.md、docs/AI-HANDOFF.md、
-docs/TECHNICAL-SPEC.md、docs/DATA-CONTRACT.md、該階段相關規格與前一階段報告，
+docs/TECHNICAL-SPEC.md、docs/DATA-CONTRACT.md、docs/BALANCE.md、該階段相關規格與前一階段報告，
 檢查目前工作樹並保留既有修改。
 前置條件未滿足時，指出確切缺項；可完成的獨立工作繼續進行。
 P01 起必須實際使用已安裝的 Laravel Boost，遵循生成的開發指示；
 不得以安裝說明或 composer.json 條目代替完整安裝驗證。
 交付本階段程式／素材、必要測試與驗收證據，建立
-docs/phase-reports/P03.md，更新進度表及受影響規格。
+docs/phase-reports/P04.md，更新進度表及受影響規格。
 報告已完成、未驗證、限制與下一階段入口，不自動展開後續階段。
 ```
 
@@ -79,6 +79,6 @@ docs/phase-reports/P03.md，更新進度表及受影響規格。
 
 ## 文件維護原則
 
-資料欄位以 [`DATA-CONTRACT.md`](DATA-CONTRACT.md) 為準（P02 已建立），遊戲數值以 `BALANCE.md` 為準，素材以 manifest 為準；尚未建立的檔案在對應階段才產生。若本組初稿與實測有差異，更新原規格並留下決策紀錄，不在多份文件各維護一組矛盾數值。
+資料欄位以 [`DATA-CONTRACT.md`](DATA-CONTRACT.md) 為準（P02 已建立），遊戲數值以 [`BALANCE.md`](BALANCE.md) 為準（P03 已建立，`rules_version 1.0.0`），素材以 manifest 為準；尚未建立的檔案在對應階段才產生。若本組初稿與實測有差異，更新原規格並留下決策紀錄，不在多份文件各維護一組矛盾數值。
 
 報告只收錄可公開且去除秘密的證據。README 已說明 `docs/` 是 Pages 發布來源，私密環境值不可放入階段報告。

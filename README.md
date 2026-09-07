@@ -4,16 +4,17 @@
 
 ## 新版開發計畫（2026-09-08）
 
-預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **13 關原創使徒策略遊戲**。P01 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；P02 已完成三個中央部會資料 adapter、正規化快照與示範情境備援。13 關引擎、正式視聽與 Hostinger 實機驗證仍按階段進行。
+預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **13 關原創使徒策略遊戲**。P01 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；P02 已完成三個中央部會資料 adapter、正規化快照與示範情境備援；P03 已完成伺服器權威戰鬥引擎、事件契約與平衡鎖版。13 關內容、正式視聽與 Hostinger 實機驗證仍按階段進行。
 
 - [分階段開發計畫](docs/DEVELOPMENT-PLAN.md)：P00～P09 依賴、交付與驗收，可逐階段派給其他 AI。
 - [技術規格](docs/TECHNICAL-SPEC.md)：版本、Boost 非互動全選、SQLite、資料來源及 Hostinger 部署。
 - [資料契約](docs/DATA-CONTRACT.md)：三個部會來源的正規化快照欄位、單位、品質門檻、失敗分類與備援。
+- [平衡鎖版](docs/BALANCE.md)：`rules_version`、技能表、傷害公式、情境修正換算與策略矩陣驗收。
 - [13 關遊戲設計](docs/GAME-DESIGN.md)：策略難度、施招、城市防守及玩家勝利複盤。
 - [美術與音效規格](docs/ART-AUDIO-SPEC.md)、[素材來源與下載紀錄](docs/ASSET-SOURCES.md)：原創生成與免費開放素材搭配。
 - [AI 派工與交接](docs/AI-HANDOFF.md)、[開發進度](docs/DEVELOPMENT-STATUS.md)：可複製派工文字與實際狀態。
 - [Boost 安裝紀錄](docs/BOOST-SETUP.md)：非互動全選的版本、agent 矩陣、產物核對與限制。
-- [P00 基線報告](docs/phase-reports/P00.md)、[P01 基礎報告](docs/phase-reports/P01.md)、[P02 資料報告](docs/phase-reports/P02.md)：各階段可重現的驗收證據。
+- [P00 基線報告](docs/phase-reports/P00.md)、[P01 基礎報告](docs/phase-reports/P01.md)、[P02 資料報告](docs/phase-reports/P02.md)、[P03 引擎報告](docs/phase-reports/P03.md)：各階段可重現的驗收證據。
 
 ## Phase 1 已完成的新版基礎
 
@@ -30,6 +31,16 @@
 - 資料是有限幅度的遊戲情境輸入，**不是災害預測**：不推算水庫蓄水率、不把公園綠地面積當熱島量測、不把園區用水當全縣即時用水。詳見[資料契約](docs/DATA-CONTRACT.md)。
 - 更新命令：`php artisan opendata:refresh`、`php artisan opendata:status`；排程由 `routes/console.php` 定義，Hostinger 只需一條 cron 呼叫 `php artisan schedule:run`。
 
+## Phase 3 已完成的戰鬥引擎
+
+- 規則只有一份，位於 `app/Domain/Game/`；`rules_version` 鎖在 `1.0.0`，數值與公式以[平衡鎖版](docs/BALANCE.md)為準。
+- **完全沒有亂數**：城市行為由關卡預告表決定，相同輸入必得相同事件與結局，重播不需保存亂數狀態。
+- 六個 `/api/v1` JSON 介面掛在 `web` middleware group，仍受工作階段與 CSRF 保護；匿名存檔綁 HttpOnly session。
+- 同一個 `action_id` 重送回放原結果不重新結算；版本過期回 409，規則不合法回 422 且不消耗回合或惡意。
+- 每則事件含 `before`／`delta`／`after`／`reason_code`／`cue_id`，足以解釋傷害、護盾、印記、抗性、修復與勝負；前端只播事件，不重算。
+- `php artisan game:simulate` 跑（關卡 × 情境 × 策略 × seed）矩陣。實測：規劃與貪心策略全數通關，合法隨機 0～15%，單系連按與舊版「三系集印記再放終招」套路全部 0%。
+- P03 只實作三個代表關卡驗證規則；其餘 10 關在 P05。機器策略勝率不是真人體驗證據，難度標籤等 P08 實測後命名。
+
 ### 新版本機驗證
 
 ```sh
@@ -37,6 +48,7 @@ composer install
 npm ci
 php artisan migrate --force
 php artisan opendata:refresh
+php artisan game:simulate --seeds=20
 npm run typecheck
 npm run build
 php artisan test --compact
@@ -66,7 +78,7 @@ npm run probe:build
 
 `php artisan test --compact`、`npm run typecheck`、`npm run build`、`npm run probe:test`、`npm run probe:build`
 
-PHP 測試涵蓋三個資料 adapter 的正規化、缺值與零值處理、過期判定，以及逾時、403、429、HTML 假成功、超量回應等受控失敗與備援。`tests/*.test.cjs` 則涵蓋靜態原型的可通關路線、亂放終招失敗、印記消耗、連攜與修復、10,000 場固定種子的隨機策略。這些是規則與資料處理測試，不等同真人使用者測試。
+PHP 測試涵蓋三個資料 adapter 的正規化、缺值與零值處理、過期判定，以及逾時、403、429、HTML 假成功、超量回應等受控失敗與備援；另涵蓋戰鬥引擎的結算順序、抗性與破綻邊界、重送去重、版本衝突、擁有者隔離與策略矩陣門檻。`tests/*.test.cjs` 則涵蓋靜態原型的可通關路線、亂放終招失敗、印記消耗、連攜與修復、10,000 場固定種子的隨機策略。這些是規則與資料處理測試，不等同真人使用者測試。
 
 ## Hostinger 主機端 API 連線實驗
 
@@ -78,4 +90,4 @@ repo 的 `api-probe/` 保留可獨立啟動的 Node.js 服務，用於驗證 Hos
 
 ## AI 使用與署名
 
-AI 共創：**GPT-6 Astra（透過 OpenAI Codex）**。本靜態原型的遊戲規則草案、核心程式、介面、固定文案與測試由 GPT-6 Astra 協助生成；**Claude Sonnet 5（透過 Claude Code）** 協助完成 Hostinger 主機連線實測、`data.gov.tw` 資料來源可行性盤點，以及遊戲頁面（`docs/`）的視覺改版；新版開發文件與開放素材來源整理由 OpenAI Codex 協助完成；**Claude Opus 5（透過 Claude Code）** 協助完成 P02 的三個中央部會資料 adapter、正規化快照契約、備援 fixture 與相關測試。張建文提供提案、創意方向與成果確認。參賽者需檢核並依競賽簡章如實揭露。本次開發文件放在 `docs/`，與既有 Pages 發布樹共存；含個人資料的報名附件及私密設定不納入公開文件。
+AI 共創：**GPT-6 Astra（透過 OpenAI Codex）**。本靜態原型的遊戲規則草案、核心程式、介面、固定文案與測試由 GPT-6 Astra 協助生成；**Claude Sonnet 5（透過 Claude Code）** 協助完成 Hostinger 主機連線實測、`data.gov.tw` 資料來源可行性盤點，以及遊戲頁面（`docs/`）的視覺改版；新版開發文件與開放素材來源整理由 OpenAI Codex 協助完成；**Claude Opus 5（透過 Claude Code）** 協助完成 P02 的三個中央部會資料 adapter、正規化快照契約、備援 fixture，以及 P03 的戰鬥引擎、事件契約、HTTP 介面與平衡鎖版。張建文提供提案、創意方向與成果確認。參賽者需檢核並依競賽簡章如實揭露。本次開發文件放在 `docs/`，與既有 Pages 發布樹共存；含個人資料的報名附件及私密設定不納入公開文件。
