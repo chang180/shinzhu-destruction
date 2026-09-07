@@ -2,12 +2,17 @@
 
 namespace Tests\Feature\Game;
 
+use App\Domain\Game\BattleEngine;
+use App\Domain\Game\LevelRepository;
+use App\Domain\Game\Scenario\ScenarioModifiers;
+use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
 use App\Models\Campaign;
 use App\Models\Run;
 use App\Models\RunAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
+use Random\Randomizer;
 use Tests\TestCase;
 
 class RunApiTest extends TestCase
@@ -30,6 +35,44 @@ class RunApiTest extends TestCase
             'skill_id' => 'probe.water',
             'target' => 'water',
         ], $overrides));
+    }
+
+    /**
+     * 用規劃策略把這一局打到玩家勝利，回傳最後一次回應。
+     */
+    private function winCurrentRun(string $runId): TestResponse
+    {
+        $engine = app(BattleEngine::class);
+        $level = app(LevelRepository::class)->get('empty-cup');
+        $run = Run::query()->where('public_id', $runId)->firstOrFail();
+        $strategy = new PlannerStrategy(
+            ScenarioModifiers::fromArray($run->scenario_modifiers),
+        );
+
+        $response = null;
+
+        for ($i = 1; $i <= $level->maxTurns; $i++) {
+            $state = Run::query()->where('public_id', $runId)->firstOrFail()->battleState();
+
+            if ($state->outcome->isFinished()) {
+                break;
+            }
+
+            $choice = $strategy->choose($state, $engine, $level, new Randomizer);
+
+            $response = $this->submit($runId, [
+                'action_id' => 'win-'.$i,
+                'expected_version' => $state->version,
+                'skill_id' => $choice['skill_id'],
+                'target' => $choice['target'],
+            ]);
+
+            $response->assertOk();
+        }
+
+        $this->assertSame('player_victory', Run::query()->where('public_id', $runId)->firstOrFail()->outcome->value);
+
+        return $response;
     }
 
     public function test_the_level_list_reports_unlock_state_and_data_status(): void
@@ -175,7 +218,8 @@ class RunApiTest extends TestCase
         $this->submit($runId, ['action_id' => 'intruder'])->assertNotFound();
 
         $this->assertSame(0, RunAction::query()->count());
-        $this->assertSame(2, Campaign::query()->count());
+        // 拒絕闖入者不需要先替他建立戰役：資料庫裡仍然只有原本那一位玩家。
+        $this->assertSame(1, Campaign::query()->count());
     }
 
     public function test_the_replay_endpoint_waits_until_the_run_is_finished(): void
@@ -249,6 +293,89 @@ class RunApiTest extends TestCase
     {
         $this->assertSame(1, (int) DB::selectOne('PRAGMA foreign_keys')->foreign_keys);
         $this->assertGreaterThan(0, (int) config('database.connections.sqlite.busy_timeout'));
+    }
+
+    public function test_read_only_endpoints_do_not_create_campaign_rows(): void
+    {
+        // 公開的關卡列表不該讓每個沒有 cookie 的請求都在資料庫留下一列。
+        for ($i = 0; $i < 5; $i++) {
+            $this->flushSession();
+            $this->getJson(route('api.v1.levels.index'))->assertOk();
+        }
+
+        $this->getJson(route('api.v1.runs.show', ['run' => 'nope']))->assertNotFound();
+        $this->getJson(route('api.v1.data-status'))->assertOk();
+
+        $this->assertSame(0, Campaign::query()->count());
+    }
+
+    public function test_a_visitor_without_a_campaign_sees_the_default_unlock_state(): void
+    {
+        $response = $this->getJson(route('api.v1.levels.index'));
+
+        $response->assertOk()
+            ->assertJsonPath('levels.0.unlocked', true)
+            ->assertJsonPath('levels.0.best', null)
+            ->assertJsonPath('levels.1.unlocked', false);
+    }
+
+    public function test_starting_a_run_is_what_creates_the_campaign(): void
+    {
+        $this->assertSame(0, Campaign::query()->count());
+
+        $this->startRun()->assertCreated();
+
+        $this->assertSame(1, Campaign::query()->count());
+    }
+
+    public function test_clearing_a_level_records_the_best_result_and_unlocks_the_next_one(): void
+    {
+        $runId = $this->startRun()->json('data.run_id');
+        $this->winCurrentRun($runId);
+
+        $campaign = Campaign::query()->firstOrFail();
+
+        $this->assertArrayHasKey('empty-cup', $campaign->best_results);
+        $this->assertSame($runId, $campaign->best_results['empty-cup']['run_id']);
+        $this->assertGreaterThan(0, $campaign->best_results['empty-cup']['turns']);
+        $this->assertContains('meter-feast', $campaign->unlocked);
+
+        // 解鎖之後才開得起下一關。
+        $this->startRun('meter-feast')->assertCreated();
+
+        $this->getJson(route('api.v1.levels.index'))
+            ->assertJsonPath('levels.1.unlocked', true)
+            ->assertJsonPath('levels.0.best.run_id', $runId);
+    }
+
+    public function test_a_won_run_can_be_replayed_with_its_frozen_snapshots(): void
+    {
+        $runId = $this->startRun()->json('data.run_id');
+        $this->winCurrentRun($runId);
+
+        $replay = $this->getJson(route('api.v1.runs.replay', ['run' => $runId]));
+
+        $replay->assertOk()->assertJsonPath('outcome', 'player_victory');
+
+        $this->assertCount(3, $replay->json('snapshots'));
+        $this->assertNotEmpty($replay->json('actions'));
+
+        // 最後一則事件必須是結局，而且事件都掛在該行動所屬的回合底下。
+        $last = collect($replay->json('actions'))->last();
+        $this->assertSame('outcome', collect($last['events'])->last()['type']);
+        $this->assertCount(1, collect($last['events'])->pluck('turn')->unique());
+    }
+
+    public function test_every_event_from_one_settlement_shares_the_action_turn(): void
+    {
+        $runId = $this->startRun()->json('data.run_id');
+
+        $events = $this->submit($runId)->json('data.events');
+        $turns = array_unique(array_column($events, 'turn'));
+
+        // 包含回合推進在內。依 turn 分組的重播不能把推進歸到下一回合。
+        $this->assertSame([1], array_values($turns));
+        $this->assertContains('turn_advanced', array_column($events, 'type'));
     }
 
     public function test_the_data_status_endpoint_does_not_leak_internal_detail(): void

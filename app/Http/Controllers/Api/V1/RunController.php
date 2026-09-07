@@ -43,16 +43,19 @@ class RunController extends Controller
 
     public function show(Request $request, string $run, CampaignResolver $campaigns): JsonResponse
     {
-        $campaign = $campaigns->resolve($request);
-
-        return (new RunResource($this->ownedRun($campaign, $run)))->response();
+        return (new RunResource(self::ownedRun($campaigns->existing($request), $run)))->response();
     }
 
     /**
      * 擁有者隔離：不是自己的局一律 404，不用 403 洩漏「這個 run 存在」。
+     * 連戰役都還沒有的訪客同樣是 404，不必為了拒絕他而先建立一個戰役。
      */
-    public static function ownedRun(Campaign $campaign, string $publicId): Run
+    public static function ownedRun(?Campaign $campaign, string $publicId): Run
     {
+        if ($campaign === null) {
+            throw new NotFoundHttpException('找不到這一局');
+        }
+
         $run = Run::query()
             ->where('campaign_id', $campaign->id)
             ->where('public_id', $publicId)

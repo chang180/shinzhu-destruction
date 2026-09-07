@@ -20,6 +20,13 @@ class BattleEngine
 {
     private int $sequence = 0;
 
+    /**
+     * 這次結算所屬的回合。同一次行動產生的所有事件都掛在這個回合底下，
+     * 包含最後的回合推進——否則依 turn 分組的重播與演出會把回合推進
+     * 歸到下一回合，複盤也會把「第幾回合做了什麼」講錯。
+     */
+    private int $actionTurn = 1;
+
     /** @var list<BattleEvent> */
     private array $events = [];
 
@@ -77,6 +84,7 @@ class BattleEngine
 
         $this->sequence = 0;
         $this->events = [];
+        $this->actionTurn = $state->turn;
 
         $next = $state->copy();
 
@@ -871,7 +879,7 @@ class BattleEngine
     ): void {
         $this->events[] = new BattleEvent(
             sequence: ++$this->sequence,
-            turn: $state->turn,
+            turn: $this->actionTurn,
             type: $type,
             actor: $actor,
             target: $target,

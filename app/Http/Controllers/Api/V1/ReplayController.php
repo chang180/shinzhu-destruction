@@ -23,8 +23,7 @@ class ReplayController extends Controller
         CampaignResolver $campaigns,
         SnapshotRepository $snapshots,
     ): JsonResponse {
-        $campaign = $campaigns->resolve($request);
-        $model = RunController::ownedRun($campaign, $run);
+        $model = RunController::ownedRun($campaigns->existing($request), $run);
 
         if (! $model->outcome->isFinished()) {
             return response()->json([

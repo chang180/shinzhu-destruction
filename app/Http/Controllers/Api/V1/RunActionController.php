@@ -31,8 +31,7 @@ class RunActionController extends Controller
             'target' => ['nullable', 'string', Rule::in(Element::values())],
         ]);
 
-        $campaign = $campaigns->resolve($request);
-        $model = RunController::ownedRun($campaign, $run);
+        $model = RunController::ownedRun($campaigns->existing($request), $run);
 
         $action = new ActionRequest(
             actionId: $validated['action_id'],

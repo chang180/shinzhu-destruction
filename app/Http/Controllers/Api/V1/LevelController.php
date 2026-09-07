@@ -20,9 +20,10 @@ class LevelController extends Controller
         SnapshotRepository $snapshots,
         OpenDataRegistry $sources,
     ): JsonResponse {
-        $campaign = $campaigns->resolve($request);
-        $unlocked = $campaign->unlocked;
-        $best = $campaign->best_results;
+        // 唯讀端點：還沒開過局的訪客看預設解鎖狀態，不為了讀一份清單就建立戰役。
+        $campaign = $campaigns->existing($request);
+        $unlocked = $campaign?->unlocked ?? $campaigns->initiallyUnlocked();
+        $best = $campaign?->best_results ?? [];
 
         $payload = [];
 
