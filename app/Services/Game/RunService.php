@@ -80,11 +80,17 @@ class RunService
     public function submit(Run $run, ActionRequest $action): array
     {
         return DB::transaction(function () use ($run, $action): array {
-            /** @var Run $locked */
-            $locked = Run::query()->whereKey($run->getKey())->lockForUpdate()->firstOrFail();
+            /*
+             * 不用 lockForUpdate()：SQLite 把它編譯成空字串，寫了只是給人安全感。
+             * 保護來自下面的條件版本更新——讀到寫入之間如果有人改了這一列，
+             * 更新會影響 0 列，我們就回 409 而不是覆蓋掉對方的結果。
+             */
+            /** @var Run $current */
+            $current = Run::query()->whereKey($run->getKey())->firstOrFail();
+            $observedVersion = $current->version;
 
             $existing = RunAction::query()
-                ->where('run_id', $locked->id)
+                ->where('run_id', $current->id)
                 ->where('action_id', $action->actionId)
                 ->first();
 
@@ -93,23 +99,23 @@ class RunService
                     throw RunConflictException::actionIdReused($action->actionId);
                 }
 
-                return ['action' => $existing, 'run' => $locked, 'replayed' => true];
+                return ['action' => $existing, 'run' => $current, 'replayed' => true];
             }
 
-            if ($action->expectedVersion !== $locked->version) {
-                throw RunConflictException::staleVersion($action->expectedVersion, $locked->version);
+            if ($action->expectedVersion !== $observedVersion) {
+                throw RunConflictException::staleVersion($action->expectedVersion, $observedVersion);
             }
 
-            $level = $this->levels->get($locked->level_id);
-            $modifiers = ScenarioModifiers::fromArray($locked->scenario_modifiers);
+            $level = $this->levels->get($current->level_id);
+            $modifiers = ScenarioModifiers::fromArray($current->scenario_modifiers);
 
             // 規則不合法會在這裡丟例外，下面任何寫入都不會發生。
-            $result = $this->engine->apply($locked->battleState(), $action, $level, $modifiers);
+            $result = $this->engine->apply($current->battleState(), $action, $level, $modifiers);
 
-            $sequence = (int) RunAction::query()->where('run_id', $locked->id)->max('sequence') + 1;
+            $sequence = (int) RunAction::query()->where('run_id', $current->id)->max('sequence') + 1;
 
             $record = RunAction::query()->create([
-                'run_id' => $locked->id,
+                'run_id' => $current->id,
                 'action_id' => $action->actionId,
                 'sequence' => $sequence,
                 'fingerprint' => $action->fingerprint(),
@@ -119,20 +125,34 @@ class RunService
                 'version_after' => $result->state->version,
             ]);
 
-            $locked->forceFill([
-                'state' => $result->state->toArray(),
-                'version' => $result->state->version,
-                'outcome' => $result->state->outcome,
-                'finished_at' => $result->state->outcome->isFinished() ? Carbon::now() : null,
-            ])->save();
+            $updated = Run::query()
+                ->whereKey($current->getKey())
+                ->where('version', $observedVersion)
+                ->update([
+                    'state' => json_encode($result->state->toArray(), JSON_THROW_ON_ERROR),
+                    'version' => $result->state->version,
+                    'outcome' => $result->state->outcome->value,
+                    'finished_at' => $result->state->outcome->isFinished() ? Carbon::now() : null,
+                    'updated_at' => Carbon::now(),
+                ]);
 
-            if ($result->state->outcome === Outcome::PlayerVictory) {
-                $this->recordClear($locked, $result->state->turn);
+            if ($updated !== 1) {
+                // 有人在我們結算的同時改了這一列；整個交易回滾，這次不算數。
+                throw RunConflictException::staleVersion(
+                    $observedVersion,
+                    (int) Run::query()->whereKey($current->getKey())->value('version'),
+                );
             }
 
-            $locked->campaign()->update(['last_activity_at' => Carbon::now()]);
+            $current->refresh();
 
-            return ['action' => $record, 'run' => $locked, 'replayed' => false];
+            if ($result->state->outcome === Outcome::PlayerVictory) {
+                $this->recordClear($current, $result->state->turn);
+            }
+
+            $current->campaign()->update(['last_activity_at' => Carbon::now()]);
+
+            return ['action' => $record, 'run' => $current, 'replayed' => false];
         });
     }
 

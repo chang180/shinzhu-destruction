@@ -21,6 +21,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('levels', [LevelController::class, 'index'])->name('levels.index');
 Route::post('runs', [RunController::class, 'store'])->name('runs.store');
 Route::get('runs/{run}', [RunController::class, 'show'])->name('runs.show');
-Route::post('runs/{run}/actions', [RunActionController::class, 'store'])->name('runs.actions.store');
+/*
+ * 施招端點限流。回合制遊戲一回合只有一個決策，正常玩家遠遠打不到上限；
+ * 這是防止腳本洗結算，不是拿來卡人。超過時 Laravel 會回 429 並附上
+ * Retry-After，前端據此等待再重送**原本的** action_id（TECHNICAL-SPEC §6）。
+ */
+Route::post('runs/{run}/actions', [RunActionController::class, 'store'])
+    ->middleware('throttle:game-actions')
+    ->name('runs.actions.store');
 Route::get('runs/{run}/replay', [ReplayController::class, 'show'])->name('runs.replay');
 Route::get('data-status', [DataStatusController::class, 'show'])->name('data-status');

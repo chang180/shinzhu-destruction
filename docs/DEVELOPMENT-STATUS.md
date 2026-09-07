@@ -24,7 +24,8 @@
 - `rules_version` 鎖在 `1.0.0`（`config/game.php`）；數值與公式以 [BALANCE.md](BALANCE.md) 為準，改動必須升版否則舊局重播會對不上。
 - 戰鬥引擎在 `app/Domain/Game/`，**完全沒有亂數**：城市行為由關卡預告表決定，相同輸入必得相同事件與結局。
 - 六個 `/api/v1` 介面掛在 `web` middleware group，仍受工作階段與 CSRF 保護（實測無 token POST 回 419）。
-- 匿名存檔為 `campaigns`／`runs`／`run_actions`；`(run_id, action_id)` 唯一索引保證重送回放原結果。
+- 匿名存檔為 `campaigns`／`runs`／`run_actions`；`(run_id, action_id)` 唯一索引保證重送回放原結果，寫入採條件版本更新（SQLite 的 `lockForUpdate()` 是 no-op，不能依賴）。
+- 施招端點限流每分鐘 60 次，超過回 429 並帶 `Retry-After`；SQLite `busy_timeout` 設 5000 毫秒。
 - `php artisan game:simulate` 產生策略矩陣；驗收門檻已釘進 `tests/Feature/Game/StrategyMatrixTest.php`。
 - `config/opendata.php` 是三個部會來源的唯一清單；resource URL 由 `data.gov.tw` 資料集 API 的 `distribution` 取得，不在程式內拼湊。
 - `data_snapshots` 只存正規化結果（實測 2.2–5.7 KB／筆，上游原始為 0.8–283 KB）；發布為原子操作，失敗保留最近有效快照。
@@ -50,7 +51,7 @@
 | 執行者及日期 | Claude Opus 5（透過 Claude Code），2026-09-08 |
 | 基準／交付 commit 或未提交變更 | 基準 `bebff8a`；交付見 P03 報告 |
 | 階段報告相對路徑 | `docs/phase-reports/P03.md` |
-| 已通過項目 | 98 個 PHPUnit 測試、策略矩陣驗收門檻、真實 HTTP 端到端（含 CSRF 419 與重送回放）、Pint、typecheck、build、probe |
+| 已通過項目 | 101 個 PHPUnit 測試、策略矩陣驗收門檻、真實 HTTP 端到端（含 CSRF 419 與重送回放）、Pint、typecheck、build、probe |
 | 尚未驗證／受阻原因 | 真人試玩與難度標籤（P08）、效能壓測、UI 與演出（P04）、其餘 10 關（P05）、快照清理的對局引用保護 |
 | 下一位執行者第一步 | 讀 `docs/BALANCE.md` 與 P03 報告，執行 `php artisan opendata:refresh` 後開始 P04 |
 

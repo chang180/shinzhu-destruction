@@ -6,6 +6,7 @@ use App\Models\Campaign;
 use App\Models\Run;
 use App\Models\RunAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -220,6 +221,34 @@ class RunApiTest extends TestCase
             range(1, count($replay->json('actions'))),
             array_column($replay->json('actions'), 'sequence'),
         );
+    }
+
+    public function test_the_action_endpoint_is_rate_limited_and_says_when_to_retry(): void
+    {
+        $runId = $this->startRun()->json('data.run_id');
+        $limit = 60;
+        $response = null;
+
+        // 用同一個 action_id 重送：每次都走完中介層，但只會結算一次。
+        for ($i = 0; $i <= $limit; $i++) {
+            $response = $this->submit($runId);
+
+            if ($response->getStatusCode() === 429) {
+                break;
+            }
+        }
+
+        $response->assertStatus(429);
+        $this->assertNotNull($response->headers->get('Retry-After'));
+
+        // 限流擋掉的請求不會多結算，仍然只有第一次那一筆。
+        $this->assertSame(1, RunAction::query()->count());
+    }
+
+    public function test_foreign_keys_and_a_busy_timeout_are_enabled_on_sqlite(): void
+    {
+        $this->assertSame(1, (int) DB::selectOne('PRAGMA foreign_keys')->foreign_keys);
+        $this->assertGreaterThan(0, (int) config('database.connections.sqlite.busy_timeout'));
     }
 
     public function test_the_data_status_endpoint_does_not_leak_internal_detail(): void
