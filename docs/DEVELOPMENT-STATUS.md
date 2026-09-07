@@ -43,7 +43,7 @@
 |---|---|
 | 本次指派階段 | P02 資料轉接、快照與備援 |
 | 執行者及日期 | Claude Opus 5（透過 Claude Code），2026-09-08 |
-| 基準／交付 commit 或未提交變更 | 基準 `0d94b5b`；變更尚未提交 |
+| 基準／交付 commit 或未提交變更 | 基準 `0d94b5b`；交付 `14318d6`，分支 `p02-open-data-adapters` 待合併回 `main` |
 | 階段報告相對路徑 | `docs/phase-reports/P02.md` |
 | 已通過項目 | 三來源實連抓取、47 個 PHPUnit 測試、Pint、typecheck、build、probe、Pages 與 Laravel 殼瀏覽器檢查 |
 | 尚未驗證／受阻原因 | Hostinger 正式主機解析樣本、水庫名稱對照的機器驗證、情境修正公式（屬 P03） |
