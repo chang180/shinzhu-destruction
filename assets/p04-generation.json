@@ -20,7 +20,8 @@
       "sha256": "51492ce8493012cda0ad6d7499891e375ae5985e0c09bac6bdbd336d9deebb20",
       "output_sha256": "fd8146a0eceae5fbed0d8fcf035505bb2eb4029b47a66987f82a33541b1d42d9",
       "bytes": 287820,
-      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending",
+      "usage": "Retained as abstract forbidden-spell manifestation for 萬川歸寂; no longer a character."
     },
     {
       "key": "city",
@@ -70,7 +71,28 @@
       "sha256": "0c357b38a1943c2a866bdd76b95b7707c6799c4e95e4bc363939b40fea7cf256",
       "output_sha256": "95a3ddc57a2e1d84572743cf37f12d7094a006af9a4895e4a3813b2ee5f802bb",
       "bytes": 264510,
-      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending",
+      "usage": "Historical first-draft portrait; replaced in the live UI by yan-chen."
+    },
+    {
+      "key": "yan-chen",
+      "prompt": "Create an original production game character illustration, portrait 2:3. Professor Yan Chen, an original fictional villain academy professor of the forbidden art Withering Tide: elegant middle-aged East Asian man, slender, composed incisive expression, neatly swept dark hair with a silver streak at the temples, no glasses, asymmetric deep ink-purple academic coat with fine copper seam details, pale high collar. He calmly holds a SMALL EMPTY IVORY CERAMIC TEACUP at chest level, the empty interior visibly tilted toward viewer. Fine turquoise vapor curls DOWN from cup into an abstract dry river motif. Half-body portrait, head fully visible in upper third for avatar crop. Hand-drawn ink lines, screenprint halftone, warm textured ivory paper, restrained turquoise and copper accents, sophisticated illustrated indie strategy game, clear silhouette, not photorealistic. The cup is a teaching prop, professor is human. Background is quiet abstract turquoise dried river rings on ivory, no city landmarks. No text, letters, symbols from franchises, logos, watermarks, existing characters, costumes or recognizable anime designs.",
+      "source": "assets/generated/p04/yan-chen.png",
+      "output": "public/assets/p04/yan-chen.webp",
+      "review": "AI visual review: original illustrated composition, no identifiable franchise character or logo. Integrated into first-level briefing/battle or victory presentation; human visual acceptance pending.",
+      "sha256": "199d66f327d1bdda094313ca8dee4f8f45b2244a6bc48a547fca087c42b1da50",
+      "output_sha256": "d990da658f07e609034cc869281823bf93a802f0e47f67eee9a6e96c432427c3",
+      "bytes": 401292
+    },
+    {
+      "key": "victory",
+      "prompt": "Original fictional villain academy strategy game VICTORY illustration, wide 16:9. A surreal miniature imaginary Taiwanese hillside city suspended above dark ink-purple void has split into floating ceramic districts and paper architectural fragments, its turquoise water channels now dry, final turquoise river ribbons evaporating upward into a giant empty ceramic ring. Spectacular radiant COPPER AND GOLD ceremonial rays across warm ivory textured paper, graphic burst of geometric confetti, triumphant and ominous, a grand completed forbidden spell. City is architectural fantasy with invented buildings, not a real location; no people, injuries, gore, fire or realistic attack mechanisms. Hand ink lines, rich screenprint halftone, tactile printmaking, elegant editorial indie game illustration, strong readable central silhouette. Lower quarter dark and quieter for UI text overlay. No text, numbers, letters, logos, watermarks, recognizable franchise iconography, anime characters or sacred symbols.",
+      "source": "assets/generated/p04/victory.png",
+      "output": "public/assets/p04/victory.webp",
+      "review": "AI visual review: original illustrated composition, no identifiable franchise character or logo. Integrated into first-level briefing/battle or victory presentation; human visual acceptance pending.",
+      "sha256": "b8dc9c2a796b577d911006601adc21144e2fbac7e94383324639a29bb65dc187",
+      "output_sha256": "46868c048c9e46a75b1f1c88d854d1702cf5f9ff5d8ade8949aa5c4b6020f289",
+      "bytes": 301324
     }
   ]
 }

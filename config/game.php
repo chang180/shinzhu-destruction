@@ -160,7 +160,7 @@ return [
 
         'empty-cup' => [
             'sequence' => 1,
-            'name' => '空杯使徒・最後一滴學分',
+            'name' => '第一禁術・枯潮｜讓城市喊渴',
             'apostle' => 'empty-cup',
             'max_turns' => 10,
             'requires' => null,

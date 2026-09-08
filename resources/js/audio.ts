@@ -22,16 +22,19 @@ export class BattleAudio {
         const ending = event.type === 'outcome';
         const frequency = event.target === 'water' ? 294 : event.target === 'heat' ? 440 : 196;
         const notes = ending ? (event.after.outcome === 'player_victory' ? [262, 330, 392, 523] : [262, 233, 196]) : [frequency];
+        const volume = ending ? this.musicVolume : this.effectsVolume;
         notes.forEach((note, index) => {
+            if (volume <= 0) return;
             const oscillator = this.context!.createOscillator();
             const gain = this.context!.createGain();
             const time = this.context!.currentTime + index * 0.18;
             oscillator.type = ending ? 'sine' : 'triangle';
             oscillator.frequency.setValueAtTime(note, time);
             gain.gain.setValueAtTime(0, time);
-            gain.gain.linearRampToValueAtTime((ending ? this.musicVolume : this.effectsVolume) * 0.18, time + 0.02);
+            gain.gain.linearRampToValueAtTime(volume * 0.18, time + 0.02);
             gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
             oscillator.connect(gain).connect(this.context!.destination);
+            oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
             oscillator.start(time); oscillator.stop(time + 0.4); this.voices.push(oscillator);
         });
         const file = event.cue_id.includes('ultimate') || event.type === 'breach_opened' ? 'impactGlass_heavy_000'

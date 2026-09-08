@@ -12,7 +12,7 @@
 | P01 框架與 Boost | 完成 | [P01 報告](phase-reports/P01.md)、[Boost 紀錄](BOOST-SETUP.md)：Laravel/Vue/SQLite、lockfile、測試、建置與 Boost 全選驗證通過 |
 | P02 資料轉接 | 完成 | [P02 報告](phase-reports/P02.md)、[資料契約](DATA-CONTRACT.md)：三來源本機實連成功，逾時／403／429／HTML 假成功／缺欄位／過期／零值缺值均有測試；正式主機解析樣本待 P09 前補齊 |
 | P03 戰鬥引擎 | 待驗收 | [P03 報告](phase-reports/P03.md)、[平衡鎖版](BALANCE.md)：確定性引擎、事件契約、六個 `/api/v1` 介面、去重與版本語意、三關策略矩陣；真人試玩與效能壓測留給 P08 |
-| P04 第 1 關切片 | 未開始 | 首批實際圖片、音效及完整遊玩；前端只播 `events`，不重算傷害 |
+| P04 第 1 關切片 | 待驗收 | [P04 報告](phase-reports/P04.md)：枯潮教授・晏沉、首批實際圖片與音效、桌機／手機流程、勝敗複盤；真人試玩與錄影待補 |
 | P05 全 13 關 | 未開始 | 差異機制、存檔與逐關可解證據 |
 | P06 正式視聽 | 未開始 | 全部必要素材、來源與演出 |
 | P07 結局複盤 | 未開始 | 26 份關卡結局樣本及全章終幕 |
@@ -55,7 +55,7 @@
 | 階段報告相對路徑 | `docs/phase-reports/P03.md` |
 | 已通過項目 | 107 個 PHPUnit 測試、策略矩陣驗收門檻、真實 HTTP 端到端（含 CSRF 419 與重送回放）、Pint、typecheck、build、probe |
 | 尚未驗證／受阻原因 | 真人試玩與難度標籤（P08）、效能壓測、UI 與演出（P04）、其餘 10 關（P05）、快照清理的對局引用保護 |
-| 下一位執行者第一步 | 讀 `docs/BALANCE.md` 與 P03 報告，執行 `php artisan opendata:refresh` 後開始 P04 |
+| 下一位執行者第一步 | 讀 `docs/AI-HANDOFF.md` 與 P04 報告，補真人試玩／錄影後進入 P05 全 13 關 |
 
 ## 決策變更紀錄
 

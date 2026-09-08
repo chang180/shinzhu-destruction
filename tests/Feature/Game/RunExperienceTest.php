@@ -68,6 +68,8 @@ class RunExperienceTest extends TestCase
     {
         $response = $this->getJson('/api/v1/levels')->assertOk();
         $response->assertJsonPath('levels.0.forecast.2.type', 'repair')
+            ->assertJsonPath('levels.0.level_id', 'empty-cup')
+            ->assertJsonPath('levels.0.name', '第一禁術・枯潮｜讓城市喊渴')
             ->assertJsonPath('levels.0.forecast.5.scheduled_turn', 6);
         $this->assertSame(5, $response->json('skills')['breach.water']['malice_cost']);
     }
