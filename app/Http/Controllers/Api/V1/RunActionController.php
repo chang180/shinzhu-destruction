@@ -29,6 +29,18 @@ class RunActionController extends Controller
             'expected_version' => ['required', 'integer', 'min:1'],
             'skill_id' => ['required', 'string', Rule::in($skills->ids())],
             'target' => ['nullable', 'string', Rule::in(Element::values())],
+        ], [
+            'action_id.required' => '缺少 action_id',
+            'action_id.string' => 'action_id 格式錯誤',
+            'action_id.max' => 'action_id 長度不可超過 64 字',
+            'expected_version.required' => '缺少 expected_version',
+            'expected_version.integer' => 'expected_version 必須是整數',
+            'expected_version.min' => 'expected_version 必須大於等於 1',
+            'skill_id.required' => '缺少 skill_id',
+            'skill_id.string' => 'skill_id 格式錯誤',
+            'skill_id.in' => '這個技能不存在',
+            'target.string' => 'target 格式錯誤',
+            'target.in' => '這個目標系別不存在',
         ]);
 
         $model = RunController::ownedRun($campaigns->existing($request), $run);

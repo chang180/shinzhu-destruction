@@ -52,6 +52,10 @@ class RunController extends Controller
     ): JsonResponse {
         $validated = $request->validate([
             'level_id' => ['required', 'string', Rule::in($levels->ids())],
+        ], [
+            'level_id.required' => '缺少 level_id',
+            'level_id.string' => 'level_id 格式錯誤',
+            'level_id.in' => '這一關不存在',
         ]);
 
         $campaign = $campaigns->resolve($request);

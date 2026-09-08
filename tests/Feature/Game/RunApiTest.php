@@ -113,6 +113,14 @@ class RunApiTest extends TestCase
             ->assertJsonPath('reason_code', 'level_locked');
     }
 
+    public function test_an_unknown_level_is_rejected_with_a_traditional_chinese_message(): void
+    {
+        $this->startRun('no-such-level')
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('level_id')
+            ->assertJsonPath('errors.level_id.0', '這一關不存在');
+    }
+
     public function test_a_successful_action_returns_an_ordered_event_stream(): void
     {
         $runId = $this->startRun()->json('data.run_id');
@@ -202,7 +210,8 @@ class RunApiTest extends TestCase
 
         $this->submit($runId, ['skill_id' => 'probe.fire', 'target' => 'water'])
             ->assertStatus(422)
-            ->assertJsonValidationErrors('skill_id');
+            ->assertJsonValidationErrors('skill_id')
+            ->assertJsonPath('errors.skill_id.0', '這個技能不存在');
 
         $this->assertSame(0, RunAction::query()->count());
     }
