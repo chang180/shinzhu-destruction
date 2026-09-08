@@ -43,12 +43,20 @@ class RunService
         $state = $this->engine->start($level);
 
         $snapshotIds = [];
+        $metadata = [];
 
         foreach ($snapshots as $sourceId => $snapshot) {
             $snapshotIds[$sourceId] = $snapshot->snapshotId;
+            $metadata[$sourceId] = [
+                'snapshot_id' => $snapshot->snapshotId,
+                'quality' => $snapshot->quality->value,
+                'observed_at' => $snapshot->observedAt?->toIso8601String(),
+                'period' => $snapshot->period?->toArray(),
+                'warnings' => array_column($snapshot->warnings, 'message'),
+            ];
         }
 
-        return DB::transaction(function () use ($campaign, $level, $snapshotIds, $modifiers, $state, $seed): Run {
+        return DB::transaction(function () use ($campaign, $level, $snapshotIds, $metadata, $modifiers, $state, $seed): Run {
             $campaign->forceFill(['last_activity_at' => Carbon::now()])->save();
 
             return Run::query()->create([
@@ -57,8 +65,40 @@ class RunService
                 'level_id' => $level->id,
                 'rules_version' => $this->engine->rulesVersion(),
                 'snapshot_ids' => $snapshotIds,
+                'snapshot_metadata' => $metadata,
                 'scenario_modifiers' => $modifiers->toArray(),
                 'seed' => $seed ?? random_int(1, PHP_INT_MAX),
+                'state' => $state->toArray(),
+                'version' => $state->version,
+                'outcome' => $state->outcome,
+            ]);
+        });
+    }
+
+    public function assertCompatible(Run $run): void
+    {
+        if ($run->rules_version !== $this->engine->rulesVersion()) {
+            throw new RunConflictException('rules_version_mismatch', '這一局使用舊版規則，可查看紀錄，請以目前規則另開新局');
+        }
+    }
+
+    public function retry(Run $original): Run
+    {
+        $this->assertCompatible($original);
+        $state = $this->engine->start($this->levels->get($original->level_id));
+
+        return DB::transaction(function () use ($original, $state): Run {
+            $original->campaign()->update(['last_activity_at' => Carbon::now()]);
+
+            return Run::query()->create([
+                'public_id' => (string) Str::uuid7(),
+                'campaign_id' => $original->campaign_id,
+                'level_id' => $original->level_id,
+                'rules_version' => $original->rules_version,
+                'snapshot_ids' => $original->snapshot_ids,
+                'snapshot_metadata' => $original->snapshot_metadata,
+                'scenario_modifiers' => $original->scenario_modifiers,
+                'seed' => $original->seed,
                 'state' => $state->toArray(),
                 'version' => $state->version,
                 'outcome' => $state->outcome,
@@ -101,6 +141,8 @@ class RunService
 
                 return ['action' => $existing, 'run' => $current, 'replayed' => true];
             }
+
+            $this->assertCompatible($current);
 
             if ($action->expectedVersion !== $observedVersion) {
                 throw RunConflictException::staleVersion($action->expectedVersion, $observedVersion);

@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-08",
+  "tool": "OpenAI image_gen",
+  "assets": [
+    {
+      "key": "hero",
+      "prompt": "Original fictional villain academy strategy game illustration. Hand ink lines, screenprint halftone, textured ivory paper, ink purple and copper palette, restrained absurd humor, striking editorial composition. NO text, letters, logos, watermarks, existing fictional characters or recognizable franchise motifs. Wide 16:9 panoramic hero. On the right, a tiny villain student carrying an absurdly oversized rolled graduation plan stands before a hovering academy assembled from irregular paper and ceramic shards on a hill. Below is a fictional Taiwanese city of low-rise buildings, awnings, hills, tiny defense lights. Left half is quiet dark purple negative space for UI title.",
+      "source": "assets/generated/p04/hero.png",
+      "output": "public/assets/p04/hero.webp",
+      "sha256": "a7613f837fff7e92509f95e2c3290dbc5b324fd96a626eead9c61dbae976e31d",
+      "output_sha256": "9047e6541f0a039aea9cfa21605c7be1eb7d7625568e3a6f13af3f04bca8bc21",
+      "bytes": 192758,
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+    },
+    {
+      "key": "apostle",
+      "prompt": "Original fictional villain academy strategy game illustration. Hand ink lines, screenprint halftone, textured ivory paper, ink purple and copper palette, restrained absurd humor, striking editorial composition. NO text, letters, logos, watermarks, existing fictional characters or recognizable franchise motifs. Portrait 2:3 of the Empty Cup Apostle: enormous hollow suspended handmade ceramic vessel with asymmetric kiln cracks, no face or limbs, no skull mask. Impossible upward-floating turquoise ink drops, tiny city lights visible THROUGH the empty hollow. Paper white ceramic rim, deep purple void, copper fractures. Monumental, wonderfully strange silhouette, simple dark backdrop.",
+      "source": "assets/generated/p04/apostle.png",
+      "output": "public/assets/p04/apostle.webp",
+      "sha256": "51492ce8493012cda0ad6d7499891e375ae5985e0c09bac6bdbd336d9deebb20",
+      "output_sha256": "fd8146a0eceae5fbed0d8fcf035505bb2eb4029b47a66987f82a33541b1d42d9",
+      "bytes": 287820,
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+    },
+    {
+      "key": "city",
+      "prompt": "Original fictional villain academy strategy game illustration. Hand ink lines, screenprint halftone, textured ivory paper, ink purple and copper palette, restrained absurd humor, striking editorial composition. NO text, letters, logos, watermarks, existing fictional characters or recognizable franchise motifs. Wide 16:9 fictional Taiwanese hill city at twilight, water tanks, low-rise arcades and awnings, tiny orderly luminous aqueduct-like defense threads, reservoir edge and hills in far distance. No real identifiable infrastructure. Vast quiet sky in top half, detailed stage-like city in lower half, turquoise and copper lights. Battle background.",
+      "source": "assets/generated/p04/city.png",
+      "output": "public/assets/p04/city.webp",
+      "sha256": "ab60da6396ab854e284225900deb60c634c39f73c413359e32a0d6c9a3c27317",
+      "output_sha256": "6a47fa40056a30ce236226cf3bb7e1e5dee51a1dc14e85a540a8cac735750146",
+      "bytes": 233046,
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+    },
+    {
+      "key": "water",
+      "prompt": "Original fictional villain academy strategy game illustration. Hand ink lines, screenprint halftone, textured ivory paper, ink purple and copper palette, restrained absurd humor, striking editorial composition. NO text, letters, logos, watermarks, existing fictional characters or recognizable franchise motifs. Wide 16:9 water forbidden spell cut-in, broken ceramic ring slicing across dry paper, a sweeping turquoise ink wave carrying tiny fictional city light particles from left to right, dramatic speed and splashes, empty upper center for overlay, NO character.",
+      "source": "assets/generated/p04/water.png",
+      "output": "public/assets/p04/water.webp",
+      "sha256": "325e2ce6e65a5412028a62f78a44e2524ae216d963fccb45639e7146b8643f1e",
+      "output_sha256": "8774c84bc26f35a93d584419e5b01fd8def6027207a9fcf0b773c9d09572497e",
+      "bytes": 255376,
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+    },
+    {
+      "key": "heat",
+      "prompt": "Original fictional villain academy strategy game illustration. Hand ink lines, screenprint halftone, textured ivory paper, ink purple and copper palette, restrained absurd humor, striking editorial composition. NO text, letters, logos, watermarks, existing fictional characters or recognizable franchise motifs. Wide 16:9 heat forbidden spell cut-in, suspended copper prism cracking open with amber thermal ribbons like folded paper, bright radiating sunburst speedlines across deep purple ink, tiny fictional city lights, distinct angular silhouette, empty upper center for overlay.",
+      "source": "assets/generated/p04/heat.png",
+      "output": "public/assets/p04/heat.webp",
+      "sha256": "db23942d3444aa5b2926050850c3cd21b912f5a7ba3e1857c07ab9ff9947db4b",
+      "output_sha256": "8c77163be204269b01b7497f6d4a0196415b1c0249e1867c2e30e091f952224a",
+      "bytes": 244678,
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+    },
+    {
+      "key": "land",
+      "prompt": "Original fictional villain academy strategy game illustration. Hand ink lines, screenprint halftone, textured ivory paper, ink purple and copper palette, restrained absurd humor, striking editorial composition. NO text, letters, logos, watermarks, existing fictional characters or recognizable franchise motifs. Wide 16:9 land forbidden spell cut-in, jade green folded strata erupt as a fan of paper and ceramic tectonic plates, spiraling botanical ink veins around a fragmented geometric city model, strong diagonal force, empty upper center for overlay.",
+      "source": "assets/generated/p04/land.png",
+      "output": "public/assets/p04/land.webp",
+      "sha256": "74597d7c1467ba4ef5cc74ae39a2b427ba261c6336572f1e41d3f842bfb9d650",
+      "output_sha256": "d8a85c03de3a1b17701fd0e7c5a9f27e1afd526b06a540c1b52ad631d509f6fb",
+      "bytes": 378298,
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+    },
+    {
+      "key": "professor",
+      "prompt": "Original fictional villain academy strategy game illustration. Hand ink lines, screenprint halftone, textured ivory paper, ink purple and copper palette, restrained absurd humor, striking editorial composition. NO text, letters, logos, watermarks, existing fictional characters or recognizable franchise motifs. Square portrait of an original eccentric academy professor, elderly woman with short white swept hair, round copper spectacles, violet asymmetrical academic coat and ceramic brooch, knowing amused expression, holding a tiny red pencil and impossibly thick plan book; shoulder portrait against flat warm ivory, never any existing character.",
+      "source": "assets/generated/p04/professor.png",
+      "output": "public/assets/p04/professor.webp",
+      "sha256": "0c357b38a1943c2a866bdd76b95b7707c6799c4e95e4bc363939b40fea7cf256",
+      "output_sha256": "95a3ddc57a2e1d84572743cf37f12d7094a006af9a4895e4a3813b2ee5f802bb",
+      "bytes": 264510,
+      "review": "Reviewed original composition; no text, logos or identifiable franchise characters; browser composition pending"
+    }
+  ]
+}

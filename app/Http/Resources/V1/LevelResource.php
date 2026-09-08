@@ -32,6 +32,7 @@ class LevelResource extends JsonResource
             'data_elements' => $this->dataElements,
             'unlocked' => $this->unlocked,
             'best' => $this->best,
+            'forecast' => array_map(fn (int $turn): array => $this->resource->intentForTurn($turn)->toArray(), range(1, $this->maxTurns)),
         ];
     }
 }

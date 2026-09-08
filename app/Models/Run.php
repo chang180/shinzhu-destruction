@@ -35,6 +35,7 @@ class Run extends Model
         return [
             'state' => 'array',
             'snapshot_ids' => 'array',
+            'snapshot_metadata' => 'array',
             'scenario_modifiers' => 'array',
             'outcome' => Outcome::class,
             'finished_at' => 'immutable_datetime',

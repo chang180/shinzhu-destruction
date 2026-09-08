@@ -28,7 +28,14 @@ class RunResource extends JsonResource
             'version' => $this->version,
             'outcome' => $this->outcome->value,
             'state' => $state->toArray(),
-            'available_actions' => $engine->availableActions($state),
+            'compatible' => $this->rules_version === $engine->rulesVersion(),
+            'available_actions' => $this->rules_version === $engine->rulesVersion() ? $engine->availableActions($state) : [],
+            'snapshots' => $this->snapshot_metadata ?? [],
+            'history' => $this->actions->map(static fn ($action): array => [
+                'sequence' => $action->sequence,
+                'input' => $action->input,
+                'events' => $action->events,
+            ])->all(),
             // 去秘密化：只送情境修正與推導理由，不送內部快照路徑或錯誤細節。
             'scenario' => $this->scenario_modifiers,
             'snapshot_ids' => $this->snapshot_ids,

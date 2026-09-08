@@ -37,7 +37,7 @@ class ReplayController extends Controller
         foreach ($model->snapshot_ids as $sourceId => $snapshotId) {
             $snapshot = $snapshots->find($snapshotId);
 
-            $frozen[$sourceId] = [
+            $frozen[$sourceId] = ($model->snapshot_metadata[$sourceId] ?? []) + [
                 'snapshot_id' => $snapshotId,
                 // 快照可能已被清理；明說「已不可得」，不用目前的快照冒充當時的。
                 'available' => $snapshot !== null,

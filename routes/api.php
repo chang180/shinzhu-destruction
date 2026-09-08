@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('levels', [LevelController::class, 'index'])->name('levels.index');
+Route::get('runs', [RunController::class, 'index'])->name('runs.index');
+Route::post('runs/{run}/retry', [RunController::class, 'retry'])->middleware('throttle:game-actions')->name('runs.retry');
 Route::post('runs', [RunController::class, 'store'])->name('runs.store');
 Route::get('runs/{run}', [RunController::class, 'show'])->name('runs.show');
 /*

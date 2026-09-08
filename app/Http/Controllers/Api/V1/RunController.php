@@ -8,6 +8,7 @@ use App\Http\Resources\V1\RunResource;
 use App\Models\Campaign;
 use App\Models\Run;
 use App\Services\Game\CampaignResolver;
+use App\Services\Game\Exceptions\RunConflictException;
 use App\Services\Game\RunService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,33 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class RunController extends Controller
 {
+    public function index(Request $request, CampaignResolver $campaigns): JsonResponse
+    {
+        $campaign = $campaigns->existing($request);
+        $runs = $campaign === null ? collect() : Run::query()
+            ->where('campaign_id', $campaign->id)->latest('id')->limit(20)->get();
+
+        return response()->json(['data' => $runs->map(static fn (Run $run): array => [
+            'run_id' => $run->public_id,
+            'level_id' => $run->level_id,
+            'outcome' => $run->outcome->value,
+            'turn' => $run->state['turn'],
+            'updated_at' => $run->updated_at->toIso8601String(),
+        ])->all()]);
+    }
+
+    public function retry(Request $request, string $run, CampaignResolver $campaigns, RunService $runs): JsonResponse
+    {
+        $original = self::ownedRun($campaigns->existing($request), $run);
+        try {
+            $retry = $runs->retry($original);
+        } catch (RunConflictException $exception) {
+            return response()->json(['reason_code' => $exception->reasonCode, 'message' => $exception->getMessage()], 409);
+        }
+
+        return (new RunResource($retry))->response()->setStatusCode(201);
+    }
+
     public function store(
         Request $request,
         RunService $runs,
