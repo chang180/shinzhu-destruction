@@ -11,7 +11,7 @@
 ## 必守專案約束
 
 - 最新穩定 Laravel + Vue、SQLite、Hostinger PHP 共享空間；不得自行換成其他框架、MySQL、VPS 或依賴常駐服務。
-- 13 是關卡數，不是總回合數。遊戲主角是反派學員，毀滅成功是玩家勝利。
+- 現行範圍為 3 關主線＋2 關進階，取代原 13 關要求；13 鄉鎮市只是資料涵蓋範圍。遊戲主角是反派學員，毀滅成功是玩家勝利。
 - 資料來源依 README 的中央部會盤點；不可把縣府主機重設成主要來源。
 - 不把缺值當零，不把模型假設寫成實際環境測量，不在遊戲中途更換資料快照。
 - 不把圖片需求降級成 emoji、純 CSS 或文字占位；不可宣稱生成完成但沒有檔案。
@@ -22,19 +22,36 @@
 
 ## 可直接複製的派工文字
 
-目前 P00、P01、P02 已完成，P03 已交付待驗收；下一個可派工階段是 **P04 一關完整體驗切片**。每次派工仍從本文件開始，再依指定階段讀取開發計畫、狀態、相關規格及上一階段報告。不要只把「繼續開發」交給 AI，必須在派工文字中寫明階段代號與交付物。
+目前 P00、P01、P02 已完成，P03 與 P04 已交付待驗收。P04 交付首關的限時手牌、留牌／換牌、30 秒窗口與不限時練習、卡牌主畫面及五關路線契約，規則升至 `rules_version 2.0.0`；**第 2～5 關 `available = false`，內容與平衡屬 P05**。P04 尚缺兩項驗收：卡牌戰鬥畫面的瀏覽器與手機證據、再次真人試玩。
+
+每次派工仍從本文件開始，再依指定階段讀取開發計畫、狀態、相關規格及上一階段報告。不要只把「繼續開發」交給 AI，必須在派工文字中寫明階段代號與交付物。
+
+補完 P04 剩餘驗收的派工：
 
 ```text
-請依 docs/DEVELOPMENT-PLAN.md 執行 P04（可替換成指定階段）。
+請補齊 docs/phase-reports/P04.md「尚未完成或未驗證」列出的兩項：
+卡牌戰鬥畫面的瀏覽器與手機（375px）證據，以及第二次真人試玩紀錄。
+不要改動規則數值；若試玩結果要求調整，先記錄卡點再依 BALANCE.md 的升版規定處理。
+```
+
+接續 P05 的派工：
+
+```text
+請依 docs/DEVELOPMENT-PLAN.md 與 docs/P04-REVISION-PLAN.md 執行 P05 五關戰役。
+P04 已交付第 1 關與共用的手牌／計時契約（rules_version 2.0.0），
+第 2～5 關已在 config/game.php 佔住穩定 ID、順序、依賴與唯一新增機制，available = false。
+本階段落實第 2～5 關的城市機制、數值與牌組，第 3 關收手結局與進階終幕入口，
+以及第 2、4 關後的牌組獎勵；每一關通過模擬驗收後才可把 available 改成 true。
 先讀 README.md、docs/DEVELOPMENT-STATUS.md、docs/AI-HANDOFF.md、
-docs/TECHNICAL-SPEC.md、docs/DATA-CONTRACT.md、docs/BALANCE.md、該階段相關規格與前一階段報告，
-檢查目前工作樹並保留既有修改。
+docs/TECHNICAL-SPEC.md、docs/DATA-CONTRACT.md、docs/BALANCE.md、
+docs/P04-REVISION-PLAN.md 與 docs/phase-reports/P04.md，
+並讀 .ai/rules/index.md 指到的規則檔，檢查目前工作樹並保留既有修改。
+新增城市機制要升 rules_version；不得沿用 1.0.0 或第 1 關的勝率當成新關卡的平衡證據。
 前置條件未滿足時，指出確切缺項；可完成的獨立工作繼續進行。
-P01 起必須實際使用已安裝的 Laravel Boost，遵循生成的開發指示；
+必須實際使用已安裝的 Laravel Boost，遵循生成的開發指示；
 不得以安裝說明或 composer.json 條目代替完整安裝驗證。
-交付本階段程式／素材、必要測試與驗收證據，建立
-docs/phase-reports/P04.md，更新進度表及受影響規格。
-報告已完成、未驗證、限制與下一階段入口，不自動展開後續階段。
+交付本階段程式、必要測試與驗收證據，建立 docs/phase-reports/P05.md，
+更新進度表及受影響規格。報告已完成、未驗證、限制與下一階段入口，不自動展開後續階段。
 ```
 
 ## 階段報告模板
@@ -79,6 +96,6 @@ docs/phase-reports/P04.md，更新進度表及受影響規格。
 
 ## 文件維護原則
 
-資料欄位以 [`DATA-CONTRACT.md`](DATA-CONTRACT.md) 為準（P02 已建立），遊戲數值以 [`BALANCE.md`](BALANCE.md) 為準（P03 已建立，`rules_version 1.0.0`），素材以 manifest 為準；尚未建立的檔案在對應階段才產生。若本組初稿與實測有差異，更新原規格並留下決策紀錄，不在多份文件各維護一組矛盾數值。
+資料欄位以 [`DATA-CONTRACT.md`](DATA-CONTRACT.md) 為準（P02 已建立），遊戲數值以 [`BALANCE.md`](BALANCE.md) 為準（P03 建立 `1.0.0`，P04 升至 `rules_version 2.0.0`），素材以 manifest 為準；尚未建立的檔案在對應階段才產生。專案內的既定決策與陷阱記在 `.ai/rules/`，由 `.ai/rules/index.md` 對應檔案路徑。若本組初稿與實測有差異，更新原規格並留下決策紀錄，不在多份文件各維護一組矛盾數值。
 
 報告只收錄可公開且去除秘密的證據。README 已說明 `docs/` 是 Pages 發布來源，私密環境值不可放入階段報告。

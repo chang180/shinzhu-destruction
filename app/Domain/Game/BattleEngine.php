@@ -2,17 +2,22 @@
 
 namespace App\Domain\Game;
 
+use App\Domain\Game\Cards\CardCatalog;
+use App\Domain\Game\Cards\Deck;
 use App\Domain\Game\Exceptions\InvalidActionException;
 use App\Domain\Game\Scenario\ScenarioModifiers;
 
 /**
  * 唯一的規則計算來源。
  *
- * 完全確定性：同一組（關卡、情境修正、行動序列）永遠得到同一串事件與結局。
- * rules_version 1.0.0 的城市行為由關卡預告表決定，沒有任何亂數，所以重播
- * 不需要保存亂數狀態。
+ * 完全確定性：同一組（關卡、情境修正、seed、行動序列）永遠得到同一串事件與結局。
+ * 城市行為由關卡預告表決定，沒有亂數；唯一的亂數是牌序，而牌序完全由
+ * (seed, 第幾次洗牌) 決定並保存在局面裡，所以重播不需要保存亂數器狀態。
  *
- * 結算順序固定為 GAME-DESIGN §3.3：
+ * 一個回合分成兩步：`reveal` 揭示手牌並開啟決策窗口，`play` 或 `timeout`
+ * 結束回合。`swap` 在窗口內可用一次，改變手牌但不讓城市行動。
+ *
+ * 出牌的結算順序固定為 GAME-DESIGN §3.3：
  * 驗證 → 扣惡意 → 套修正 → 算核心衝擊 → 扣防線 → 更新印記／連攜／打斷 →
  * 核心歸零即勝 → 城市回應 → 更新效果與冷卻 → 檢查回合耗盡 → 產生下回合預告與回復。
  */
@@ -35,6 +40,7 @@ class BattleEngine
      */
     public function __construct(
         private readonly SkillCatalog $skills,
+        private readonly CardCatalog $cards,
         private readonly array $config,
     ) {}
 
@@ -43,9 +49,14 @@ class BattleEngine
         return $this->config['rules_version'];
     }
 
-    public function start(LevelDefinition $level): BattleState
+    /**
+     * 開局。牌組在這裡展開成實體牌並依 seed 洗好，手牌要等玩家揭牌才發。
+     */
+    public function start(LevelDefinition $level, int $seed): BattleState
     {
         $initial = $this->config['initial'];
+        $hand = $this->config['hand'];
+        $deck = Deck::expand($level->deck);
 
         return new BattleState(
             turn: 1,
@@ -68,24 +79,180 @@ class BattleEngine
             flags: [],
             version: 1,
             outcome: Outcome::InProgress,
+            deck: $deck,
+            hand: [],
+            drawPile: Deck::openingOrder($deck, $this->cards, $seed),
+            discardPile: [],
+            handSize: $hand['size'],
+            maxKeep: $hand['max_keep'],
+            turnPhase: BattleState::PHASE_AWAITING_REVEAL,
+            deadlineAt: null,
+            swapUsed: false,
+            shuffleCount: 0,
+            timeouts: 0,
+            deckSeed: $seed,
         );
     }
 
-    /**
-     * @throws InvalidActionException 在扣任何資源之前丟出
-     */
     public function apply(
         BattleState $state,
         ActionRequest $action,
         LevelDefinition $level,
         ScenarioModifiers $modifiers,
     ): TurnResult {
-        $skill = $this->validate($state, $action);
+        if ($state->outcome->isFinished()) {
+            throw InvalidActionException::runFinished();
+        }
 
-        $this->sequence = 0;
-        $this->events = [];
-        $this->actionTurn = $state->turn;
+        return match ($action->type) {
+            ActionType::Reveal => $this->applyReveal($state, $action),
+            ActionType::Swap => $this->applySwap($state, $action),
+            ActionType::Timeout => $this->applyTimeout($state, $level),
+            ActionType::Play => $this->applyPlay($state, $action, $level, $modifiers),
+        };
+    }
 
+    /**
+     * 揭牌：補滿手牌並開啟決策窗口。城市不動，回合不推進。
+     */
+    private function applyReveal(BattleState $state, ActionRequest $action): TurnResult
+    {
+        if ($state->turnPhase !== BattleState::PHASE_AWAITING_REVEAL) {
+            throw InvalidActionException::alreadyRevealed();
+        }
+
+        $this->beginEvents($state);
+        $next = $state->copy();
+
+        $kept = $next->hand;
+        $drawn = $this->draw($next, $next->handSize - count($next->hand));
+
+        $next->turnPhase = BattleState::PHASE_DECISION;
+        $next->deadlineAt = $action->deadlineAt;
+        $next->swapUsed = false;
+        $next->version++;
+
+        $this->record($next, 'hand_revealed', BattleEvent::PLAYER, null, 'decision_window_opened',
+            ['kept' => $kept],
+            ['drawn' => $drawn],
+            ['hand' => $next->hand, 'deadline_at' => $next->deadlineAt, 'draw_pile_count' => count($next->drawPile)],
+            'cue.hand.revealed',
+        );
+
+        return new TurnResult($next, $this->events);
+    }
+
+    /**
+     * 換牌：每回合一次，免費，不推進城市回合也不重設倒數。
+     *
+     * 換掉的牌先離開可抽集合再進棄牌堆，所以不會立刻把同一張實體牌換回來
+     * （P04-REVISION-PLAN §4.4）。
+     */
+    private function applySwap(BattleState $state, ActionRequest $action): TurnResult
+    {
+        if ($state->turnPhase !== BattleState::PHASE_DECISION) {
+            throw InvalidActionException::handNotRevealed();
+        }
+
+        if ($state->swapUsed) {
+            throw InvalidActionException::swapAlreadyUsed();
+        }
+
+        $cardId = $action->cardId;
+
+        if ($cardId === null || ! $state->inHand($cardId)) {
+            throw InvalidActionException::cardNotInHand((string) $cardId);
+        }
+
+        if ($state->drawPile === [] && $state->discardPile === []) {
+            throw InvalidActionException::nothingToSwap();
+        }
+
+        $this->beginEvents($state);
+        $next = $state->copy();
+
+        $next->hand = array_values(array_filter($next->hand, static fn (string $id): bool => $id !== $cardId));
+        $drawn = $this->draw($next, 1);
+        $next->discardPile[] = $cardId;
+        $next->swapUsed = true;
+        $next->version++;
+
+        $this->record($next, 'card_swapped', BattleEvent::PLAYER, null, 'free_swap_used',
+            ['card' => $cardId],
+            ['drawn' => $drawn],
+            ['hand' => $next->hand, 'draw_pile_count' => count($next->drawPile)],
+            'cue.hand.swapped',
+        );
+
+        return new TurnResult($next, $this->events);
+    }
+
+    /**
+     * 逾時：錯失行動。不施放任何牌、不扣惡意，城市照預告行動。
+     *
+     * 連攜鏈與破綻窗口按錯失行動規則消耗——窗口是「下一個行動」用掉的，
+     * 錯過那個行動就等於錯過窗口（P04-REVISION-PLAN §5）。
+     */
+    private function applyTimeout(BattleState $state, LevelDefinition $level): TurnResult
+    {
+        if ($state->turnPhase !== BattleState::PHASE_DECISION) {
+            throw InvalidActionException::handNotRevealed();
+        }
+
+        $this->beginEvents($state);
+        $next = $state->copy();
+        $next->timeouts++;
+
+        $this->record($next, 'action_missed', BattleEvent::PLAYER, null, 'decision_window_expired',
+            ['hand' => $next->hand, 'breach_available' => $next->breachAvailable, 'combo_chain' => $next->comboChain],
+            ['timeouts' => 1],
+            ['malice' => $next->malice],
+            'cue.turn.missed',
+        );
+
+        if ($next->breachAvailable) {
+            $next->breachAvailable = false;
+
+            $this->record($next, 'breach_consumed', BattleEvent::CITY, null, 'missed_action_wasted_breach',
+                ['breach_available' => true],
+                [],
+                ['breach_available' => false],
+                'cue.breach.wasted',
+            );
+        }
+
+        $next->comboChain = [];
+        $this->discardHand($next);
+
+        $this->resolveCityResponse($next, $level, false);
+        $this->expireEffects($next);
+
+        if ($next->turn >= $next->maxTurns) {
+            $this->finish($next, Outcome::CityHeld, 'turns_exhausted');
+
+            return new TurnResult($next, $this->events);
+        }
+
+        $this->advanceTurn($next, $level);
+
+        return new TurnResult($next, $this->events);
+    }
+
+    private function applyPlay(
+        BattleState $state,
+        ActionRequest $action,
+        LevelDefinition $level,
+        ScenarioModifiers $modifiers,
+    ): TurnResult {
+        if ($state->turnPhase !== BattleState::PHASE_DECISION) {
+            throw InvalidActionException::handNotRevealed();
+        }
+
+        $skill = $this->resolvePlayedSkill($state, $action);
+        $this->validateKeep($state, $action);
+        $this->validateSkill($state, $skill);
+
+        $this->beginEvents($state);
         $next = $state->copy();
 
         $this->spendMalice($next, $skill);
@@ -97,6 +264,7 @@ class BattleEngine
         }
 
         $interrupted = $this->resolveInterrupt($next, $skill, $level);
+        $this->settleHand($next, $action);
 
         if ($next->coreResilience <= 0) {
             $this->finish($next, Outcome::PlayerVictory, 'core_depleted');
@@ -129,70 +297,142 @@ class BattleEngine
      * 目前可以合法送出的行動。前端用它決定按鈕狀態，模擬策略用它挑動作；
      * 兩者都不重算規則，只讀這份清單。
      *
-     * @return list<array{skill_id: string, target: string|null, reason: string|null}>
+     * 逾時不在清單裡：那不是玩家的選項，是伺服器對截止時間的判定。
+     *
+     * @return list<array{type: string, card_id: string|null, fixed: string|null, skill_id: string|null, target: string|null, reason: string|null}>
      */
     public function availableActions(BattleState $state): array
     {
+        if ($state->outcome->isFinished()) {
+            return [];
+        }
+
+        if ($state->turnPhase === BattleState::PHASE_AWAITING_REVEAL) {
+            return [$this->action('reveal', null, null, null, null, null)];
+        }
+
         $actions = [];
 
-        foreach ($this->skills->all() as $skill) {
-            $targets = $skill->kind->isElemental() ? Element::all() : [null];
+        foreach ($state->hand as $instanceId) {
+            $type = $state->cardType($instanceId);
+            $skill = $type === null ? null : $this->cards->skillFor($type);
 
-            foreach ($targets as $target) {
-                $request = new ActionRequest('probe', $state->version, $skill->id, $target);
+            $actions[] = $this->action(
+                'play',
+                $instanceId,
+                null,
+                $skill?->id,
+                $skill?->element?->value,
+                $skill === null ? 'card_not_in_hand' : $this->skillRejection($state, $skill),
+            );
+        }
 
-                try {
-                    $this->validate($state, $request);
-                    $reason = null;
-                } catch (InvalidActionException $exception) {
-                    $reason = $exception->reasonCode;
-                }
+        foreach ($this->config['fixed_actions'] as $skillId) {
+            $skill = $this->skills->get($skillId);
 
-                $actions[] = [
-                    'skill_id' => $skill->id,
-                    'target' => $target?->value,
-                    'reason' => $reason,
-                ];
-            }
+            $actions[] = $this->action('play', null, $skillId, $skillId, null, $this->skillRejection($state, $skill));
+        }
+
+        $swapReason = match (true) {
+            $state->swapUsed => 'swap_already_used',
+            $state->drawPile === [] && $state->discardPile === [] => 'nothing_to_swap',
+            default => null,
+        };
+
+        foreach ($state->hand as $instanceId) {
+            $actions[] = $this->action('swap', $instanceId, null, null, null, $swapReason);
         }
 
         return $actions;
     }
 
     /**
-     * @return list<array{skill_id: string, target: string|null}>
+     * @return list<array{type: string, card_id: string|null, fixed: string|null, skill_id: string|null, target: string|null, reason: string|null}>
      */
     public function legalActions(BattleState $state): array
     {
-        return array_values(array_map(
-            static fn (array $action): array => ['skill_id' => $action['skill_id'], 'target' => $action['target']],
-            array_filter($this->availableActions($state), static fn (array $action): bool => $action['reason'] === null),
+        return array_values(array_filter(
+            $this->availableActions($state),
+            static fn (array $action): bool => $action['reason'] === null,
         ));
     }
 
     /**
-     * 驗證只讀狀態，不改任何東西。任何一項不過就丟例外，回合與惡意都不消耗。
+     * @return array{type: string, card_id: string|null, fixed: string|null, skill_id: string|null, target: string|null, reason: string|null}
      */
-    private function validate(BattleState $state, ActionRequest $action): Skill
+    private function action(
+        string $type,
+        ?string $cardId,
+        ?string $fixed,
+        ?string $skillId,
+        ?string $target,
+        ?string $reason,
+    ): array {
+        return [
+            'type' => $type,
+            'card_id' => $cardId,
+            'fixed' => $fixed,
+            'skill_id' => $skillId,
+            'target' => $target,
+            'reason' => $reason,
+        ];
+    }
+
+    /**
+     * 出牌指向的技能：手牌上的一張實體牌，或手牌旁的固定行動。
+     */
+    private function resolvePlayedSkill(BattleState $state, ActionRequest $action): Skill
     {
-        if ($state->outcome->isFinished()) {
-            throw InvalidActionException::runFinished();
+        if ($action->cardId !== null) {
+            if (! $state->inHand($action->cardId)) {
+                throw InvalidActionException::cardNotInHand($action->cardId);
+            }
+
+            $type = $state->cardType($action->cardId);
+
+            if ($type === null || ! $this->cards->has($type)) {
+                throw InvalidActionException::cardNotInHand($action->cardId);
+            }
+
+            return $this->cards->skillFor($type);
         }
 
-        if (! $this->skills->has($action->skillId)) {
-            throw InvalidActionException::unknownSkill($action->skillId);
+        if ($action->fixedSkillId === null) {
+            throw InvalidActionException::playTargetRequired();
         }
 
-        $skill = $this->skills->get($action->skillId);
-
-        if ($skill->kind->isElemental() && $action->target === null) {
-            throw InvalidActionException::targetRequired($skill->id);
+        if (! in_array($action->fixedSkillId, $this->config['fixed_actions'], true)) {
+            throw InvalidActionException::fixedActionNotAllowed($action->fixedSkillId);
         }
 
-        if (! $skill->kind->isElemental() && $action->target !== null) {
-            throw InvalidActionException::targetNotAllowed($skill->id);
+        return $this->skills->get($action->fixedSkillId);
+    }
+
+    private function validateKeep(BattleState $state, ActionRequest $action): void
+    {
+        if (count($action->keep) > $state->maxKeep) {
+            throw InvalidActionException::keepLimitExceeded($state->maxKeep, count($action->keep));
         }
 
+        // 打出的那一張不能同時留下，所以它不在可留清單裡。
+        $keepable = array_values(array_filter(
+            $state->hand,
+            static fn (string $id): bool => $id !== $action->cardId,
+        ));
+
+        $unknown = array_values(array_diff($action->keep, $keepable));
+
+        if ($unknown !== []) {
+            throw InvalidActionException::keepNotInHand($unknown);
+        }
+    }
+
+    /**
+     * 技能層級的驗證。只讀狀態，不改任何東西：任何一項不過就丟例外，
+     * 回合與惡意都不消耗。
+     */
+    private function validateSkill(BattleState $state, Skill $skill): void
+    {
         if (! $state->skillReady($skill->id)) {
             throw InvalidActionException::onCooldown($skill->id, $state->cooldowns[$skill->id]);
         }
@@ -201,23 +441,112 @@ class BattleEngine
             throw InvalidActionException::notEnoughMalice($skill->maliceCost, $state->malice);
         }
 
-        if ($skill->kind === SkillKind::Ultimate) {
-            $missing = [];
+        if ($skill->kind !== SkillKind::Ultimate) {
+            return;
+        }
 
-            foreach (Element::all() as $element) {
-                $shortfall = $skill->requiredSigilsPerElement - $state->sigil($element);
+        $missing = [];
 
-                if ($shortfall > 0) {
-                    $missing[$element->value] = $shortfall;
-                }
-            }
+        foreach (Element::all() as $element) {
+            $shortfall = $skill->requiredSigilsPerElement - $state->sigil($element);
 
-            if ($missing !== []) {
-                throw InvalidActionException::sigilsNotReady($missing);
+            if ($shortfall > 0) {
+                $missing[$element->value] = $shortfall;
             }
         }
 
-        return $skill;
+        if ($missing !== []) {
+            throw InvalidActionException::sigilsNotReady($missing);
+        }
+    }
+
+    private function skillRejection(BattleState $state, Skill $skill): ?string
+    {
+        try {
+            $this->validateSkill($state, $skill);
+
+            return null;
+        } catch (InvalidActionException $exception) {
+            return $exception->reasonCode;
+        }
+    }
+
+    /**
+     * 出牌後整理手牌：打出的牌與未指定留下的牌都進棄牌堆，留牌繼續佔下回合手牌位置。
+     */
+    private function settleHand(BattleState $state, ActionRequest $action): void
+    {
+        $before = $state->hand;
+        $discarded = [];
+
+        foreach ($state->hand as $instanceId) {
+            if (! in_array($instanceId, $action->keep, true)) {
+                $discarded[] = $instanceId;
+            }
+        }
+
+        $state->discardPile = array_merge($state->discardPile, $discarded);
+        $state->hand = array_values($action->keep);
+
+        $this->record($state, 'hand_settled', BattleEvent::PLAYER, null, 'played_and_discarded',
+            ['hand' => $before],
+            ['played' => $action->cardId ?? $action->fixedSkillId, 'discarded' => $discarded],
+            ['kept' => $state->hand],
+            'cue.hand.settled',
+        );
+    }
+
+    private function discardHand(BattleState $state): void
+    {
+        if ($state->hand === []) {
+            return;
+        }
+
+        $before = $state->hand;
+        $state->discardPile = array_merge($state->discardPile, $state->hand);
+        $state->hand = [];
+
+        $this->record($state, 'hand_settled', BattleEvent::PLAYER, null, 'missed_action_discarded',
+            ['hand' => $before],
+            ['discarded' => $before],
+            ['kept' => []],
+            'cue.hand.settled',
+        );
+    }
+
+    /**
+     * 抽牌。抽牌堆用盡才把棄牌堆洗回來，洗牌次數加一，牌序仍然由 seed 決定。
+     *
+     * @return list<string>
+     */
+    private function draw(BattleState $state, int $count): array
+    {
+        $drawn = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            if ($state->drawPile === []) {
+                if ($state->discardPile === []) {
+                    break;
+                }
+
+                $state->shuffleCount++;
+                $state->drawPile = Deck::shuffle($state->discardPile, $state->deckSeed, $state->shuffleCount);
+                $state->discardPile = [];
+            }
+
+            $drawn[] = array_shift($state->drawPile);
+        }
+
+        $state->hand = array_merge($state->hand, $drawn);
+
+        return $drawn;
+    }
+
+    private function beginEvents(BattleState $state): void
+    {
+        $this->sequence = 0;
+        $this->events = [];
+        $this->actionTurn = $state->turn;
     }
 
     private function spendMalice(BattleState $state, Skill $skill): void
@@ -801,6 +1130,12 @@ class BattleEngine
         $state->turn++;
         $state->version++;
 
+        // 下一回合先回到未揭牌：倒數在玩家按下「開始回合」之前不會跑，
+        // 演出與閱讀預告的時間不算進 30 秒（P04-REVISION-PLAN §5）。
+        $state->turnPhase = BattleState::PHASE_AWAITING_REVEAL;
+        $state->deadlineAt = null;
+        $state->swapUsed = false;
+
         $maliceBefore = $state->malice;
         $state->malice = min($state->maliceCap, $state->malice + $this->config['initial']['malice_regen']);
 
@@ -852,6 +1187,8 @@ class BattleEngine
         $state->outcome = $outcome;
         $state->version++;
         $state->intent = null;
+        $state->turnPhase = BattleState::PHASE_AWAITING_REVEAL;
+        $state->deadlineAt = null;
 
         $this->record($state, 'outcome', BattleEvent::CITY, null, $reasonCode,
             ['outcome' => Outcome::InProgress->value],

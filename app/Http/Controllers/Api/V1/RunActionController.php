@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Game\ActionRequest;
-use App\Domain\Game\Element;
+use App\Domain\Game\ActionType;
 use App\Domain\Game\Exceptions\InvalidActionException;
-use App\Domain\Game\SkillCatalog;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\ActionResource;
 use App\Services\Game\CampaignResolver;
@@ -13,6 +12,7 @@ use App\Services\Game\Exceptions\RunConflictException;
 use App\Services\Game\RunService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class RunActionController extends Controller
@@ -21,14 +21,16 @@ class RunActionController extends Controller
         Request $request,
         string $run,
         RunService $runs,
-        SkillCatalog $skills,
         CampaignResolver $campaigns,
     ): JsonResponse {
         $validated = $request->validate([
             'action_id' => ['required', 'string', 'max:64'],
             'expected_version' => ['required', 'integer', 'min:1'],
-            'skill_id' => ['required', 'string', Rule::in($skills->ids())],
-            'target' => ['nullable', 'string', Rule::in(Element::values())],
+            'type' => ['required', 'string', Rule::in(array_column(ActionType::cases(), 'value'))],
+            'card_id' => ['nullable', 'string', 'max:64'],
+            'fixed' => ['nullable', 'string', Rule::in(config('game.fixed_actions'))],
+            'keep' => ['array', 'max:5'],
+            'keep.*' => ['string', 'max:64'],
         ], [
             'action_id.required' => '缺少 action_id',
             'action_id.string' => 'action_id 格式錯誤',
@@ -36,11 +38,14 @@ class RunActionController extends Controller
             'expected_version.required' => '缺少 expected_version',
             'expected_version.integer' => 'expected_version 必須是整數',
             'expected_version.min' => 'expected_version 必須大於等於 1',
-            'skill_id.required' => '缺少 skill_id',
-            'skill_id.string' => 'skill_id 格式錯誤',
-            'skill_id.in' => '這個技能不存在',
-            'target.string' => 'target 格式錯誤',
-            'target.in' => '這個目標系別不存在',
+            'type.required' => '缺少行動類型',
+            'type.in' => '這個行動類型不存在',
+            'card_id.string' => 'card_id 格式錯誤',
+            'card_id.max' => 'card_id 長度不可超過 64 字',
+            'fixed.in' => '這不是手牌旁的固定行動',
+            'keep.array' => 'keep 必須是陣列',
+            'keep.max' => '留牌張數超過手牌上限',
+            'keep.*.string' => 'keep 只能是牌的識別碼',
         ]);
 
         $model = RunController::ownedRun($campaigns->existing($request), $run);
@@ -48,8 +53,10 @@ class RunActionController extends Controller
         $action = new ActionRequest(
             actionId: $validated['action_id'],
             expectedVersion: $validated['expected_version'],
-            skillId: $validated['skill_id'],
-            target: isset($validated['target']) ? Element::from($validated['target']) : null,
+            type: ActionType::from($validated['type']),
+            cardId: $validated['card_id'] ?? null,
+            fixedSkillId: $validated['fixed'] ?? null,
+            keep: $validated['keep'] ?? [],
         );
 
         try {
@@ -61,6 +68,7 @@ class RunActionController extends Controller
                 'message' => $exception->getMessage(),
                 'context' => $exception->context,
                 'current_version' => $model->fresh()->version,
+                'server_time' => Carbon::now()->toIso8601ZuluString('millisecond'),
             ], 409);
         } catch (InvalidActionException $exception) {
             // 422：規則不合法，交易沒有寫入，回合與惡意都沒有被消耗。
@@ -69,6 +77,7 @@ class RunActionController extends Controller
                 'message' => $exception->getMessage(),
                 'context' => $exception->context,
                 'current_version' => $model->fresh()->version,
+                'server_time' => Carbon::now()->toIso8601ZuluString('millisecond'),
             ], 422);
         }
 

@@ -4,3 +4,87 @@
 @media(max-width:760px){.topbar{height:76px;padding:0 18px;gap:8px}.brand{font-size:.82rem;gap:9px}.brand small{font-size:.45rem}.brand-seal{font-size:1.3rem}.edition{display:none}.settings summary{font-size:.72rem;padding:8px}.hero{height:620px}.hero-art{object-position:67% center;opacity:.55}.hero:after{background:linear-gradient(90deg,#171321a8,transparent)}.hero-copy{left:24px;top:55px;right:20px}.hero h1{font-size:clamp(3.25rem,12vw,4.8rem)}.eyebrow{font-size:.59rem;line-height:1.8;letter-spacing:.12em}.hero .lead{font-size:1rem}.hero-caption{right:16px;bottom:18px;font-size:.56rem}.lobby-bottom{padding:32px 24px;grid-template-columns:1fr;gap:24px}.lobby-bottom h2{font-size:1.45rem}.content-width{width:calc(100% - 32px)}.briefing{grid-template-columns:1fr;padding-top:25px;gap:25px}.briefing-art{max-width:220px;margin:auto}.briefing-art img{height:275px;object-position:50% 45%}.briefing h1{font-size:2.6rem}.briefing .lead{font-size:.95rem}.lesson{font-size:.85rem}.battle-heading h1{font-size:1.45rem}.battle-heading .eyebrow{font-size:.56rem}.turn{gap:7px}.turn strong{font-size:2.5rem}.turn span{font-size:.65rem}.battle-layout{grid-template-columns:1fr;gap:22px}.city-stage{min-height:300px}.core-panel{padding:16px}.intent{padding:16px}.intent p{font-size:.8rem}.defenses{gap:12px;padding:18px 0}.defenses b{font-size:.7rem}.defenses small{font-size:.63rem}.professor{padding:12px;gap:14px}.professor img{width:55px;height:70px}.professor p{font-size:.76rem}.command-panel{padding:18px}.skills button{font-size:.8rem;padding:12px 4px}.skills button small{font-size:.65rem}.skill-detail{min-height:140px}.cast{font-size:.95rem}.data-grid{grid-template-columns:1fr;gap:8px}.report{grid-template-columns:1fr;gap:25px;padding-top:25px}.report>img{height:260px;object-fit:cover;object-position:50% 45%}.report.victory>img{object-fit:contain;background:#100c19}.report h1{font-size:2.8rem}.report-actions button{flex:1;white-space:nowrap}.report-actions .primary{flex-basis:100%}.highlights{grid-template-columns:1fr}.highlights li{font-size:.75rem;gap:15px}.cutscene-copy{left:6%;right:6%;bottom:20%}.cutscene-copy h2{font-size:2.3rem}.cutscene>button{top:18px;right:18px}.cutscene-copy p{font-size:.8rem}footer{padding:25px 20px;flex-direction:column;gap:10px}.message{margin:12px 16px;padding:14px;font-size:.8rem}}
 
 .professor-quote{margin:0 0 24px;padding:16px 20px;border-left:2px solid var(--water);background:#82c6cf09;line-height:1.9;font-family:serif;font-size:1.15rem}.professor-quote small{display:block;margin-top:10px;font-family:system-ui,sans-serif}.briefing-art span{background:#171321e8;padding:8px 12px;left:12px;bottom:12px}.professor img{object-position:50% 20%}.highlights li{line-height:1.9;align-items:baseline}.report.victory>img{object-fit:cover;object-position:50% 40%}.cutscene-copy{max-height:65vh;overflow:auto}
+
+/* P04：卡牌成為主畫面。城市情報壓縮成上方橫幅，手牌佔主要操作區。 */
+.mode-picker{border:0;padding:0;margin:0 0 22px;display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:620px}
+.mode-picker legend{font-size:.68rem;letter-spacing:.2em;color:var(--copper);font-weight:650;padding:0 0 10px}
+.mode-picker label{display:block;padding:12px 14px;border:1px solid var(--line);background:#171321b8;cursor:pointer}
+.mode-picker label.on{border-color:var(--copper);background:#d3a06e18}
+.mode-picker input{margin-right:8px}
+.mode-picker b{font-size:.88rem}
+.mode-picker small{display:block;margin-top:6px;font-size:.68rem}
+.route{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.route li{background:#211b2b;padding:13px 16px;opacity:.55}
+.route li.ready{opacity:1;box-shadow:inset 3px 0 var(--copper)}
+.route b{display:block;font-size:.9rem}
+.route span{display:block;font-size:.76rem;color:#c7bbcc;line-height:1.7;margin:4px 0}
+.route small{font-size:.68rem;color:var(--muted)}
+.save-list button span small{display:block;color:var(--muted);font-size:.65rem;margin-top:3px}
+.clock{display:flex;align-items:center;gap:26px}
+.countdown{display:flex;align-items:baseline;gap:6px;padding:6px 16px;border:1px solid var(--line);min-width:108px;justify-content:center}
+.countdown strong{font-family:serif;font-size:2.6rem;color:var(--water);font-variant-numeric:tabular-nums}
+.countdown span{font-size:.7rem;color:var(--muted)}
+.countdown.urgent{border-color:#ec9789;background:#ec978914}
+.countdown.urgent strong{color:#f0a293;font-size:3.1rem}
+.countdown.practice strong{color:var(--muted);font-size:2rem}
+.city-strip{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:20px;margin-bottom:20px}
+.city-core{position:relative;min-height:190px;overflow:hidden;border:1px solid var(--line)}
+.city-core>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.city-read{display:flex;flex-direction:column;gap:14px}
+.intent-card{padding:14px 18px;border:1px solid var(--line);background:#211b2b}
+.intent-card.interruptible{border-color:var(--water);box-shadow:inset 3px 0 var(--water)}
+.intent-card small{color:var(--copper);font-size:.66rem;letter-spacing:.12em}
+.intent-card p{font-size:.92rem;margin:7px 0 0}
+.intent-card .tag{display:inline-block;margin-top:9px;font-size:.68rem;color:var(--water);border:1px solid var(--water);padding:3px 9px}
+.city-read .defenses{padding:0;gap:16px}
+.table-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px;padding:14px 18px;border:1px solid var(--line);background:#211b2b;margin-bottom:18px}
+.table-bar .malice{border:0;padding:0;margin:0;gap:10px;align-items:baseline}
+.table-bar .counts{margin:0;font-size:.76rem;color:var(--muted)}
+.table-bar .professor-note{margin:0;flex:1 1 320px;font-size:.8rem;color:#c7bbcc;line-height:1.7}
+.reveal-gate{padding:52px 24px;border:1px dashed var(--line);text-align:center;background:#ede2ca05}
+.reveal-gate p{font-size:.88rem;color:#c7bbcc}
+.hand{list-style:none;margin:0 0 18px;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.hand li{display:flex;flex-direction:column;gap:8px}
+.card-face{display:flex;flex-direction:column;gap:9px;text-align:left;padding:16px 14px;min-height:270px;width:100%;border-color:#ffffff20;background:linear-gradient(#241d30,#1c1726)}
+.card-face:not(:disabled):hover{border-color:var(--element,var(--copper))}
+.hand li.chosen .card-face{border-color:var(--element,var(--copper));border-width:2px;background:linear-gradient(#2c2438,#221b2e);box-shadow:0 0 0 1px var(--element,var(--copper)),0 10px 30px #0007;transform:translateY(-6px)}
+.hand li.kept .card-face{box-shadow:inset 0 -3px var(--copper)}
+.hand li.unavailable .card-face{background:repeating-linear-gradient(135deg,#1c1726,#1c1726 6px,#ffffff05 6px,#ffffff05 8px);opacity:.72}
+.card-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card-top b{font-family:'Songti TC','Noto Serif TC',serif;font-size:1.02rem;line-height:1.35;color:var(--element,var(--paper))}
+.card-top em{font-style:normal;font-size:.63rem;color:var(--element,var(--muted));border:1px solid var(--element,var(--line));padding:2px 6px;white-space:nowrap}
+.card-cost{font-size:.68rem;letter-spacing:.08em;color:var(--copper)}
+.card-text{font-size:.75rem;line-height:1.75;color:#d4c8d4}
+.card-role{font-size:.68rem;line-height:1.6;color:var(--muted);margin-top:auto}
+.card-data{font-size:.64rem;line-height:1.5;color:var(--water);border-top:1px solid var(--line);padding-top:8px}
+.card-block{font-size:.66rem;color:#ec9789}
+.card-tools{display:flex;gap:6px}
+.card-tools button{flex:1;padding:7px 4px;font-size:.64rem;border-color:#ffffff18}
+.card-tools button[aria-pressed=true]{border-color:var(--copper);color:var(--copper)}
+.confirm-bar{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:center;padding:18px;border:1px solid var(--line);background:#211b2b;margin-bottom:16px}
+.chosen-detail b{font-size:1rem}
+.chosen-detail p{font-size:.8rem;margin:6px 0}
+.chosen-detail small{font-size:.68rem}
+.confirm-bar .cast{width:100%;margin:0}
+.fixed-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding-bottom:8px}
+.fixed-actions .eyebrow{margin:0 12px 0 0;flex-basis:100%}
+.fixed-actions button{flex:1 1 220px;text-align:left;padding:12px 16px}
+.fixed-actions b{display:block;font-size:.88rem}
+.fixed-actions small{display:block;margin-top:4px;font-size:.68rem}
+.fixed-actions button.chosen{border-color:var(--copper);background:#d3a06e14;box-shadow:inset 0 -2px var(--copper)}
+.fixed-actions button.unavailable{opacity:.6}
+@media(max-width:1050px){.city-strip{grid-template-columns:1fr}.city-core{min-height:150px}.hand{grid-template-columns:repeat(3,minmax(0,1fr))}.confirm-bar{grid-template-columns:1fr}}
+@media(max-width:760px){
+    .mode-picker{grid-template-columns:1fr}
+    .clock{gap:14px}.countdown{min-width:88px;padding:4px 12px}.countdown strong{font-size:2rem}.countdown.urgent strong{font-size:2.4rem}
+    /* 手機用可讀的橫向手牌列：卡片維持可讀字級，不縮成小字。 */
+    .hand{display:flex;overflow-x:auto;gap:12px;padding-bottom:10px;scroll-snap-type:x mandatory}
+    .hand li{flex:0 0 78%;scroll-snap-align:center}
+    .card-face{min-height:250px}
+    .card-top b{font-size:1.05rem}.card-text{font-size:.82rem}
+    .card-tools button{padding:10px 4px;font-size:.72rem}
+    .table-bar{padding:12px 14px;gap:8px 16px}
+    .fixed-actions button{flex-basis:100%}
+    .confirm-bar{padding:14px}
+    .reveal-gate{padding:34px 16px}
+}

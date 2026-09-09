@@ -3,9 +3,9 @@
 namespace App\Domain\Game\Simulation\Strategies;
 
 use App\Domain\Game\ActionRequest;
+use App\Domain\Game\ActionType;
 use App\Domain\Game\BattleEngine;
 use App\Domain\Game\BattleState;
-use App\Domain\Game\Element;
 use App\Domain\Game\Exceptions\InvalidActionException;
 use App\Domain\Game\LevelDefinition;
 use App\Domain\Game\Scenario\ScenarioModifiers;
@@ -36,10 +36,21 @@ abstract class LookaheadStrategy implements Strategy
         $bestScore = -INF;
 
         foreach ($legal as $action) {
+            // 換牌不結束回合，一步預測看不出它的價值；先只評估真正的出牌。
+            if ($action['type'] !== 'play') {
+                continue;
+            }
+
             try {
                 $result = $engine->apply(
                     $state,
-                    new ActionRequest('lookahead', $state->version, $action['skill_id'], $this->element($action)),
+                    new ActionRequest(
+                        actionId: 'lookahead',
+                        expectedVersion: $state->version,
+                        type: ActionType::Play,
+                        cardId: $action['card_id'],
+                        fixedSkillId: $action['fixed'],
+                    ),
                     $level,
                     $this->modifiers,
                 );
@@ -55,20 +66,37 @@ abstract class LookaheadStrategy implements Strategy
             }
         }
 
-        return $best ?? ['skill_id' => 'gather', 'target' => null];
+        if ($best === null) {
+            return self::gather();
+        }
+
+        $best['keep'] = $this->keep($state, $best);
+
+        return $best;
     }
 
     /**
-     * @param  array{skill_id: string, target: string|null}  $action
+     * @param  array<string, mixed>  $action
      */
     abstract protected function score(BattleState $before, TurnResult $result, array $action): float;
 
     /**
-     * @param  array{skill_id: string, target: string|null}  $action
+     * 預設不留牌：多看新牌。會布局的策略覆寫這個方法。
+     *
+     * @param  array<string, mixed>  $action
+     * @return list<string>
      */
-    protected function element(array $action): ?Element
+    protected function keep(BattleState $state, array $action): array
     {
-        return $action['target'] === null ? null : Element::from($action['target']);
+        return [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected static function gather(): array
+    {
+        return ['type' => 'play', 'card_id' => null, 'fixed' => 'gather', 'skill_id' => 'gather', 'target' => null];
     }
 
     /**

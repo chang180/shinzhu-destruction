@@ -4,6 +4,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 
 | Applies to | Rule file |
 | --- | --- |
+| docs/** | .ai/rules/docs.md |
 | app/Domain/Game/** | .ai/rules/game.md |
 | app/Services/OpenData/** | .ai/rules/open-data.md |
 | app/Services/Game/** | .ai/rules/services-game.md |

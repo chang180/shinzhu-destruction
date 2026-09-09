@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Domain\Game\BattleEngine;
+use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\LevelRepository;
 use App\Domain\Game\Scenario\ScenarioModifierCalculator;
 use App\Domain\Game\SkillCatalog;
@@ -48,6 +49,13 @@ class AppServiceProvider extends ServiceProvider
             return new SkillCatalog($config->get('game.skills'));
         });
 
+        $this->app->singleton(CardCatalog::class, function ($app): CardCatalog {
+            /** @var ConfigRepository $config */
+            $config = $app->make('config');
+
+            return new CardCatalog($config->get('game.cards'), $app->make(SkillCatalog::class));
+        });
+
         $this->app->singleton(LevelRepository::class, function ($app): LevelRepository {
             /** @var ConfigRepository $config */
             $config = $app->make('config');
@@ -70,7 +78,11 @@ class AppServiceProvider extends ServiceProvider
             /** @var ConfigRepository $config */
             $config = $app->make('config');
 
-            return new BattleEngine($app->make(SkillCatalog::class), $config->get('game'));
+            return new BattleEngine(
+                $app->make(SkillCatalog::class),
+                $app->make(CardCatalog::class),
+                $config->get('game'),
+            );
         });
 
         $this->app->singleton(FixtureRepository::class, function ($app): FixtureRepository {

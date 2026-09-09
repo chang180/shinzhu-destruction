@@ -3,20 +3,24 @@
 namespace Tests\Feature\Game;
 
 use App\Domain\Game\ActionRequest;
+use App\Domain\Game\ActionType;
 use App\Domain\Game\BattleEngine;
+use App\Domain\Game\BattleState;
+use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\Element;
 use App\Domain\Game\LevelRepository;
 use App\Domain\Game\Scenario\ScenarioModifiers;
 use App\Domain\Game\Simulation\BattleSimulator;
 use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
 use App\Domain\Game\Simulation\Strategies\RandomStrategy;
+use App\Domain\Game\SkillKind;
 use Random\Randomizer;
 use Tests\TestCase;
 
 /**
  * 驗收：相同輸入得到相同事件與結局。
  *
- * rules_version 1.0.0 的城市完全沒有亂數，唯一的亂數來源是自動策略，
+ * 城市完全沒有亂數；亂數只有牌序與策略選擇，兩者都由 seed 決定，
  * 所以 (關卡, 情境, 策略, seed) 完全決定整場結果。
  */
 class BattleDeterminismTest extends TestCase
@@ -55,27 +59,25 @@ class BattleDeterminismTest extends TestCase
 
     public function test_a_replayed_action_list_reproduces_the_event_stream_byte_for_byte(): void
     {
-        $level = app(LevelRepository::class)->get('meter-feast');
+        $level = app(LevelRepository::class)->get('empty-cup');
         $modifiers = $this->modifiers(0.0);
+        $seed = 991;
 
         $events = [];
 
         foreach ([1, 2] as $pass) {
             $engine = app(BattleEngine::class);
-            $state = $engine->start($level);
-            $strategy = new PlannerStrategy($modifiers);
+            $state = $engine->start($level, $seed);
+            $strategy = new PlannerStrategy($modifiers, app(CardCatalog::class));
             $stream = [];
             $counter = 0;
 
             while (! $state->outcome->isFinished()) {
-                $choice = $strategy->choose($state, $engine, $level, new Randomizer);
-                $result = $engine->apply(
-                    $state,
-                    new ActionRequest('r'.(++$counter), $state->version, $choice['skill_id'],
-                        $choice['target'] === null ? null : Element::from($choice['target'])),
-                    $level,
-                    $modifiers,
-                );
+                $action = $state->turnPhase === BattleState::PHASE_AWAITING_REVEAL
+                    ? new ActionRequest('r'.(++$counter), $state->version, ActionType::Reveal)
+                    : $this->playRequest('r'.(++$counter), $state, $strategy->choose($state, $engine, $level, new Randomizer));
+
+                $result = $engine->apply($state, $action, $level, $modifiers);
                 $stream[] = $result->eventsToArray();
                 $state = $result->state;
             }
@@ -85,6 +87,58 @@ class BattleDeterminismTest extends TestCase
 
         $this->assertSame($events[1], $events[2]);
         $this->assertNotSame([], $events[1]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $choice
+     */
+    private function playRequest(string $actionId, BattleState $state, array $choice): ActionRequest
+    {
+        return new ActionRequest(
+            actionId: $actionId,
+            expectedVersion: $state->version,
+            type: ActionType::Play,
+            cardId: $choice['card_id'] ?? null,
+            fixedSkillId: $choice['fixed'] ?? null,
+            keep: $choice['keep'] ?? [],
+        );
+    }
+
+    public function test_the_same_seed_deals_the_same_hand_and_a_different_seed_does_not(): void
+    {
+        $engine = app(BattleEngine::class);
+        $level = app(LevelRepository::class)->get('empty-cup');
+        $modifiers = $this->modifiers(0.0);
+
+        $hand = function (int $seed) use ($engine, $level, $modifiers): array {
+            $state = $engine->start($level, $seed);
+
+            return $engine->apply(
+                $state,
+                new ActionRequest('reveal', $state->version, ActionType::Reveal),
+                $level,
+                $modifiers,
+            )->state->hand;
+        };
+
+        // 重整頁面不會換手牌：同一個 seed 一定發同一手。
+        $this->assertSame($hand(555), $hand(555));
+        $this->assertNotSame($hand(555), $hand(556));
+
+        // 首手保證看得到三系試探（P04-REVISION-PLAN §4.5）。
+        $cards = app(CardCatalog::class);
+        $deck = $engine->start($level, 555)->deck;
+        $elements = [];
+
+        foreach ($hand(555) as $instanceId) {
+            $skill = $cards->skillFor($deck[$instanceId]);
+
+            if ($skill->kind === SkillKind::Probe) {
+                $elements[] = $skill->element?->value;
+            }
+        }
+
+        $this->assertSame(Element::values(), array_values(array_unique(array_filter($elements))));
     }
 
     public function test_different_data_scenarios_change_the_result(): void

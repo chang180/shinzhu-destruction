@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Domain\Game\BattleEngine;
+use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\Element;
 use App\Domain\Game\LevelRepository;
 use App\Domain\Game\Scenario\ScenarioModifiers;
@@ -149,7 +150,7 @@ class SimulateBattlesCommand extends Command
             new SingleElementStrategy(Element::Water),
             new LegacyCycleStrategy,
             new GreedyStrategy($modifiers),
-            new PlannerStrategy($modifiers),
+            new PlannerStrategy($modifiers, app(CardCatalog::class)),
         ];
     }
 }

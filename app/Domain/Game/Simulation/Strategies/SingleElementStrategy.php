@@ -28,13 +28,13 @@ class SingleElementStrategy implements Strategy
         $legal = $engine->legalActions($state);
 
         foreach (['breach', 'probe'] as $kind) {
-            $wanted = ['skill_id' => $kind.'.'.$this->element->value, 'target' => $this->element->value];
-
-            if (in_array($wanted, $legal, true)) {
-                return $wanted;
+            foreach ($legal as $action) {
+                if ($action['type'] === 'play' && $action['skill_id'] === $kind.'.'.$this->element->value) {
+                    return $action;
+                }
             }
         }
 
-        return ['skill_id' => 'gather', 'target' => null];
+        return ['type' => 'play', 'card_id' => null, 'fixed' => 'gather', 'skill_id' => 'gather', 'target' => null];
     }
 }

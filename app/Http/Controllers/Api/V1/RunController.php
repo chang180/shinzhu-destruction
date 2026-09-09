@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Game\LevelRepository;
+use App\Domain\Game\RunMode;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\RunResource;
 use App\Models\Campaign;
@@ -26,6 +27,7 @@ class RunController extends Controller
         return response()->json(['data' => $runs->map(static fn (Run $run): array => [
             'run_id' => $run->public_id,
             'level_id' => $run->level_id,
+            'mode' => $run->mode,
             'outcome' => $run->outcome->value,
             'turn' => $run->state['turn'],
             'updated_at' => $run->updated_at->toIso8601String(),
@@ -52,23 +54,42 @@ class RunController extends Controller
     ): JsonResponse {
         $validated = $request->validate([
             'level_id' => ['required', 'string', Rule::in($levels->ids())],
+            'mode' => ['nullable', 'string', Rule::in(array_column(RunMode::cases(), 'value'))],
         ], [
             'level_id.required' => '缺少 level_id',
             'level_id.string' => 'level_id 格式錯誤',
             'level_id.in' => '這一關不存在',
+            'mode.in' => '模式只能是限時挑戰或不限時練習',
         ]);
 
         $campaign = $campaigns->resolve($request);
         $level = $levels->get($validated['level_id']);
+        $mode = RunMode::from($validated['mode'] ?? RunMode::Challenge->value);
 
-        if ($level->requires !== null && ! in_array($level->id, $campaign->unlocked, true)) {
+        /*
+         * 內容未交付的關卡不能開局。這和解鎖是兩回事：解鎖是玩家的進度，
+         * `available` 是「這一關的規則與數值做完了沒有」，硬開只會讓玩家玩到
+         * 一組還沒驗證的數值，然後把它當成正式難度。
+         */
+        if (! $level->available) {
+            return response()->json([
+                'reason_code' => 'level_unavailable',
+                'message' => '這一關的內容尚未交付，目前只能挑戰已完成的關卡',
+            ], 409);
+        }
+
+        $unlocked = $mode === RunMode::Practice
+            ? array_values(array_unique(array_merge($campaigns->initiallyUnlocked(), $campaign->practiceUnlocked())))
+            : $campaign->unlocked;
+
+        if ($level->requires !== null && ! in_array($level->id, $unlocked, true)) {
             return response()->json([
                 'reason_code' => 'level_locked',
                 'message' => '這一關尚未解鎖',
             ], 403);
         }
 
-        $run = $runs->create($campaign, $level->id);
+        $run = $runs->create($campaign, $level->id, $mode);
 
         return (new RunResource($run))->response()->setStatusCode(201);
     }

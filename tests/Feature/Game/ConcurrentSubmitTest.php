@@ -3,9 +3,10 @@
 namespace Tests\Feature\Game;
 
 use App\Domain\Game\ActionRequest;
+use App\Domain\Game\ActionType;
 use App\Domain\Game\BattleEngine;
 use App\Domain\Game\BattleState;
-use App\Domain\Game\Element;
+use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\LevelDefinition;
 use App\Domain\Game\Scenario\ScenarioModifiers;
 use App\Domain\Game\SkillCatalog;
@@ -34,6 +35,7 @@ class ConcurrentSubmitTest extends TestCase
 
         $this->app->bind(BattleEngine::class, fn ($app) => new CompetingWriteEngine(
             $app->make(SkillCatalog::class),
+            $app->make(CardCatalog::class),
             $app->make('config')->get('game'),
             $run->id,
         ));
@@ -42,7 +44,7 @@ class ConcurrentSubmitTest extends TestCase
         $stateBefore = $run->state;
 
         try {
-            $service->submit($run, new ActionRequest('act-1', 1, 'probe.water', Element::Water));
+            $service->submit($run, new ActionRequest('act-1', 1, ActionType::Reveal));
             $this->fail('搶先寫入之後仍然結算成功，代表發生了 lost update');
         } catch (RunConflictException $exception) {
             $this->assertSame('stale_version', $exception->reasonCode);
@@ -68,9 +70,9 @@ class CompetingWriteEngine extends BattleEngine
     /**
      * @param  array<string, mixed>  $config
      */
-    public function __construct(SkillCatalog $skills, array $config, private readonly int $runId)
+    public function __construct(SkillCatalog $skills, CardCatalog $cards, array $config, private readonly int $runId)
     {
-        parent::__construct($skills, $config);
+        parent::__construct($skills, $cards, $config);
     }
 
     public function apply(

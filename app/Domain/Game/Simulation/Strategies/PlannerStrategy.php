@@ -3,7 +3,9 @@
 namespace App\Domain\Game\Simulation\Strategies;
 
 use App\Domain\Game\BattleState;
+use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\Element;
+use App\Domain\Game\Scenario\ScenarioModifiers;
 use App\Domain\Game\TurnResult;
 
 /**
@@ -14,6 +16,11 @@ use App\Domain\Game\TurnResult;
  */
 class PlannerStrategy extends LookaheadStrategy
 {
+    public function __construct(ScenarioModifiers $modifiers, private readonly CardCatalog $cards)
+    {
+        parent::__construct($modifiers);
+    }
+
     public function name(): string
     {
         return 'planner';
@@ -60,6 +67,37 @@ class PlannerStrategy extends LookaheadStrategy
         $score += $state->malice * 0.25;
 
         return $score;
+    }
+
+    /**
+     * 留下這回合打不出來、但衝擊最高的牌。留牌的代價是少看到新牌，所以只留
+     * 真的想用的那一兩張，不是把手牌鎖死。
+     *
+     * @param  array<string, mixed>  $action
+     * @return list<string>
+     */
+    protected function keep(BattleState $state, array $action): array
+    {
+        $candidates = [];
+
+        foreach ($state->hand as $instanceId) {
+            if ($instanceId === ($action['card_id'] ?? null)) {
+                continue;
+            }
+
+            $candidates[$instanceId] = $this->impact($state, $instanceId);
+        }
+
+        arsort($candidates);
+
+        return array_slice(array_keys($candidates), 0, min($state->maxKeep, 1));
+    }
+
+    private function impact(BattleState $state, string $instanceId): int
+    {
+        $type = $state->cardType($instanceId);
+
+        return $type === null ? 0 : $this->cards->skillFor($type)->baseImpact;
     }
 
     private function sigilProgress(BattleState $before, BattleState $after): float

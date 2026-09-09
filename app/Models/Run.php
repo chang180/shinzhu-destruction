@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Domain\Game\BattleState;
 use App\Domain\Game\Outcome;
+use App\Domain\Game\RunMode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array<string, string> $snapshot_ids
  * @property array<string, mixed> $scenario_modifiers
  * @property Outcome $outcome
+ * @property string $mode
  */
 class Run extends Model
 {
@@ -61,5 +63,10 @@ class Run extends Model
     public function battleState(): BattleState
     {
         return BattleState::fromArray($this->state);
+    }
+
+    public function runMode(): RunMode
+    {
+        return RunMode::from($this->mode);
     }
 }

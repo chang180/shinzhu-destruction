@@ -25,6 +25,8 @@ class Campaign extends Model
         return [
             'unlocked' => 'array',
             'best_results' => 'array',
+            'practice_unlocked' => 'array',
+            'practice_results' => 'array',
             'last_activity_at' => 'immutable_datetime',
         ];
     }
@@ -43,6 +45,25 @@ class Campaign extends Model
     public static function newAnonymousId(): string
     {
         return Str::random(48);
+    }
+
+    /**
+     * 練習軌的解鎖狀態。舊戰役沒有這一欄，回退到挑戰軌的初始解鎖由呼叫端決定，
+     * 這裡只保證型別，不把 null 當成「什麼都沒解鎖」以外的意思。
+     *
+     * @return list<string>
+     */
+    public function practiceUnlocked(): array
+    {
+        return $this->practice_unlocked ?? [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function practiceResults(): array
+    {
+        return $this->practice_results ?? [];
     }
 
     public function hasCleared(string $levelId): bool

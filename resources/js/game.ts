@@ -1,34 +1,66 @@
 export type Element = 'water' | 'heat' | 'land';
 export type Outcome = 'in_progress' | 'player_victory' | 'city_held';
+export type ActionType = 'reveal' | 'play' | 'swap' | 'timeout';
+export type RunMode = 'challenge' | 'practice';
+export type TurnPhase = 'awaiting_reveal' | 'decision';
 export interface Intent { type: string; element: Element; magnitude: number; interruptible: boolean; scheduled_turn: number; description: string }
 export interface BattleState {
     turn: number; max_turns: number; core_resilience: number; malice: number; malice_cap: number; sigil_cap: number;
     defenses: Record<Element, number>; resistance: Record<Element, number>; sigils: Record<Element, number>;
     cooldowns: Record<string, number>; shields: { element: string; amount: number }[];
     combo_chain: Element[]; breach_available: boolean; intent: Intent | null; outcome: Outcome;
+    // 牌桌狀態。抽牌堆只送剩餘張數，未抽牌序留在伺服器。
+    deck: Record<string, string>; hand: string[]; discard_pile: string[]; draw_pile_count: number;
+    hand_size: number; max_keep: number; turn_phase: TurnPhase; deadline_at: string | null;
+    swap_used: boolean; timeouts: number;
 }
 export interface BattleEvent { sequence: number; turn: number; type: string; actor: string; target: Element | null; reason_code: string; cue_id: string; before: Record<string, unknown>; delta: Record<string, unknown>; after: Record<string, unknown> }
-export interface Choice { skill_id: string; target: Element | null; reason: string | null }
-export interface ActionInput { action_id: string; expected_version: number; skill_id: string; target: Element | null }
+export interface Choice { type: ActionType; card_id: string | null; fixed: string | null; skill_id: string | null; target: Element | null; reason: string | null }
+export interface ActionInput { action_id: string; expected_version: number; type: ActionType; card_id?: string | null; fixed?: string | null; keep?: string[] }
 export interface History { sequence: number; input: ActionInput; events: BattleEvent[] }
 export interface Snapshot { quality: string; observed_at: string | null; period: Record<string, unknown> | null; warnings?: string[] }
-export interface Run { run_id: string; level_id: string; rules_version: string; compatible: boolean; version: number; outcome: Outcome; state: BattleState; available_actions: Choice[]; snapshots: Record<string, Snapshot>; scenario: { modifiers: Record<Element, number>; reasons: Record<Element, { message: string }> }; history: History[] }
+// 卡面。成本、冷卻與衝擊都由伺服器從技能表算好，前端不另存一份數值。
+export interface Card { card: string; skill_id: string; name: string; text: string; role: string; kind: string; element: Element | null; malice_cost: number; cooldown: number; base_impact: number; defense_delta: number; required_sigils: number }
+export interface DataNote { applied: boolean; modifier: number | null; reason: string | null }
+export interface Run {
+    run_id: string; level_id: string; mode: RunMode; rules_version: string; compatible: boolean; version: number;
+    outcome: Outcome; state: BattleState; available_actions: Choice[]; cards: Record<string, Card>;
+    snapshots: Record<string, Snapshot>; scenario: { modifiers: Record<Element, number>; reasons: Record<Element, { message: string }> };
+    data_notes: Record<Element, DataNote>; history: History[]; server_time: string;
+}
 export interface Skill { id: string; kind: string; element: Element | null; malice_cost: number; cooldown: number; base_impact: number; defense_delta: number; required_sigils: number }
-export interface Level { level_id: string; name: string; apostle: string; max_turns: number; unlocked: boolean; initial_defenses: Record<Element, number>; forecast: Intent[] }
-export interface SavedRun { run_id: string; level_id: string; turn: number; outcome: Outcome }
-export interface Settlement { events: BattleEvent[]; version: number; state: BattleState; replayed: boolean }
+export interface Level { level_id: string; sequence: number; tier: 'main' | 'advanced'; available: boolean; name: string; subtitle: string; mechanic: string; apostle: string; max_turns: number; requires: string | null; unlocked: boolean; practice_unlocked: boolean; deck_size: number; initial_defenses: Record<Element, number>; forecast: Intent[] }
+export interface SavedRun { run_id: string; level_id: string; mode: RunMode; turn: number; outcome: Outcome }
+export interface Settlement { events: BattleEvent[]; version: number; state: BattleState; replayed: boolean; server_time: string }
 export const elements: Element[] = ['water', 'heat', 'land'];
 export const elementNames = { water: '水', heat: '熱', land: '土地' };
 export const kindNames: Record<string, string> = { probe: '試探', breach: '破陣', disrupt: '擾序', gather: '蓄勢', ultimate: '萬川歸寂' };
 export function skillName(id: string): string { const [kind, element] = id.split('.'); return (element ? `${elementNames[element as Element]}系・` : '') + (kindNames[kind] ?? kind); }
-export function unavailableText(choice: Choice | undefined, state: BattleState, skill: Skill): string {
+export function unavailableText(choice: Choice | undefined, state: BattleState, card: Card): string {
     if (!choice) return '目前無法施放';
-    if (choice.reason === 'on_cooldown') return `第 ${state.cooldowns[skill.id]} 回合可用`;
-    if (choice.reason === 'not_enough_malice') return `需 ${skill.malice_cost} 惡意`;
-    if (choice.reason === 'sigils_not_ready') return `三系印記各需 ${skill.required_sigils} 枚`;
+    if (choice.reason === 'on_cooldown') return `第 ${state.cooldowns[card.skill_id]} 回合可用`;
+    if (choice.reason === 'not_enough_malice') return `需 ${card.malice_cost} 惡意`;
+    if (choice.reason === 'sigils_not_ready') return `三系印記各需 ${card.required_sigils} 枚`;
+    if (choice.reason === 'swap_already_used') return '這一回合已經換過牌';
+    if (choice.reason === 'nothing_to_swap') return '沒有牌可以換';
     return choice.reason ? '目前無法施放' : '';
 }
-const eventNames: Record<string, string> = { action_accepted: '禁術發動', impact: '核心命中', defense_shift: '防線削弱', sigil_gain: '印記累積', sigil_spent: '印記解放', resistance_change: '抗性變化', combo: '跨系連攜', breach_opened: '破綻開啟', breach_consumed: '破綻追擊', interrupt: '成功打斷修復', interrupt_failed: '未能打斷', malice_refund: '枯潮返還惡意', malice_recovered: '蓄勢回復', city_repair: '城市修復', city_reinforce: '城市補強', city_shield: '城市架盾', shield_absorbed: '護盾吸收', shield_expired: '護盾到期', phase_change: '階段轉換', turn_advanced: '進入下一回合', outcome: '對局結算' };
+// 這一局實際生效的資料修正。沒被本關採用的系別明說「本關未採用」，不做裝飾性的假加成。
+export function dataNoteText(note: DataNote | undefined, element: Element | null): string {
+    if (!element) return '本局結算依實際事件紀錄。';
+    if (!note || !note.applied || note.modifier === null) return '本關未採用這一系的資料。';
+    const percent = (note.modifier * 100).toFixed(1);
+    return `${elementNames[element]}情修正 ${note.modifier >= 0 ? '+' : ''}${percent}%（本局）`;
+}
+// 伺服器截止時間減去伺服器現在時間，就是還剩幾秒；客戶端的本機時鐘不參與判定。
+export function secondsLeft(deadlineAt: string | null, serverOffsetMs: number, now = Date.now()): number | null {
+    if (!deadlineAt) return null;
+    return Math.max(0, Math.ceil((Date.parse(deadlineAt) - (now + serverOffsetMs)) / 1000));
+}
+export function serverOffset(serverTime: string, now = Date.now()): number {
+    return Date.parse(serverTime) - now;
+}
+const eventNames: Record<string, string> = { hand_revealed: '揭示手牌', card_swapped: '換牌', hand_settled: '整理手牌', action_missed: '錯失行動', action_accepted: '禁術發動', impact: '核心命中', defense_shift: '防線削弱', sigil_gain: '印記累積', sigil_spent: '印記解放', resistance_change: '抗性變化', combo: '跨系連攜', breach_opened: '破綻開啟', breach_consumed: '破綻追擊', interrupt: '成功打斷修復', interrupt_failed: '未能打斷', malice_refund: '枯潮返還惡意', malice_recovered: '蓄勢回復', city_repair: '城市修復', city_reinforce: '城市補強', city_shield: '城市架盾', shield_absorbed: '護盾吸收', shield_expired: '護盾到期', phase_change: '階段轉換', turn_advanced: '進入下一回合', outcome: '對局結算' };
 export function eventText(event: BattleEvent): string {
     if (event.type === 'outcome') return event.after.outcome === 'player_victory' ? '毀滅成功・學院認可' : '城市守住・本次試煉結束';
     let detail = '';
@@ -49,9 +81,20 @@ export function cueDuration(event: BattleEvent): number {
     return 700;
 }
 export function visibleEvents(events: BattleEvent[]): BattleEvent[] {
-    return events.filter(e => ['action_accepted', 'impact', 'interrupt', 'interrupt_failed', 'breach_opened', 'combo', 'city_repair', 'city_shield', 'city_reinforce', 'outcome'].includes(e.type));
+    return events.filter(e => ['action_accepted', 'action_missed', 'impact', 'interrupt', 'interrupt_failed', 'breach_opened', 'combo', 'city_repair', 'city_shield', 'city_reinforce', 'outcome'].includes(e.type));
 }
 export interface ReportFinding { turn: number | null; text: string }
+// 一次行動打出的是哪一張牌。牌名優先，找不到牌就退回招式代碼的名稱。
+export function playedName(run: Run, input: ActionInput | undefined): string {
+    if (!input) return '未知行動';
+    if (input.type === 'timeout') return '逾時錯失行動';
+    if (input.type === 'reveal') return '揭示手牌';
+    if (input.type === 'swap') return '換牌';
+    const cardType = input.card_id ? run.state.deck[input.card_id] : null;
+    if (cardType && run.cards[cardType]) return run.cards[cardType]!.name;
+    const fixed = Object.values(run.cards).find(card => card.skill_id === input.fixed);
+    return fixed ? fixed.name : skillName(input.fixed ?? '');
+}
 // Describe recorded consequences only; combat calculations remain on the server.
 export function reportFindings(run: Run): ReportFinding[] {
     const events = run.history.flatMap(entry => entry.events);
@@ -65,10 +108,16 @@ export function reportFindings(run: Run): ReportFinding[] {
     const strongest = events.filter(event => event.type === 'impact').sort((a, b) => Number(a.delta.core_resilience) - Number(b.delta.core_resilience))[0];
     if (strongest && Number(strongest.delta.core_resilience) < 0) {
         const action = run.history.find(entry => entry.events.includes(strongest));
-        findings.push({ turn: strongest.turn, text: `${skillName(action?.input.skill_id ?? '')}造成本局最大單次核心損失 ${-Number(strongest.delta.core_resilience)} 點。${events.some(event => event.turn === strongest.turn && event.type === 'breach_consumed') ? '這一擊確實用到了破綻窗口。' : '完整紀錄保留了當時的護盾與防線。'}` });
+        findings.push({ turn: strongest.turn, text: `${playedName(run, action?.input)}造成本局最大單次核心損失 ${-Number(strongest.delta.core_resilience)} 點。${events.some(event => event.turn === strongest.turn && event.type === 'breach_consumed') ? '這一擊確實用到了破綻窗口。' : '完整紀錄保留了當時的護盾與防線。'}` });
     }
-    const gathered = run.history.filter(entry => entry.input.skill_id === 'gather').length;
+    const gathered = run.history.filter(entry => entry.input.fixed === 'gather').length;
     if (gathered) findings.push({ turn: null, text: `你用了 ${gathered} 回合蓄勢。它回復資源但不直接衝擊核心，城市仍照預告行動。${run.outcome === 'city_held' ? '下一次，把蓄起的惡意換成攻勢。' : ''}` });
+    const missed = events.filter(event => event.type === 'action_missed');
+    if (missed.length) findings.push({ turn: missed[0]!.turn, text: `第 ${missed.map(event => event.turn).join('、')} 回合逾時，共 ${missed.length} 次。這些回合你沒有出手，城市照預告行動；${events.some(event => event.reason_code === 'missed_action_wasted_breach') ? '其中至少一次還讓已經開啟的破綻窗口過期。' : '手牌全部進了棄牌堆。'}` });
+    const kept = run.history.filter(entry => (entry.input.keep ?? []).length > 0);
+    if (kept.length) findings.push({ turn: kept[0]!.events[0]?.turn ?? null, text: `你留了 ${kept.reduce((sum, entry) => sum + (entry.input.keep ?? []).length, 0)} 張牌到下一回合，分佈在 ${kept.length} 個回合。留牌的代價是那幾回合少看到新牌。` });
+    const swaps = run.history.filter(entry => entry.input.type === 'swap');
+    if (swaps.length) findings.push({ turn: swaps[0]!.events[0]?.turn ?? null, text: `你用掉 ${swaps.length} 次免費換牌。換掉的牌當回合離開可抽集合，所以換走的那一張不會立刻回到手上。` });
     return findings;
 }
 export class PendingStorageError extends Error {}
@@ -99,16 +148,18 @@ export class PendingAction {
             if (typeof value?.runId === 'string' && /^[a-zA-Z0-9-]+$/.test(value.runId)
                 && typeof input?.action_id === 'string' && input.action_id.length > 0
                 && Number.isInteger(input.expected_version) && input.expected_version > 0
-                && typeof input.skill_id === 'string' && input.skill_id.length > 0
-                && (input.target === null || elements.includes(input.target))) this.value = value;
+                && ['reveal', 'play', 'swap', 'timeout'].includes(input.type)
+                && (input.card_id == null || typeof input.card_id === 'string')
+                && (input.fixed == null || typeof input.fixed === 'string')
+                && (input.keep === undefined || Array.isArray(input.keep))) this.value = value;
         } catch { this.value = null; }
     }
-    prepare(run: Run, choice: Choice): ActionInput {
+    prepare(run: Run, choice: Pick<Choice, 'type' | 'card_id' | 'fixed'>, keep: string[] = []): ActionInput {
         if (this.value) {
             if (this.value.runId !== run.run_id) throw new Error('另一局仍有待確認行動');
             return this.value.input;
         }
-        const input = { action_id: crypto.randomUUID(), expected_version: run.version, skill_id: choice.skill_id, target: choice.target };
+        const input: ActionInput = { action_id: crypto.randomUUID(), expected_version: run.version, type: choice.type, card_id: choice.card_id, fixed: choice.fixed, keep };
         const value = { runId: run.run_id, input };
         try { this.storage.setItem('academy.pending', JSON.stringify(value)); }
         catch { throw new PendingStorageError('瀏覽器無法保存待確認行動，本次尚未送出。請允許此網站使用工作階段儲存後再試。'); }

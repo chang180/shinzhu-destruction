@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\LevelRepository;
 use App\Domain\Game\SkillCatalog;
 use App\Http\Controllers\Controller;
@@ -17,6 +18,7 @@ class LevelController extends Controller
     public function index(
         Request $request,
         SkillCatalog $skills,
+        CardCatalog $cards,
         LevelRepository $levels,
         CampaignResolver $campaigns,
         SnapshotRepository $snapshots,
@@ -26,6 +28,11 @@ class LevelController extends Controller
         $campaign = $campaigns->existing($request);
         $unlocked = $campaign?->unlocked ?? $campaigns->initiallyUnlocked();
         $best = $campaign?->best_results ?? [];
+        $practiceUnlocked = array_values(array_unique(array_merge(
+            $campaigns->initiallyUnlocked(),
+            $campaign?->practiceUnlocked() ?? [],
+        )));
+        $practiceBest = $campaign?->practiceResults() ?? [];
 
         $payload = [];
 
@@ -34,6 +41,8 @@ class LevelController extends Controller
                 $level,
                 in_array($levelId, $unlocked, true),
                 $best[$levelId] ?? null,
+                in_array($levelId, $practiceUnlocked, true),
+                $practiceBest[$levelId] ?? null,
             );
         }
 
@@ -46,6 +55,10 @@ class LevelController extends Controller
                 'base_impact' => $skill->baseImpact, 'defense_delta' => $skill->defenseDelta,
                 'required_sigils' => $skill->requiredSigilsPerElement,
             ])->all(),
+            'cards' => $cards->toArray(),
+            'hand' => config('game.hand'),
+            'fixed_actions' => config('game.fixed_actions'),
+            'decision_seconds' => config('game.timer.decision_seconds'),
             'data_status' => $snapshots->status($sources->sourceIds()),
         ]);
     }
