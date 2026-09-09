@@ -10,7 +10,7 @@ const source = ts.transpileModule(fs.readFileSync('resources/js/game.ts', 'utf8'
 }).outputText;
 const context = { exports: {}, crypto: globalThis.crypto };
 vm.runInNewContext(source, context);
-const { cueImage, cueDuration, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, playedName } = context.exports;
+const { cueImage, cueDuration, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, playedName } = context.exports;
 const event = (type, turn, delta = {}, after = {}) => ({ type, turn, delta, after, cue_id: '', reason_code: '', actor: 'player', target: 'water' });
 // 牌組與卡面在真實回應裡一定存在；戰報要靠它們把 card_id 翻成玩家看到的卡名。
 const deck = { 'c1': 'long-flow', 'c2': 'final-waste' };
@@ -96,6 +96,30 @@ test('the countdown reads the server deadline through the clock offset, not the 
   // 過了截止時間只會停在 0，不會變成負數倒著跑。
   assert.equal(secondsLeft('2026-09-09T12:00:30.000Z', offset, Date.parse('2026-09-09T12:02:00.000Z')), 0);
   assert.equal(secondsLeft(null, 0), null);
+});
+
+test('battle timing copy promises continuous hands without a start-turn gate', () => {
+  assert.equal(briefingTimingText('practice'), '進入戰鬥就會自動發牌；練習模式不限時，出牌演出後直接接下一手。');
+  assert.match(briefingTimingText('challenge'), /自動發牌.*30 秒.*直接接下一個 30 秒/);
+  assert.doesNotMatch(briefingTimingText('challenge'), /開始回合/);
+  assert.match(nextHandText('challenge'), /立即開始 30 秒/);
+});
+
+test('only compatible in-progress runs between hands are automatically revealed', () => {
+  const runState = (outcome, compatible, turn_phase) => ({ outcome, compatible, state: { turn_phase } });
+  assert.equal(shouldAutoReveal(runState('in_progress', true, 'awaiting_reveal')), true);
+  assert.equal(shouldAutoReveal(runState('in_progress', true, 'decision')), false);
+  assert.equal(shouldAutoReveal(runState('player_victory', true, 'awaiting_reveal')), false);
+  assert.equal(shouldAutoReveal(runState('in_progress', false, 'awaiting_reveal')), false);
+});
+
+test('clicking a kept card plays it instead of trying to retain the same physical card', () => {
+  assert.deepEqual(keptCardsForPlay(['card-1', 'card-2'], 'card-1'), ['card-2']);
+});
+
+test('the lobby sound label reflects the current preference instead of claiming a default', () => {
+  assert.equal(soundStatusText(true), '目前靜音');
+  assert.equal(soundStatusText(false), '目前有聲');
 });
 
 test('a card face only claims a data modifier when this level actually applies it', () => {

@@ -35,6 +35,23 @@ export interface Settlement { events: BattleEvent[]; version: number; state: Bat
 export const elements: Element[] = ['water', 'heat', 'land'];
 export const elementNames = { water: '水', heat: '熱', land: '土地' };
 export const kindNames: Record<string, string> = { probe: '試探', breach: '破陣', disrupt: '擾序', gather: '蓄勢', ultimate: '萬川歸寂' };
+export function briefingTimingText(mode: RunMode): string {
+    return mode === 'practice'
+        ? '進入戰鬥就會自動發牌；練習模式不限時，出牌演出後直接接下一手。'
+        : '進入戰鬥就會自動發牌並開始 30 秒倒數；出牌演出後直接接下一個 30 秒。';
+}
+export function nextHandText(mode: RunMode): string {
+    return mode === 'practice' ? '正在發下一手；練習模式不限時。' : '正在發下一手，接著立即開始 30 秒。';
+}
+export function shouldAutoReveal(run: Pick<Run, 'outcome' | 'compatible' | 'state'>): boolean {
+    return run.compatible && run.outcome === 'in_progress' && run.state.turn_phase === 'awaiting_reveal';
+}
+export function keptCardsForPlay(keptCards: string[], playedCardId: string): string[] {
+    return keptCards.filter(cardId => cardId !== playedCardId);
+}
+export function soundStatusText(muted: boolean): string {
+    return muted ? '目前靜音' : '目前有聲';
+}
 export function skillName(id: string): string { const [kind, element] = id.split('.'); return (element ? `${elementNames[element as Element]}系・` : '') + (kindNames[kind] ?? kind); }
 export function unavailableText(choice: Choice | undefined, state: BattleState, card: Card): string {
     if (!choice) return '目前無法施放';

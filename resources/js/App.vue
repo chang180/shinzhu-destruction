@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents } from './game';
 import type { BattleEvent, Card, Choice, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
@@ -14,8 +14,7 @@ const playing = ref(false);
 const error = ref('');
 const notice = ref('');
 const mode = ref<RunMode>('challenge');
-const selected = ref<string | null>(null);
-const selectedFixed = ref<string | null>(null);
+const previewedCard = ref<Card>();
 const keep = ref<string[]>([]);
 const currentEvent = ref<BattleEvent>();
 const pending = new PendingAction({
@@ -55,18 +54,16 @@ const allEvents = computed(() => run.value?.history.flatMap(h => h.events) ?? []
 const highlights = computed(() => run.value ? reportFindings(run.value) : []);
 const hand = computed(() => (state.value?.hand ?? []).map(id => ({ id, card: cardFor(id) })).filter(entry => !!entry.card));
 const fixedCards = computed(() => Object.values(run.value?.cards ?? {}).filter(card => ['gather', 'ultimate'].includes(card.skill_id)));
-const selectedCard = computed(() => selected.value ? cardFor(selected.value) : fixedCards.value.find(c => c.skill_id === selectedFixed.value));
-const selectedChoice = computed(() => selected.value ? choiceForCard(selected.value) : choiceForFixed(selectedFixed.value));
 const canKeepMore = computed(() => keep.value.length < (state.value?.max_keep ?? 2));
 const sourceNames: Record<string, string> = { 'wra.reservoir_conditions': '水利署・水庫水情', 'nstc.science_park_water': '國科會・園區用水', 'moi.land_use': '內政部・國土利用' };
 const qualityNames: Record<string, string> = { demo: '示範情境', fresh: '開局時有效資料', stale: '開局時已過期資料', unavailable: '資料不可得' };
 const hint = computed(() => {
     if (!state.value) return '';
-    if (!revealed.value) return `按下「開始回合」才發牌與開始倒數。讀預告、想清楚再開始——${mode.value === 'practice' ? '這是不限時練習。' : '簡報與演出的時間不算進 30 秒。'}`;
+    if (!revealed.value) return nextHandText(mode.value);
     if (state.value.breach_available) return '防線已裂開！下一個行動會用掉破綻，連逾時也算。把窗口留給值得的一擊。';
     if (state.value.intent?.interruptible) return '城市正準備修復。看看手上有沒有同系的擾序牌；打斷成功會直接劃掉那條預告。';
-    if (state.value.turn === 1) return '五張手牌，出一張。最多留 2 張到下回合，另外還有一次免費換牌。留牌的代價是少看到新牌。';
-    return '換系能緩解原系抗性，連續三種不同系進攻會連攜。手上沒有想要的牌時，換牌與蓄勢都是退路。';
+    if (state.value.turn === 1) return '先勾選最多 2 張留牌，再點要打出的牌；點牌會立即施放。每回合另有一次免費換牌。';
+    return '點牌會立即施放。換系能緩解原系抗性，連續三種不同系進攻會連攜；手上沒有想要的牌時，換牌與蓄勢都是退路。';
 });
 
 function cardFor(instanceId: string): Card | undefined {
@@ -92,20 +89,8 @@ function fixedReason(card: Card): string {
 function noteFor(card: Card | undefined): string {
     return card ? dataNoteText(run.value?.data_notes[card.element as never], card.element) : '';
 }
-function pick(instanceId: string): void {
-    if (locked.value || !revealed.value) return;
-    // 滑過或點一下只是選牌，不是出牌；出牌一定要再按確認。
-    selected.value = selected.value === instanceId ? null : instanceId;
-    selectedFixed.value = null;
-    keep.value = keep.value.filter(id => id !== selected.value);
-}
-function pickFixed(skillId: string): void {
-    if (locked.value || !revealed.value) return;
-    selectedFixed.value = selectedFixed.value === skillId ? null : skillId;
-    selected.value = null;
-}
 function toggleKeep(instanceId: string): void {
-    if (locked.value || !revealed.value || instanceId === selected.value) return;
+    if (locked.value || !revealed.value) return;
     keep.value = keep.value.includes(instanceId)
         ? keep.value.filter(id => id !== instanceId)
         : canKeepMore.value ? [...keep.value, instanceId] : keep.value;
@@ -116,7 +101,7 @@ function showRun(value: Run, briefing = false): void {
     run.value = value;
     mode.value = value.mode;
     clockOffset.value = serverOffset(value.server_time);
-    selected.value = null; selectedFixed.value = null; keep.value = [];
+    previewedCard.value = undefined; keep.value = [];
     page.value = value.outcome !== 'in_progress' ? 'report' : briefing ? 'briefing' : 'battle';
     if (!value.compatible) notice.value = '這一局使用舊版規則。可以查看紀錄，請回學院另開新局。';
     focusHeading();
@@ -153,9 +138,11 @@ function handleError(e: unknown): void {
 }
 async function openRun(id: string): Promise<void> {
     if (locked.value) return;
+    let opened: Run | undefined;
     busy.value = true; error.value = ''; notice.value = '';
-    try { showRun((await api<{ data: Run }>(`/runs/${id}`)).data); }
+    try { opened = (await api<{ data: Run }>(`/runs/${id}`)).data; showRun(opened); }
     catch (e) { handleError(e); } finally { busy.value = false; }
+    if (opened && shouldAutoReveal(opened)) await reveal();
 }
 async function start(retry = false): Promise<void> {
     if (locked.value) return;
@@ -170,7 +157,10 @@ async function start(retry = false): Promise<void> {
         for (const name of ['city', 'apostle', 'yan-chen', 'victory', 'water', 'heat', 'land']) { const image = new Image(); image.src = asset(name); }
     } catch (e) { handleError(e); } finally { busy.value = false; }
 }
-async function enterBattle(): Promise<void> { await audio.unlock(); page.value = 'battle'; focusHeading(); }
+async function enterBattle(): Promise<void> {
+    await audio.unlock(); page.value = 'battle'; focusHeading();
+    if (run.value && shouldAutoReveal(run.value)) await reveal();
+}
 function skip(): void { presentation++; stopWait?.(); stopWait = undefined; currentEvent.value = undefined; audio.stop(); }
 async function present(events: BattleEvent[]): Promise<void> {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -199,6 +189,7 @@ async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, k
     if (!retry && !choice) return;
     busy.value = true; error.value = ''; notice.value = '';
     await audio.unlock();
+    let automaticallyReveal = false;
     try {
         const input = retry ? pending.value!.input : pending.prepare(run.value, choice!, keepCards);
         uncertain.value = true;
@@ -207,6 +198,7 @@ async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, k
         pending.clear(); uncertain.value = false;
         if (input.type === 'play' || input.type === 'timeout') await present(response.data.events);
         showRun(latest);
+        automaticallyReveal = (input.type === 'play' || input.type === 'timeout') && shouldAutoReveal(latest);
         if (latest.version > response.data.version) notice.value = '另一分頁已繼續操作，現在顯示最新局面。';
     } catch (e) {
         if (e instanceof ApiError && [404, 409, 422].includes(e.status)) {
@@ -215,9 +207,19 @@ async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, k
         }
         handleError(e);
     } finally { busy.value = false; }
+    if (automaticallyReveal) await reveal();
 }
-const reveal = () => send({ type: 'reveal', card_id: null, fixed: null });
-const cast = () => send({ type: 'play', card_id: selected.value, fixed: selectedFixed.value }, keep.value);
+async function reveal(): Promise<void> { await send({ type: 'reveal', card_id: null, fixed: null }); }
+async function castCard(instanceId: string): Promise<void> {
+    const choice = choiceForCard(instanceId);
+    if (!choice || choice.reason || !run.value?.compatible) return;
+    await send(choice, keptCardsForPlay(keep.value, instanceId));
+}
+async function castFixed(skillId: string): Promise<void> {
+    const choice = choiceForFixed(skillId);
+    if (!choice || choice.reason || !run.value?.compatible) return;
+    await send(choice, keep.value);
+}
 const swap = (instanceId: string) => send({ type: 'swap', card_id: instanceId, fixed: null });
 /**
  * 倒數歸零時請伺服器收斂這一回合。Hostinger 沒有常駐 worker，逾時要靠客戶端
@@ -280,7 +282,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                             <label :class="{ on: mode === 'challenge' }"><input v-model="mode" type="radio" value="challenge"><b>限時挑戰</b><small>每回合 {{ decisionSeconds }} 秒決策；逾時只執行城市回應。</small></label>
                             <label :class="{ on: mode === 'practice' }"><input v-model="mode" type="radio" value="practice"><b>不限時練習</b><small>同一套牌組與城市規則，只關掉截止時間。成績分開記錄。</small></label>
                         </fieldset>
-                        <button class="primary" :disabled="locked || !firstLevel" @click="start()">簽下入學計畫 <span>↗</span></button><p class="small">單人牌組策略 · 手牌 5 張 · 預設靜音</p></div>
+                        <button class="primary" :disabled="locked || !firstLevel" @click="start()">簽下入學計畫 <span>↗</span></button><p class="small">單人牌組策略 · 手牌 5 張 · {{ soundStatusText(muted) }}（可於右上角調整）</p></div>
                     <span class="hero-caption">虛構城市演習 / 非真實災害預測</span>
                 </section>
                 <section class="lobby-bottom"><div><p class="eyebrow">CAMPAIGN · 主線 3 關 / 進階 2 關</p><h2 tabindex="-1">五門禁術</h2>
@@ -297,7 +299,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
             <template v-else-if="run && state">
                 <section v-if="page === 'briefing'" class="briefing content-width">
                     <div class="briefing-art"><img :src="asset('yan-chen')" alt="枯潮教授晏沉，身穿深紫學院長袍，平靜地端著一只空杯"><span>枯潮教授 / 晏沉</span></div>
-                    <div><p class="eyebrow">作戰簡報 · {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">讓城市<br>喊渴。</h1><blockquote class="professor-quote">「杯子空了，補水就好。城市空了呢？」<small>晏沉將空杯推到你面前。「這就是你今天的作業。」</small></blockquote><p class="lead">你有 {{ state.max_turns }} 回合、一副 {{ level?.deck_size }} 張的牌組。核心歸零便通關；回合用盡而城市仍站著，這次試煉就結束。</p><ol class="lesson"><li><b>每回合五張手牌，出一張。</b>按「開始回合」才發牌並開始倒數；讀簡報與看演出的時間不計入。</li><li><b>最多留 2 張。</b>留下的牌佔住下一手的位置，代價是少看到新牌。另有每回合一次的免費換牌。</li><li><b>讀預告。</b>第 3、6 回合城市會修復核心；同系擾序牌可以取消它，首次打斷還會返還 2 點惡意。</li><li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，所以勝負不會取決於有沒有抽到終招。</li></ol><button class="primary" :disabled="locked" @click="enterBattle">明白了，開始試煉 ↗</button><p class="small">本局情境與牌序已凍結。回學院後可繼續，不用一次打完。</p></div>
+                    <div><p class="eyebrow">作戰簡報 · {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">讓城市<br>喊渴。</h1><blockquote class="professor-quote">「杯子空了，補水就好。城市空了呢？」<small>晏沉將空杯推到你面前。「這就是你今天的作業。」</small></blockquote><p class="lead">你有 {{ state.max_turns }} 回合、一副 {{ level?.deck_size }} 張的牌組。核心歸零便通關；回合用盡而城市仍站著，這次試煉就結束。</p><ol class="lesson"><li><b>每回合五張手牌，點一張立即施放。</b>{{ briefingTimingText(mode) }}</li><li><b>最多留 2 張。</b>先標記要留下的牌，再點另一張施放；留下的牌會佔住下一手的位置。另有每回合一次的免費換牌。</li><li><b>讀預告。</b>第 3、6 回合城市會修復核心；同系擾序牌可以取消它，首次打斷還會返還 2 點惡意。</li><li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，點擊同樣立即執行。</li></ol><button class="primary" :disabled="locked" @click="enterBattle">明白了，開始連續試煉 ↗</button><p class="small">本局情境與牌序已凍結。回學院後可繼續，不用一次打完。</p></div>
                 </section>
                 <section v-if="page === 'battle'" class="battle content-width">
                     <div class="battle-heading"><div><p class="eyebrow">CHAPTER 01 / {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ level?.subtitle }}</h1></div>
@@ -316,17 +318,16 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     </div>
                     <div class="table-bar"><div class="malice"><span>你的惡意</span><b>{{ state.malice }}<small> / {{ state.malice_cap }}</small></b></div>
                         <p class="counts">抽牌堆 {{ state.draw_pile_count }} · 棄牌堆 {{ state.discard_pile.length }} · 留牌 {{ keep.length }}/{{ state.max_keep }}</p>
-                        <p class="professor-note">{{ hint }}</p>
+                        <p v-if="revealed" class="professor-note">{{ hint }}</p>
                     </div>
 
                     <div v-if="!revealed" class="reveal-gate">
-                        <p>手牌尚未揭示。{{ mode === 'practice' ? '這一局不限時。' : `按下開始後，伺服器會給你 ${decisionSeconds} 秒決策。` }}</p>
-                        <button class="primary" :disabled="locked || !run.compatible" @click="reveal">開始回合 · 揭示五張手牌 ↗</button>
+                        <p>{{ nextHandText(mode) }}</p>
                     </div>
                     <template v-else>
                         <ul class="hand" aria-label="手牌">
-                            <li v-for="entry in hand" :key="entry.id" :class="[entry.card!.element, { chosen: selected === entry.id, kept: keep.includes(entry.id), unavailable: !!reasonFor(entry.id) }]">
-                                <button class="card-face" :aria-pressed="selected === entry.id" :disabled="locked" @click="pick(entry.id)">
+                            <li v-for="entry in hand" :key="entry.id" :class="[entry.card!.element, { previewed: previewedCard === entry.card, kept: keep.includes(entry.id), unavailable: !!reasonFor(entry.id) }]">
+                                <button class="card-face" :disabled="locked || !!reasonFor(entry.id) || !run.compatible" :title="reasonFor(entry.id) || `點擊立即施放 ${entry.card!.name}`" @mouseenter="previewedCard = entry.card" @mouseleave="previewedCard = undefined" @focus="previewedCard = entry.card" @blur="previewedCard = undefined" @click="castCard(entry.id)">
                                     <span class="card-top"><b>{{ entry.card!.name }}</b><em>{{ entry.card!.element ? elementNames[entry.card!.element] + '系' : '無系' }}</em></span>
                                     <span class="card-cost">惡意 {{ entry.card!.malice_cost }}<template v-if="entry.card!.cooldown"> · 冷卻 {{ entry.card!.cooldown }}</template></span>
                                     <span class="card-text">{{ entry.card!.text }}</span>
@@ -335,21 +336,18 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                                     <span v-if="reasonFor(entry.id)" class="card-block">{{ reasonFor(entry.id) }}</span>
                                 </button>
                                 <div class="card-tools">
-                                    <button :disabled="locked || selected === entry.id || (!keep.includes(entry.id) && !canKeepMore)" :aria-pressed="keep.includes(entry.id)" @click="toggleKeep(entry.id)">{{ keep.includes(entry.id) ? '已留牌' : '留到下回合' }}</button>
+                                    <button :disabled="locked || (!keep.includes(entry.id) && !canKeepMore)" :aria-pressed="keep.includes(entry.id)" @click="toggleKeep(entry.id)">{{ keep.includes(entry.id) ? '已留牌' : '留到下回合' }}</button>
                                     <button :disabled="locked || !!swapChoice(entry.id)?.reason" @click="swap(entry.id)">{{ state.swap_used ? '已換過' : '換這張' }}</button>
                                 </div>
                             </li>
                         </ul>
-                        <div class="confirm-bar">
-                            <div class="chosen-detail">
-                                <template v-if="selectedCard"><b>{{ selectedCard.name }}</b><p>{{ selectedCard.role }}</p><small>基礎衝擊 {{ selectedCard.base_impact }} · 防線 {{ selectedCard.defense_delta }}｜{{ noteFor(selectedCard) }}<br>實際戰果由伺服器依防線、抗性、護盾與情境結算。</small></template>
-                                <template v-else><b>先選一張牌</b><p>點選手牌或右邊的固定行動，再按確認出牌。滑過或點選都不會直接出牌。</p></template>
-                            </div>
-                            <button class="primary cast" :disabled="locked || !selectedChoice || !!selectedChoice.reason || !run.compatible" @click="cast">{{ selectedCard ? `施放 ${selectedCard.name}` : '選擇一張牌' }}<template v-if="keep.length"> · 留 {{ keep.length }} 張</template> ↗</button>
+                        <div class="preview-bar" aria-live="polite">
+                            <template v-if="previewedCard"><b>{{ previewedCard.name }}</b><p>{{ previewedCard.role }}</p><small>基礎衝擊 {{ previewedCard.base_impact }} · 防線 {{ previewedCard.defense_delta }}｜{{ noteFor(previewedCard) }}<br>點擊立即施放；實際戰果由伺服器依防線、抗性、護盾與情境結算。</small></template>
+                            <template v-else><b>先留牌，再出手</b><p>先勾選最多 2 張要留到下一手的牌；移到卡牌上可預覽，點擊卡牌立即施放。</p></template>
                         </div>
                         <div class="fixed-actions">
                             <p class="eyebrow">手牌旁的固定行動 · 不佔手牌</p>
-                            <button v-for="card in fixedCards" :key="card.skill_id" :class="{ chosen: selectedFixed === card.skill_id, unavailable: !!fixedReason(card) }" :aria-pressed="selectedFixed === card.skill_id" :disabled="locked" @click="pickFixed(card.skill_id)"><b>{{ card.name }}</b><small>{{ fixedReason(card) || card.role }}</small></button>
+                            <button v-for="card in fixedCards" :key="card.skill_id" :class="{ unavailable: !!fixedReason(card) }" :disabled="locked || !!fixedReason(card) || !run.compatible" :title="fixedReason(card) || `點擊立即執行 ${card.name}`" @mouseenter="previewedCard = card" @mouseleave="previewedCard = undefined" @focus="previewedCard = card" @blur="previewedCard = undefined" @click="castFixed(card.skill_id)"><b>{{ card.name }}</b><small>{{ fixedReason(card) || `${card.role}，點擊立即執行` }}</small></button>
                         </div>
                     </template>
                     <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="intent in level?.forecast" :key="intent.scheduled_turn">{{ intent.description }}</li></ol></details>

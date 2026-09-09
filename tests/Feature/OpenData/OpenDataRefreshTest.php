@@ -9,6 +9,7 @@ use App\Services\OpenData\OpenDataRegistry;
 use App\Services\OpenData\Snapshot\SnapshotQuality;
 use App\Services\OpenData\SnapshotRepository;
 use App\Services\OpenData\SnapshotResolver;
+use Carbon\Carbon;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Response;
@@ -26,7 +27,15 @@ class OpenDataRefreshTest extends TestCase
     {
         parent::setUp();
 
+        Carbon::setTestNow('2026-09-08 02:00:00 UTC');
         Http::preventStrayRequests();
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
     }
 
     public function test_it_publishes_a_snapshot_and_marks_it_as_the_only_current_one(): void
