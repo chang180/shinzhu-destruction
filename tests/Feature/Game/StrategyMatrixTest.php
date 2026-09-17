@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Game;
 
+use App\Domain\Game\ActionRequest;
+use App\Domain\Game\ActionType;
 use App\Domain\Game\BattleEngine;
+use App\Domain\Game\BattleState;
 use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\Element;
 use App\Domain\Game\LevelRepository;
@@ -14,6 +17,8 @@ use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
 use App\Domain\Game\Simulation\Strategies\RandomStrategy;
 use App\Domain\Game\Simulation\Strategies\SingleElementStrategy;
 use App\Domain\Game\Simulation\Strategy;
+use Random\Engine\Xoshiro256StarStar;
+use Random\Randomizer;
 use Tests\TestCase;
 
 /**
@@ -27,7 +32,7 @@ use Tests\TestCase;
  */
 class StrategyMatrixTest extends TestCase
 {
-    private const SEEDS = 25;
+    private const SEEDS = 100;
 
     private function modifiers(float $value): ScenarioModifiers
     {
@@ -123,7 +128,7 @@ class StrategyMatrixTest extends TestCase
                 $rate = $this->winRate($levelId, $modifiers, new LegacyCycleStrategy, $label);
 
                 $this->assertLessThan(
-                    0.95,
+                    $levelId === 'empty-cup' ? 0.95 : 0.80,
                     $rate,
                     "舊版三系集印記再放終招的套路在 {$levelId}／{$label} 仍有 ".round($rate * 100).'% 勝率',
                 );
@@ -149,35 +154,85 @@ class StrategyMatrixTest extends TestCase
     public function test_at_least_two_different_strategies_can_clear_each_level(): void
     {
         foreach ($this->levelIds() as $levelId) {
-            $modifiers = $this->modifiers(0.0);
+            foreach ($this->scenarios() as $label => $modifiers) {
+                $greedy = $this->winRate($levelId, $modifiers, new GreedyStrategy($modifiers), $label);
+                $planner = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $label);
 
-            $greedy = $this->winRate($levelId, $modifiers, new GreedyStrategy($modifiers), 'mid');
-            $planner = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 'mid');
-
-            $this->assertGreaterThanOrEqual(0.70, $greedy, "{$levelId} 只剩一種可行策略");
-            $this->assertGreaterThanOrEqual(0.70, $planner, "{$levelId} 只剩一種可行策略");
+                $this->assertGreaterThanOrEqual(0.70, $greedy, "{$levelId}／{$label} 只剩一種可行策略");
+                $this->assertGreaterThanOrEqual(0.70, $planner, "{$levelId}／{$label} 只剩一種可行策略");
+            }
         }
     }
 
     public function test_the_two_clearing_strategies_are_not_the_same_line_of_play(): void
     {
-        $modifiers = $this->modifiers(0.0);
         $simulator = new BattleSimulator(app(BattleEngine::class));
-        $distinct = 0;
 
         foreach ($this->levelIds() as $levelId) {
             $level = app(LevelRepository::class)->get($levelId);
 
-            $greedy = $simulator->run($level, $modifiers, new GreedyStrategy($modifiers), 1, 'mid');
-            $planner = $simulator->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 1, 'mid');
+            foreach ($this->scenarios() as $label => $modifiers) {
+                $distinctWins = 0;
 
-            if (array_column($greedy->actions, 'skill_id') !== array_column($planner->actions, 'skill_id')) {
-                $distinct++;
+                for ($seed = 1; $seed <= self::SEEDS; $seed++) {
+                    $greedy = $simulator->run($level, $modifiers, new GreedyStrategy($modifiers), $seed, $label);
+                    $planner = $simulator->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $seed, $label);
+
+                    if ($greedy->won() && $planner->won()
+                        && array_column($greedy->actions, 'skill_id') !== array_column($planner->actions, 'skill_id')) {
+                        $distinctWins++;
+                    }
+                }
+
+                // 必須在同一情境、同一發牌 seed 下以不同招式序列各自勝利，
+                // 不能用另一關的差異或一條失敗路線充當兩種可行打法。
+                $this->assertGreaterThan(0, $distinctWins, "{$levelId}／{$label} 沒有兩條不同的通關路線");
             }
         }
+    }
 
-        // 兩種策略若在每一關都打出同一串行動，那就只是同一條路線的兩個名字。
-        $this->assertGreaterThan(0, $distinct, '兩種通關策略的行動序列完全相同');
+    public function test_strategy_decisions_do_not_depend_on_hidden_draw_order_or_seed(): void
+    {
+        $engine = app(BattleEngine::class);
+
+        foreach ($this->levelIds() as $levelId) {
+            $level = app(LevelRepository::class)->get($levelId);
+
+            foreach ($this->scenarios() as $label => $modifiers) {
+                foreach ([new RandomStrategy, new SingleElementStrategy(Element::Water), new LegacyCycleStrategy,
+                    new GreedyStrategy($modifiers), new PlannerStrategy($modifiers, app(CardCatalog::class))] as $strategy) {
+                    for ($seed = 1; $seed <= 5; $seed++) {
+                        $state = $engine->start($level, $seed);
+
+                        while (! $state->outcome->isFinished()) {
+                            if ($state->turnPhase === BattleState::PHASE_AWAITING_REVEAL) {
+                                $state = $engine->apply($state, new ActionRequest('reveal', $state->version, ActionType::Reveal), $level, $modifiers)->state;
+                            }
+
+                            $alternate = $state->copy();
+                            $alternate->drawPile = array_reverse($state->drawPile);
+                            $alternate->deckSeed = $seed + 1000;
+                            $this->assertSame($state->toPublicArray(), $alternate->toPublicArray());
+                            $randomSeed = hash('sha256', "{$seed}:{$state->turn}", true);
+
+                            $choice = $strategy->choose($state, $engine, $level, new Randomizer(new Xoshiro256StarStar($randomSeed)));
+                            $alternative = $strategy->choose($alternate, $engine, $level, new Randomizer(new Xoshiro256StarStar($randomSeed)));
+
+                            $this->assertSame($choice, $alternative, "{$strategy->name()} 在 {$levelId}／{$label}／seed {$seed}／回合 {$state->turn} 依賴未公開資訊");
+                            $this->assertNotNull($choice);
+                            $state = $engine->apply($state, new ActionRequest(
+                                actionId: 'play',
+                                expectedVersion: $state->version,
+                                type: ActionType::from($choice['type']),
+                                cardId: $choice['card_id'] ?? null,
+                                fixedSkillId: $choice['fixed'] ?? null,
+                                keep: $choice['keep'] ?? [],
+                            ), $level, $modifiers)->state;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public function test_levels_whose_balance_is_not_verified_yet_are_marked_unavailable(): void

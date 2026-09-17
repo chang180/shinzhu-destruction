@@ -226,6 +226,18 @@ final class BattleState
      */
     public static function fromArray(array $state): self
     {
+        // 1.0.0 存檔沒有牌組；僅補讀取投影，不生成新牌序或改寫舊局。
+        // 是否可繼續結算仍由 RunService 的 rules_version 檢查決定。
+        if (! array_key_exists('deck', $state)) {
+            $state += [
+                'deck' => [], 'hand' => [], 'draw_pile' => [], 'discard_pile' => [],
+                'hand_size' => 0, 'max_keep' => 0,
+                'turn_phase' => self::PHASE_AWAITING_REVEAL,
+                'deadline_at' => null, 'swap_used' => false,
+                'shuffle_count' => 0, 'timeouts' => 0, 'deck_seed' => 0,
+            ];
+        }
+
         return new self(
             $state['turn'],
             $state['max_turns'],
