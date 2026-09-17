@@ -22,35 +22,36 @@
 
 ## 可直接複製的派工文字
 
-目前 P00、P01、P02 已完成，P03 與 P04 已交付待驗收。P04 交付首關的限時手牌、留牌／換牌、30 秒窗口與不限時練習、卡牌主畫面及五關路線契約；戰鬥進場及每次演出後自動發牌，卡牌以 hover／focus 預覽、單擊立即施放，規則仍為 `rules_version 2.0.0`。**第 2～5 關 `available = false`，內容與平衡屬 P05**。桌機與 390×844 響應式瀏覽器證據已補；P04 尚缺完整真人試玩、操作錄影與手機實機確認。
+目前 P00～P02 已完成，P03、P04、P05 已交付待驗收。**P05 交付了五關的完整內容**：第 2～5 關的城市機制、數值與牌組，第 2、4 關後的牌組獎勵（兩選一替換，牌組維持 15 張），第 3 關的主線收手結局與進階入口，以及第 5 關的進階終幕。規則升至 `rules_version 3.0.0`——護盾只吸收同系攻擊、第 4 關護盾鏡射玩家上一次進攻的系別、關卡可再設情境修正上限。五關的 `available` 都是在通過 100 seed 模擬門檻後才打開的（矩陣見 [BALANCE.md §7.0](BALANCE.md)）。
+
+**尚未做的事**：3.0.0 的真人試玩、時長紀錄與操作錄影；手機實機；獎勵後的牌組未單獨掃 seed；素材仍沿用第 1 關的圖，四張新牌與後四關場景沒有卡圖（屬 P06）。
 
 每次派工仍從本文件開始，再依指定階段讀取開發計畫、狀態、相關規格及上一階段報告。不要只把「繼續開發」交給 AI，必須在派工文字中寫明階段代號與交付物。
 
-補完 P04 剩餘驗收的派工：
+補完 P04／P05 真人驗收的派工：
 
 ```text
-請補齊 docs/phase-reports/P04.md「尚未完成或未驗證」列出的項目：
-完整真人試玩與時長紀錄、操作錄影，以及手機實機音效與捲動手感確認。
+請補齊 docs/phase-reports/P04.md 與 P05.md「尚未完成或未驗證」列出的真人項目：
+一次從第 1 關打到第 3 關（或第 5 關）的完整真人試玩與時長紀錄、操作錄影，
+以及手機實機的音效與捲動手感確認；獎勵頁與兩個終幕頁也要看手機 viewport。
 不要改動規則數值；若試玩結果要求調整，先記錄卡點再依 BALANCE.md 的升版規定處理。
 ```
 
-接續 P05 的派工：
+接續 P06 的派工：
 
 ```text
-請依 docs/DEVELOPMENT-PLAN.md 與 docs/P04-REVISION-PLAN.md 執行 P05 五關戰役。
-P04 已交付第 1 關與共用的手牌／計時契約（rules_version 2.0.0），
-第 2～5 關已在 config/game.php 佔住穩定 ID、順序、依賴與唯一新增機制，available = false。
-本階段落實第 2～5 關的城市機制、數值與牌組，第 3 關收手結局與進階終幕入口，
-以及第 2、4 關後的牌組獎勵；每一關通過模擬驗收後才可把 available 改成 true。
+請依 docs/DEVELOPMENT-PLAN.md 執行 P06 正式視聽。
+P05 已交付五關完整內容與 rules_version 3.0.0，機制與數值已鎖定，
+素材換上去不需要改任何規則。需要的清單可由 config/game.php 取得：
+15 張牌（含 P05 獎勵的四張新牌）、5 個關卡場景、5 門禁術巨物、2 種戰役終幕。
 先讀 README.md、docs/DEVELOPMENT-STATUS.md、docs/AI-HANDOFF.md、
-docs/TECHNICAL-SPEC.md、docs/DATA-CONTRACT.md、docs/BALANCE.md、
-docs/P04-REVISION-PLAN.md 與 docs/phase-reports/P04.md，
-並讀 .ai/rules/index.md 指到的規則檔，檢查目前工作樹並保留既有修改。
-新增城市機制要升 rules_version；不得沿用 1.0.0 或第 1 關的勝率當成新關卡的平衡證據。
-前置條件未滿足時，指出確切缺項；可完成的獨立工作繼續進行。
-必須實際使用已安裝的 Laravel Boost，遵循生成的開發指示；
-不得以安裝說明或 composer.json 條目代替完整安裝驗證。
-交付本階段程式、必要測試與驗收證據，建立 docs/phase-reports/P05.md，
+docs/ART-AUDIO-SPEC.md、docs/ASSET-SOURCES.md、docs/BALANCE.md 與
+docs/phase-reports/P05.md，並讀 .ai/rules/index.md 指到的規則檔，
+檢查目前工作樹並保留既有修改。
+不得把圖片需求降級成 emoji、純 CSS 或文字占位，也不得宣稱生成完成但沒有檔案；
+素材要附來源、授權與實際載入證據，桌機與手機都要可讀。
+沒有生成工具時可以完成其他工作，但素材交付保持未完成並交接實際缺項。
+交付本階段程式、必要測試與驗收證據，建立 docs/phase-reports/P06.md，
 更新進度表及受影響規格。報告已完成、未驗證、限制與下一階段入口，不自動展開後續階段。
 ```
 
@@ -96,6 +97,6 @@ docs/P04-REVISION-PLAN.md 與 docs/phase-reports/P04.md，
 
 ## 文件維護原則
 
-資料欄位以 [`DATA-CONTRACT.md`](DATA-CONTRACT.md) 為準（P02 已建立），遊戲數值以 [`BALANCE.md`](BALANCE.md) 為準（P03 建立 `1.0.0`，P04 升至 `rules_version 2.0.0`），素材以 manifest 為準；尚未建立的檔案在對應階段才產生。專案內的既定決策與陷阱記在 `.ai/rules/`，由 `.ai/rules/index.md` 對應檔案路徑。若本組初稿與實測有差異，更新原規格並留下決策紀錄，不在多份文件各維護一組矛盾數值。
+資料欄位以 [`DATA-CONTRACT.md`](DATA-CONTRACT.md) 為準（P02 已建立），遊戲數值以 [`BALANCE.md`](BALANCE.md) 為準（P03 建立 `1.0.0`，P04 升至 `2.0.0`，P05 升至 `rules_version 3.0.0`），素材以 manifest 為準；尚未建立的檔案在對應階段才產生。專案內的既定決策與陷阱記在 `.ai/rules/`，由 `.ai/rules/index.md` 對應檔案路徑。若本組初稿與實測有差異，更新原規格並留下決策紀錄，不在多份文件各維護一組矛盾數值。
 
 報告只收錄可公開且去除秘密的證據。README 已說明 `docs/` 是 Pages 發布來源，私密環境值不可放入階段報告。

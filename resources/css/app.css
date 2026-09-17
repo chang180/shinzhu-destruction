@@ -86,3 +86,29 @@
     .preview-bar{padding:14px;min-height:0}
     .reveal-gate{padding:34px 16px}
 }
+
+/* P05：關卡選擇、牌組獎勵與兩種戰役終幕。 */
+.route li button{margin-top:10px;padding:8px 14px;font-size:.72rem}
+.campaign-state{border-top:1px solid var(--line);padding-top:18px;margin-top:4px}
+.campaign-state .titles{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.campaign-state .tag{font-size:.68rem;color:var(--copper);border:1px solid var(--copper);padding:4px 10px}
+.campaign-state em{font-style:normal;font-size:.7rem;color:var(--muted)}
+.campaign-state .primary{margin-bottom:16px;font-size:.8rem;gap:18px}
+.deck-list{list-style:none;padding:0;margin:14px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
+.deck-list li{background:#211b2b;padding:10px 13px}
+.deck-list b{display:block;font-size:.8rem}
+.deck-list small{font-size:.65rem}
+.reward{padding-top:50px;padding-bottom:40px}
+.reward h1{font-size:clamp(2.2rem,4vw,3.4rem);margin-bottom:18px}
+.reward-options{list-style:none;padding:0;margin:26px 0;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.reward-options li{border:1px solid var(--line);background:linear-gradient(#241d30,#1c1726);padding:22px}
+.reward-options b{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:'Songti TC','Noto Serif TC',serif;font-size:1.25rem;color:var(--copper);margin-bottom:12px}
+.reward-options em{font-style:normal;font-size:.66rem;color:var(--water);border:1px solid var(--water);padding:3px 8px}
+.reward-options p{font-size:.85rem}
+.reward-options .cost{font-size:.76rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.reward-options button{width:100%;justify-content:center;gap:0}
+.ending{padding-top:36px;padding-bottom:30px;border-top:1px solid var(--line)}
+.ending h2{font-size:clamp(1.9rem,3.4vw,2.9rem);margin-bottom:16px}
+.ending.main h2,.ending.advanced h2{color:var(--copper)}
+.ending .report-actions{margin:20px 0 14px}
+@media(max-width:760px){.reward-options,.deck-list{grid-template-columns:1fr}.reward-options li{padding:18px}}

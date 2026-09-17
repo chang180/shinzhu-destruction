@@ -33,7 +33,7 @@ class CampaignProgress
         $firstLevel = $this->levels->all()[array_key_first($this->levels->all())];
 
         if ($campaign === null) {
-            return [
+            return $this->finales() + [
                 'milestones' => [],
                 'titles' => [],
                 'deck' => $firstLevel->deck,
@@ -48,7 +48,7 @@ class CampaignProgress
         $milestones = $campaign->milestones();
         $titles = (array) config('game.campaign.titles');
 
-        return [
+        return $this->finales() + [
             'milestones' => $milestones,
             'titles' => array_intersect_key($titles, array_flip($milestones)),
             'deck' => $this->decks->compose($firstLevel, $campaign),
@@ -59,6 +59,19 @@ class CampaignProgress
             'main_cleared' => in_array(self::MAIN_CLEARED, $milestones, true),
             'stood_down' => in_array(self::STOOD_DOWN, $milestones, true),
             'advanced_cleared' => in_array(self::ADVANCED_CLEARED, $milestones, true),
+        ];
+    }
+
+    /**
+     * 兩個終幕的關卡代碼。前端據此決定通關後要不要進終幕，不在畫面上硬寫關卡 ID。
+     *
+     * @return array<string, string>
+     */
+    private function finales(): array
+    {
+        return [
+            'main_finale' => (string) config('game.campaign.main_finale'),
+            'advanced_finale' => (string) config('game.campaign.advanced_finale'),
         ];
     }
 

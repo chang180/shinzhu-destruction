@@ -29,7 +29,49 @@ export interface Run {
     data_notes: Record<Element, DataNote>; history: History[]; server_time: string;
 }
 export interface Skill { id: string; kind: string; element: Element | null; malice_cost: number; cooldown: number; base_impact: number; defense_delta: number; required_sigils: number }
-export interface Level { level_id: string; sequence: number; tier: 'main' | 'advanced'; available: boolean; name: string; subtitle: string; mechanic: string; apostle: string; max_turns: number; requires: string | null; unlocked: boolean; practice_unlocked: boolean; deck_size: number; initial_defenses: Record<Element, number>; forecast: Intent[] }
+export interface Briefing { headline: string; quote: string; quote_note: string; lessons: string[] }
+export interface Level { level_id: string; sequence: number; tier: 'main' | 'advanced'; available: boolean; name: string; subtitle: string; mechanic: string; lesson: string; briefing: Briefing | null; apostle: string; max_turns: number; requires: string | null; unlocked: boolean; practice_unlocked: boolean; best: { turns: number; run_id: string } | null; practice_best: { turns: number; run_id: string } | null; deck_size: number; initial_defenses: Record<Element, number>; reward: { options: string[] } | null; forecast: Intent[] }
+export interface RewardOption { key: string; style: string; add: Card; remove: Card; remove_remaining: number }
+export interface RewardOffer { level_id: string; level_name: string; prompt: string; options: RewardOption[]; chosen: string | null }
+export interface Campaign {
+    milestones: string[]; titles: Record<string, string>; deck: Record<string, number>; deck_choices: Record<string, string>;
+    pending_reward: RewardOffer | null; main_cleared: boolean; stood_down: boolean; advanced_cleared: boolean;
+    main_finale: string; advanced_finale: string;
+}
+/**
+ * 這個模式下這一關能不能開。available 是「內容做完了沒有」，unlocked 是玩家進度，
+ * 兩者都成立才可以開局；練習軌有自己的解鎖狀態。
+ */
+export function canPlay(level: Level, mode: RunMode): boolean {
+    return level.available && (mode === 'practice' ? level.practice_unlocked : level.unlocked);
+}
+export function levelStatusText(level: Level, mode: RunMode): string {
+    if (!level.available) return '內容製作中';
+    if (!canPlay(level, mode)) return '先通過前一關';
+    const best = mode === 'practice' ? level.practice_best : level.best;
+    return best ? `最佳 ${best.turns} 回合` : `${level.max_turns} 回合 · 牌組 ${level.deck_size} 張`;
+}
+/** 下一關：還沒通關的第一個可玩關卡；全通了就回最後一個可玩的關卡。 */
+export function nextPlayableLevel(levels: Level[], mode: RunMode): Level | undefined {
+    const playable = levels.filter(level => canPlay(level, mode));
+    return playable.find(level => !(mode === 'practice' ? level.practice_best : level.best)) ?? playable[playable.length - 1];
+}
+export type EndingKind = 'main' | 'advanced' | null;
+/**
+ * 這一局的勝利要不要接戰役終幕。主線最後一關通關＝完成主線目標，玩家可以收手
+ * 結束；進階最後一關通關＝進階終幕。收手之後再打主線關卡不會重播終幕。
+ */
+export function endingFor(run: Pick<Run, 'outcome' | 'level_id'>, campaign: Campaign | undefined, mainFinale: string, advancedFinale: string): EndingKind {
+    if (!campaign || run.outcome !== 'player_victory') return null;
+    if (run.level_id === advancedFinale && campaign.advanced_cleared) return 'advanced';
+    if (run.level_id === mainFinale && campaign.main_cleared && !campaign.stood_down) return 'main';
+    return null;
+}
+export function deckSummary(deck: Record<string, number>, cards: Record<string, Card>): { name: string; count: number; role: string }[] {
+    return Object.entries(deck)
+        .filter(([, count]) => count > 0)
+        .map(([type, count]) => ({ name: cards[type]?.name ?? type, count, role: cards[type]?.role ?? '' }));
+}
 export interface SavedRun { run_id: string; level_id: string; mode: RunMode; turn: number; outcome: Outcome }
 export interface Settlement { events: BattleEvent[]; version: number; state: BattleState; replayed: boolean; server_time: string }
 export const elements: Element[] = ['water', 'heat', 'land'];
@@ -48,6 +90,10 @@ export function shouldAutoReveal(run: Pick<Run, 'outcome' | 'compatible' | 'stat
 }
 export function keptCardsForPlay(keptCards: string[], playedCardId: string): string[] {
     return keptCards.filter(cardId => cardId !== playedCardId);
+}
+/** 簡報標題是設定檔裡的兩行字；不在前端硬寫任何一關的文案。 */
+export function briefingLines(level: Level | undefined): string[] {
+    return (level?.briefing?.headline ?? '').split('\n').filter(line => line.length > 0);
 }
 export function soundStatusText(muted: boolean): string {
     return muted ? '目前靜音' : '目前有聲';

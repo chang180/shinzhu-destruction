@@ -37,3 +37,12 @@ BattleState::toArray() 含抽牌堆順序，是完整存檔，只給資料庫與
 卡面成本與冷卻一律從技能表讀，牌型（config/game.php 的 cards）不另存一份數值——換皮不能改動平衡。
 
 關卡的 available 是「這一關的內容做完了沒有」，和玩家解鎖（campaigns.unlocked）是兩回事。只有通過模擬驗收的關卡才能把 available 打開。
+
+## 3.0.0 的城市規則：同系護盾、鏡射護盾、逐關修正上限
+rules_version 目前是 3.0.0（P05 五關戰役）。三條和 2.0.0 不同的規則：
+
+1. 護盾只吸收同系的攻擊。終招沒有系別，任何一道盾都會吸收它——不設例外，否則終招會變成無視所有城市防禦的萬用解答。這條是第 2 關「換系繞盾」成立的前提。
+2. 第 4 關（mirror-shade）的 adaptive_shield：沒有排定行程且回合 >= from_turn 的回合，城市架起玩家上一次進攻系別的同系護盾。它讀的是局面裡的 lastAttackElement，沒有亂數；回合表寫死的預告優先。關卡列表的靜態 forecast 在還沒有人出手時只說明規則，不假裝城市已經選好系別。
+3. 關卡可以設 modifier_cap，把每一系的情境修正再夾一次（第 5 關 0.08）。三系同時採用資料時不夾，low/high 的資料情境會直接決定勝負，而玩家選不了資料。
+
+關卡的 available 只能在該關通過 tests/Feature/Game/StrategyMatrixTest.php 的門檻後才打開：planner/greedy >= 70%、planner - random >= 25 點、legacy-cycle < 80%（第 1 關 < 95%）、單系連按 < 80%、非法選擇 0。數值與矩陣以 docs/BALANCE.md 為準。

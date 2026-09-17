@@ -31,3 +31,10 @@ ActionRequest 的指紋不含 deadlineAt：那是伺服器決定的，列進去�
 唯讀端點不得收斂逾時、不得建立戰役。逾時要靠客戶端請求或下一次有效寫入來結算，Hostinger 不新增常駐 worker。
 
 練習模式只關掉截止時間，其餘規則完全相同；解鎖與最佳表現寫在 campaigns 的 practice_unlocked／practice_results，練習通關不得寫進挑戰軌。
+
+## 牌組獎勵與戰役里程碑只認限時挑戰
+牌組獎勵是戰役層級的選擇（campaigns.deck_choices），但牌組組成在開局時就凍結進 runs.deck，retry 也沿用同一副——否則同情境重試與重播會抽到不同的牌。DeckComposer::compose() 是唯一的組牌來源，獎勵一律是「替換」：加一張就要拿掉一張，牌組維持 15 張。
+
+只有 challenge 模式通關才推進戰役：pending_reward 與 milestones（main_cleared／stood_down／advanced_cleared）都只寫挑戰軌，練習通關不給獎勵也不給里程碑，和 practice_unlocked／practice_results 的分軌規則一致。
+
+收手（stand-down）是結局不是失敗：記 stood_down 之後進階關卡仍然解鎖，進階失敗也不撤銷主線通關與既有 best_results。

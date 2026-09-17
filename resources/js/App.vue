@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents } from './game';
-import type { BattleEvent, Card, Choice, Level, Run, RunMode, SavedRun, Settlement } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary } from './game';
+import type { BattleEvent, Campaign, Card, Choice, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
-const page = ref<'lobby' | 'briefing' | 'battle' | 'report'>('lobby');
+const page = ref<'lobby' | 'briefing' | 'battle' | 'report' | 'reward'>('lobby');
 const levels = ref<Level[]>([]);
+const campaign = ref<Campaign>();
+const cards = ref<Record<string, Card>>({});
 const decisionSeconds = ref(30);
 const savedRuns = ref<SavedRun[]>([]);
 const run = ref<Run>();
@@ -45,7 +47,11 @@ const state = computed(() => run.value?.state);
 const level = computed(() => levels.value.find(l => l.level_id === run.value?.level_id) ?? levels.value[0]);
 const mainLevels = computed(() => levels.value.filter(l => l.tier === 'main'));
 const advancedLevels = computed(() => levels.value.filter(l => l.tier === 'advanced'));
-const firstLevel = computed(() => levels.value.find(l => l.available));
+const nextLevel = computed(() => nextPlayableLevel(levels.value, mode.value));
+const ending = computed(() => run.value ? endingFor(run.value, campaign.value, campaign.value?.main_finale ?? '', campaign.value?.advanced_finale ?? '') : null);
+const reward = computed(() => campaign.value?.pending_reward ?? null);
+const currentDeck = computed(() => deckSummary(campaign.value?.deck ?? {}, cards.value));
+const advancedEntry = computed(() => levels.value.find(l => l.tier === 'advanced' && canPlay(l, mode.value)));
 const locked = computed(() => busy.value || playing.value || uncertain.value);
 const revealed = computed(() => state.value?.turn_phase === 'decision');
 const remaining = computed(() => secondsLeft(state.value?.deadline_at ?? null, clockOffset.value, tick.value));
@@ -111,9 +117,11 @@ async function loadLobby(): Promise<void> {
     busy.value = true; error.value = ''; notice.value = '';
     try {
         const [catalog, saves] = await Promise.all([
-            api<{ levels: Level[]; decision_seconds: number }>('/levels'), api<{ data: SavedRun[] }>('/runs'),
+            api<{ levels: Level[]; decision_seconds: number; campaign: Campaign; cards: Record<string, Card> }>('/levels'),
+            api<{ data: SavedRun[] }>('/runs'),
         ]);
         levels.value = catalog.levels; decisionSeconds.value = catalog.decision_seconds;
+        campaign.value = catalog.campaign; cards.value = catalog.cards;
         savedRuns.value = saves.data; page.value = 'lobby';
         if (pending.value) {
             try {
@@ -144,18 +152,44 @@ async function openRun(id: string): Promise<void> {
     catch (e) { handleError(e); } finally { busy.value = false; }
     if (opened && shouldAutoReveal(opened)) await reveal();
 }
-async function start(retry = false): Promise<void> {
+async function start(retry = false, levelId?: string): Promise<void> {
     if (locked.value) return;
+    const target = levelId ?? nextLevel.value?.level_id;
+    if (!retry && !target) return;
     busy.value = true; error.value = ''; notice.value = '';
     await audio.unlock();
     try {
         const result = await api<{ data: Run }>(
             retry ? `/runs/${run.value!.run_id}/retry` : '/runs',
-            retry ? {} : { level_id: firstLevel.value?.level_id, mode: mode.value },
+            retry ? {} : { level_id: target, mode: mode.value },
         );
         showRun(result.data, true);
         for (const name of ['city', 'apostle', 'yan-chen', 'victory', 'water', 'heat', 'land']) { const image = new Image(); image.src = asset(name); }
     } catch (e) { handleError(e); } finally { busy.value = false; }
+}
+/** 挑一張獎勵牌。它只影響**下一局**：已經開始的那一局在開局時就凍結了牌組。 */
+async function chooseReward(levelId: string, option: string): Promise<void> {
+    if (locked.value) return;
+    busy.value = true; error.value = '';
+    try {
+        campaign.value = (await api<{ data: Campaign }>('/campaign/reward', { level_id: levelId, option })).data;
+        notice.value = '新牌已換進牌組，下一局生效。';
+        page.value = 'lobby'; focusHeading();
+    } catch (e) { handleError(e); } finally { busy.value = false; }
+}
+/** 收下戰果，結束本次毀滅計畫。進階畢業考仍然留著，日後可以回來挑戰。 */
+async function standDown(): Promise<void> {
+    if (locked.value) return;
+    busy.value = true; error.value = '';
+    try {
+        campaign.value = (await api<{ data: Campaign }>('/campaign/stand-down', {})).data;
+        notice.value = '毀滅計畫已結案。進階畢業考隨時可以回來挑戰。';
+        page.value = 'lobby'; focusHeading();
+    } catch (e) { handleError(e); } finally { busy.value = false; }
+}
+async function openReward(): Promise<void> {
+    if (locked.value || !reward.value) return;
+    page.value = 'reward'; focusHeading();
 }
 async function enterBattle(): Promise<void> {
     await audio.unlock(); page.value = 'battle'; focusHeading();
@@ -197,6 +231,10 @@ async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, k
         const latest = (await api<{ data: Run }>(`/runs/${run.value.run_id}`)).data;
         pending.clear(); uncertain.value = false;
         if (input.type === 'play' || input.type === 'timeout') await present(response.data.events);
+        if (latest.outcome !== 'in_progress') {
+            // 通關才會有新的里程碑與牌組獎勵；戰報要顯示它們，所以這裡重新取一次戰役狀態。
+            try { campaign.value = (await api<{ data: Campaign }>('/campaign')).data; } catch { /* 戰報照樣顯示。 */ }
+        }
         showRun(latest);
         automaticallyReveal = (input.type === 'play' || input.type === 'timeout') && shouldAutoReveal(latest);
         if (latest.version > response.data.version) notice.value = '另一分頁已繼續操作，現在顯示最新局面。';
@@ -282,27 +320,60 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                             <label :class="{ on: mode === 'challenge' }"><input v-model="mode" type="radio" value="challenge"><b>限時挑戰</b><small>每回合 {{ decisionSeconds }} 秒決策；逾時只執行城市回應。</small></label>
                             <label :class="{ on: mode === 'practice' }"><input v-model="mode" type="radio" value="practice"><b>不限時練習</b><small>同一套牌組與城市規則，只關掉截止時間。成績分開記錄。</small></label>
                         </fieldset>
-                        <button class="primary" :disabled="locked || !firstLevel" @click="start()">簽下入學計畫 <span>↗</span></button><p class="small">單人牌組策略 · 手牌 5 張 · {{ soundStatusText(muted) }}（可於右上角調整）</p></div>
+                        <button class="primary" :disabled="locked || !nextLevel" @click="start()">{{ nextLevel && nextLevel.sequence > 1 ? `繼續計畫 · ${nextLevel.name}` : '簽下入學計畫' }} <span>↗</span></button><p class="small">單人牌組策略 · 手牌 5 張 · {{ soundStatusText(muted) }}（可於右上角調整）</p></div>
                     <span class="hero-caption">虛構城市演習 / 非真實災害預測</span>
                 </section>
                 <section class="lobby-bottom"><div><p class="eyebrow">CAMPAIGN · 主線 3 關 / 進階 2 關</p><h2 tabindex="-1">五門禁術</h2>
                     <ol class="route">
-                        <li v-for="l in mainLevels" :key="l.level_id" :class="{ ready: l.available }"><b>{{ l.sequence }}. {{ l.name }}</b><span>{{ l.mechanic }}</span><small>{{ l.available ? `${l.max_turns} 回合 · 牌組 ${l.deck_size} 張` : '內容製作中（P05）' }}</small></li>
+                        <li v-for="l in mainLevels" :key="l.level_id" :class="{ ready: canPlay(l, mode) }"><b>{{ l.sequence }}. {{ l.name }}</b><span>{{ l.mechanic }}</span><small>{{ levelStatusText(l, mode) }}</small><button v-if="canPlay(l, mode)" :disabled="locked" @click="start(false, l.level_id)">{{ (mode === 'practice' ? l.practice_best : l.best) ? '再挑戰一次' : '開始這一關' }} ↗</button></li>
                     </ol>
                     <p class="eyebrow">進階畢業考 · 主線通關後解鎖</p>
                     <ol class="route advanced">
-                        <li v-for="l in advancedLevels" :key="l.level_id"><b>{{ l.sequence }}. {{ l.name }}</b><span>{{ l.mechanic }}</span><small>內容製作中（P05）</small></li>
+                        <li v-for="l in advancedLevels" :key="l.level_id" :class="{ ready: canPlay(l, mode) }"><b>{{ l.sequence }}. {{ l.name }}</b><span>{{ l.mechanic }}</span><small>{{ levelStatusText(l, mode) }}</small><button v-if="canPlay(l, mode)" :disabled="locked" @click="start(false, l.level_id)">{{ (mode === 'practice' ? l.practice_best : l.best) ? '再挑戰一次' : '開始這一關' }} ↗</button></li>
                     </ol>
                     <p class="small">第 3 關完成主線目標即可收下戰果結束；進階是選修，失敗不會撤銷主線通關。</p>
+                    <div v-if="campaign" class="campaign-state">
+                        <p v-if="campaign.milestones.length" class="titles"><span v-for="(title, key) in campaign.titles" :key="key" class="tag">{{ title }}</span><em v-if="campaign.stood_down">已收下戰果結案</em></p>
+                        <button v-if="reward" class="primary" :disabled="locked" @click="openReward">有一張新禁術等你挑選 · {{ reward.level_name }} ↗</button>
+                        <details><summary>目前牌組 · {{ Object.values(campaign.deck).reduce((sum, count) => sum + count, 0) }} 張</summary><ul class="deck-list"><li v-for="entry in currentDeck" :key="entry.name"><b>{{ entry.name }} ×{{ entry.count }}</b><small>{{ entry.role }}</small></li></ul><p class="small">牌組獎勵是替換不是增牌；每一局在開局時凍結牌組，之後挑的牌從下一局生效。</p></details>
+                    </div>
                 </div><div class="save-list"><p class="eyebrow">你的試煉紀錄 · 本瀏覽器</p><p v-if="!savedRuns.length">還沒有紀錄。從第一次大膽的決策開始。</p><button v-for="saved in savedRuns" :key="saved.run_id" :disabled="locked" @click="openRun(saved.run_id)"><span>{{ saved.outcome === 'in_progress' ? '繼續試煉' : saved.outcome === 'player_victory' ? '毀滅成功・查看戰報' : '城市守住・查看戰報' }}<small>{{ saved.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</small></span><small>第 {{ saved.turn }} 回合 ↗</small></button><p class="small">匿名紀錄依賴本瀏覽器 Cookie；清除後無法找回。</p></div></section>
+            </template>
+            <template v-else-if="page === 'reward' && reward">
+                <section class="content-width reward">
+                    <p class="eyebrow">DECK REWARD / {{ reward!.level_name }}</p>
+                    <h1 tabindex="-1">挑一張，換掉一張。</h1>
+                    <p class="lead">{{ reward!.prompt }}</p>
+                    <ul class="reward-options">
+                        <li v-for="option in reward!.options" :key="option.key">
+                            <b>{{ option.add.name }}<em>{{ option.style }}</em></b>
+                            <p>{{ option.add.text }}</p>
+                            <small>{{ option.add.role }}｜惡意 {{ option.add.malice_cost }}<template v-if="option.add.cooldown"> · 冷卻 {{ option.add.cooldown }}</template></small>
+                            <p class="cost">代價：換掉一張「{{ option.remove.name }}」，牌組裡還剩 {{ option.remove_remaining }} 張。</p>
+                            <button class="primary" :disabled="locked" @click="chooseReward(reward!.level_id, option.key)">選這一張</button>
+                        </li>
+                    </ul>
+                    <p class="small">牌組維持 15 張。挑過就不能重挑，新牌從下一局開始生效——已經開始的對局在開局時就凍結了牌組。</p>
+                    <div class="report-actions"><button :disabled="locked" @click="loadLobby">晚點再決定</button></div>
+                </section>
             </template>
             <template v-else-if="run && state">
                 <section v-if="page === 'briefing'" class="briefing content-width">
                     <div class="briefing-art"><img :src="asset('yan-chen')" alt="枯潮教授晏沉，身穿深紫學院長袍，平靜地端著一只空杯"><span>枯潮教授 / 晏沉</span></div>
-                    <div><p class="eyebrow">作戰簡報 · {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">讓城市<br>喊渴。</h1><blockquote class="professor-quote">「杯子空了，補水就好。城市空了呢？」<small>晏沉將空杯推到你面前。「這就是你今天的作業。」</small></blockquote><p class="lead">你有 {{ state.max_turns }} 回合、一副 {{ level?.deck_size }} 張的牌組。核心歸零便通關；回合用盡而城市仍站著，這次試煉就結束。</p><ol class="lesson"><li><b>每回合五張手牌，點一張立即施放。</b>{{ briefingTimingText(mode) }}</li><li><b>最多留 2 張。</b>先標記要留下的牌，再點另一張施放；留下的牌會佔住下一手的位置。另有每回合一次的免費換牌。</li><li><b>讀預告。</b>第 3、6 回合城市會修復核心；同系擾序牌可以取消它，首次打斷還會返還 2 點惡意。</li><li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，點擊同樣立即執行。</li></ol><button class="primary" :disabled="locked" @click="enterBattle">明白了，開始連續試煉 ↗</button><p class="small">本局情境與牌序已凍結。回學院後可繼續，不用一次打完。</p></div>
+                    <div><p class="eyebrow">作戰簡報 · 第 {{ level?.sequence }} 關 {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p>
+                        <h1 tabindex="-1"><template v-for="(line, index) in briefingLines(level)" :key="index">{{ line }}<br v-if="index < briefingLines(level).length - 1"></template></h1>
+                        <blockquote class="professor-quote">{{ level?.briefing?.quote }}<small>{{ level?.briefing?.quote_note }}</small></blockquote>
+                        <p class="lead">你有 {{ state.max_turns }} 回合、一副 {{ level?.deck_size }} 張的牌組。核心歸零便通關；回合用盡而城市仍站著，這次試煉就結束。</p>
+                        <ol class="lesson">
+                            <li><b>每回合五張手牌，點一張立即施放。</b>{{ briefingTimingText(mode) }}</li>
+                            <li><b>最多留 2 張。</b>先標記要留下的牌，再點另一張施放；留下的牌會佔住下一手的位置。另有每回合一次的免費換牌。</li>
+                            <li v-for="(lesson, index) in level?.briefing?.lessons ?? []" :key="index">{{ lesson }}</li>
+                            <li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，點擊同樣立即執行。</li>
+                        </ol>
+                        <button class="primary" :disabled="locked" @click="enterBattle">明白了，開始連續試煉 ↗</button><p class="small">本局情境與牌序已凍結。回學院後可繼續，不用一次打完。</p></div>
                 </section>
                 <section v-if="page === 'battle'" class="battle content-width">
-                    <div class="battle-heading"><div><p class="eyebrow">CHAPTER 01 / {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ level?.subtitle }}</h1></div>
+                    <div class="battle-heading"><div><p class="eyebrow">CHAPTER {{ String(level?.sequence ?? 1).padStart(2, '0') }} / {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ level?.subtitle }}</h1></div>
                         <div class="clock"><div class="turn"><strong>{{ state.turn.toString().padStart(2, '0') }}</strong><span>/ {{ state.max_turns }} 回合</span></div>
                             <div v-if="revealed && remaining !== null" class="countdown" :class="{ urgent }" role="timer" :aria-label="`本回合剩餘 ${remaining} 秒`"><strong>{{ remaining }}</strong><span>秒</span></div>
                             <div v-else-if="revealed" class="countdown practice"><strong>∞</strong><span>不限時</span></div>
@@ -353,7 +424,30 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="intent in level?.forecast" :key="intent.scheduled_turn">{{ intent.description }}</li></ol></details>
                 </section>
                 <section v-if="page === 'report'" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }"><img :src="asset(run.outcome === 'player_victory' ? 'victory' : 'city')" :alt="run.outcome === 'player_victory' ? '虛構城市化為懸浮陶片，金色光幕宣告枯潮試煉通關' : '守住的虛構城市'">
-                    <div><p class="eyebrow">ACADEMY FIELD REPORT / 第一關戰報 · {{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ run.outcome === 'player_victory' ? '毀滅成功。' : '城市守住了。' }}</h1><p class="lead">{{ run.outcome === 'player_victory' ? '第一門禁術・枯潮，修習通過。晏沉抬杯，向你致意。' : '本次試煉結束。把城市的回應，變成下一次的計畫。' }}</p><p>第 {{ state.turn }} 回合 · 核心剩餘 {{ state.core_resilience }} · 逾時 {{ state.timeouts }} 次</p><p>{{ run.outcome === 'player_victory' ? '晏沉的結語：「一座城市若把每次撐過去，都當成不必改變的理由，最後就會連下一次也沒有。」以下列出你如何使這一局走到終點。' : '晏沉收回空杯：「你讓它喘過氣了。看看是哪一回合。」以下依你的實際行動複盤，再挑一個決策重試。' }}</p><p v-if="run.mode === 'practice'" class="small">練習成績單獨記錄，不會登記為限時挑戰通關。</p><div class="report-actions"><button class="primary" :disabled="locked || !run.compatible" @click="start(true)">同情境再試一次 ↗</button><button :disabled="locked" @click="replay">重播本局演出</button><button :disabled="locked" @click="loadLobby">回學院</button></div></div>
+                    <div><p class="eyebrow">ACADEMY FIELD REPORT / 第 {{ level?.sequence }} 關戰報 · {{ level?.name }}｜{{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ run.outcome === 'player_victory' ? '毀滅成功。' : '城市守住了。' }}</h1><p class="lead">{{ run.outcome === 'player_victory' ? `第 ${level?.sequence} 門禁術・${level?.name}，修習通過。晏沉抬杯，向你致意。` : '本次試煉結束。把城市的回應，變成下一次的計畫。' }}</p><p>第 {{ state.turn }} 回合 · 核心剩餘 {{ state.core_resilience }} · 逾時 {{ state.timeouts }} 次</p><p>{{ run.outcome === 'player_victory' ? '晏沉的結語：「一座城市若把每次撐過去，都當成不必改變的理由，最後就會連下一次也沒有。」以下列出你如何使這一局走到終點。' : '晏沉收回空杯：「你讓它喘過氣了。看看是哪一回合。」以下依你的實際行動複盤，再挑一個決策重試。' }}</p><p v-if="run.mode === 'practice'" class="small">練習成績單獨記錄，不會登記為限時挑戰通關。</p><div class="report-actions"><button v-if="run.outcome === 'player_victory' && nextLevel && nextLevel.level_id !== run.level_id" class="primary" :disabled="locked" @click="start(false, nextLevel.level_id)">前往第 {{ nextLevel.sequence }} 關 · {{ nextLevel.name }} ↗</button><button :class="{ primary: run.outcome !== 'player_victory' }" :disabled="locked || !run.compatible" @click="start(true)">同情境再試一次 ↗</button><button :disabled="locked" @click="replay">重播本局演出</button><button :disabled="locked" @click="loadLobby">回學院</button></div></div>
+                </section>
+                <section v-if="page === 'report' && ending === 'main'" class="content-width ending main">
+                    <p class="eyebrow">CAMPAIGN ENDING / 主線目標達成</p>
+                    <h2 tabindex="-1">新竹縣模擬防線，失守。</h2>
+                    <p class="lead">晏沉在名冊上蓋下「{{ campaign?.titles?.main_cleared ?? '毀滅計畫通過' }}」。三門禁術修習完畢，這份計畫已經可以結案。</p>
+                    <p>接下來由你決定：收下戰果結束本次計畫，或接受進階畢業考——那是兩關更強的城市應變方案，失敗不會撤銷你剛剛拿到的通過。</p>
+                    <div class="report-actions">
+                        <button class="primary" :disabled="locked" @click="standDown">收下戰果，結束本次計畫</button>
+                        <button :disabled="locked || !advancedEntry" @click="advancedEntry && start(false, advancedEntry.level_id)">接受進階畢業考 · {{ advancedEntry?.name }} ↗</button>
+                    </div>
+                    <p class="small">收手之後仍可從同一份存檔回來挑戰進階；這不是失敗，也不是少拿一個結局。</p>
+                </section>
+                <section v-if="page === 'report' && ending === 'advanced'" class="content-width ending advanced">
+                    <p class="eyebrow">CAMPAIGN ENDING / 進階終幕</p>
+                    <h2 tabindex="-1">蓄夜之後，沒有下一個夜晚。</h2>
+                    <p class="lead">五門禁術全數修習完畢。晏沉把空杯倒扣在桌上：「{{ campaign?.titles?.advanced_cleared ?? '首席反派' }}。這個稱號，學院只發給把最後一次重整也打斷的人。」</p>
+                    <p class="small">虛構城市演習；真實的新竹縣不是這場推演的結論。</p>
+                </section>
+                <section v-if="page === 'report' && reward" class="content-width ending reward-hint">
+                    <p class="eyebrow">DECK REWARD / 牌組獎勵</p>
+                    <h2 tabindex="-1">有一張新禁術可以換進牌組。</h2>
+                    <p class="lead">{{ reward?.prompt }}</p>
+                    <div class="report-actions"><button class="primary" :disabled="locked" @click="openReward">去挑一張 ↗</button></div>
                 </section>
                 <section v-if="page === 'report'" class="content-width"><h2>關鍵回合 · 依實際紀錄</h2><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></section>
                 <section class="content-width data-panel"><details :open="page === 'briefing'"><summary>本局情境情報 · 開局後不變</summary><p class="small">以下是遊戲情境修正，不是災害預測。正值有利進攻；缺值採中性修正。標示「本關未採用」的系別不會在這一局生效。</p><div class="data-grid"><div v-for="element in elements" :key="element"><b>{{ elementNames[element] }}系 {{ run.data_notes[element]?.applied ? ((run.data_notes[element].modifier ?? 0) * 100).toFixed(1) + '%' : '本關未採用' }}</b><p>{{ run.data_notes[element]?.reason ?? run.scenario.reasons[element]?.message }}</p></div></div><div v-if="!Object.keys(run.snapshots).length" class="message">舊局未保存來源品質。保留原情境數值，不以今日資料冒充。</div><div v-for="(snapshot, source) in run.snapshots" :key="source" class="source-row"><b>{{ sourceNames[source] ?? source }}</b><span>{{ qualityNames[snapshot.quality] ?? snapshot.quality }}</span><small>觀測：{{ snapshot.observed_at ?? (snapshot.period ? Object.values(snapshot.period).join(' / ') : '無觀測日期') }}</small><p v-for="warning in snapshot.warnings" :key="warning" class="small">{{ warning }}</p></div></details></section>
@@ -362,6 +456,6 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
         </main>
         <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><a href="/docs/ASSET-SOURCES.md" @click.prevent="notice = '圖片：OpenAI image_gen 原創生成。音效：Kenney Impact Sounds（CC0）。完整來源與提示詞見專案 assets/p04-generation.json、assets/third-party/manifest.json。'">素材來源</a></footer>
         </div>
-        <div v-if="currentEvent" class="cutscene" :class="{ ultimate: currentEvent.cue_id.includes('ultimate'), triumph: currentEvent.after.outcome === 'player_victory' }" role="dialog" aria-modal="true" aria-label="戰鬥演出"><img :src="asset(cueImage(currentEvent))" :alt="eventText(currentEvent)"><div class="cutscene-copy"><p class="eyebrow">第 {{ currentEvent.turn }} 回合 / {{ currentEvent.target ? elementNames[currentEvent.target] + '系' : '枯潮・寶山空杯' }}</p><h2>{{ currentEvent.cue_id.includes('ultimate') && currentEvent.type !== 'outcome' ? '揮霍無度・新竹歸寂' : eventText(currentEvent) }}</h2><p v-if="currentEvent.type === 'outcome'">{{ currentEvent.after.outcome === 'player_victory' ? '枯潮修習通過。這一局，城市已無下一次。' : '城市尚存韌性。回到課堂，檢查這次的決策。' }}</p><p v-if="currentEvent.type === 'action_missed'">決策時間用完了。這一回合你沒有出手，城市照預告行動。</p><p v-if="currentEvent.type === 'impact'">護盾吸收 {{ currentEvent.delta.absorbed }} · 命中前有效防線 {{ currentEvent.delta.effective_defense }}</p></div><button @click="skip">跳過演出 · Esc</button></div>
+        <div v-if="currentEvent" class="cutscene" :class="{ ultimate: currentEvent.cue_id.includes('ultimate'), triumph: currentEvent.after.outcome === 'player_victory' }" role="dialog" aria-modal="true" aria-label="戰鬥演出"><img :src="asset(cueImage(currentEvent))" :alt="eventText(currentEvent)"><div class="cutscene-copy"><p class="eyebrow">第 {{ currentEvent.turn }} 回合 / {{ currentEvent.target ? elementNames[currentEvent.target] + '系' : (level?.name ?? '') }}</p><h2>{{ currentEvent.cue_id.includes('ultimate') && currentEvent.type !== 'outcome' ? '揮霍無度・新竹歸寂' : eventText(currentEvent) }}</h2><p v-if="currentEvent.type === 'outcome'">{{ currentEvent.after.outcome === 'player_victory' ? '枯潮修習通過。這一局，城市已無下一次。' : '城市尚存韌性。回到課堂，檢查這次的決策。' }}</p><p v-if="currentEvent.type === 'action_missed'">決策時間用完了。這一回合你沒有出手，城市照預告行動。</p><p v-if="currentEvent.type === 'impact'">護盾吸收 {{ currentEvent.delta.absorbed }} · 命中前有效防線 {{ currentEvent.delta.effective_defense }}</p></div><button @click="skip">跳過演出 · Esc</button></div>
     </div>
 </template>
