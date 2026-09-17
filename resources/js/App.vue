@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset } from './game';
 import type { BattleEvent, Campaign, Card, Choice, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
@@ -51,6 +51,7 @@ const nextLevel = computed(() => nextPlayableLevel(levels.value, mode.value));
 const ending = computed(() => run.value ? endingFor(run.value, campaign.value, campaign.value?.main_finale ?? '', campaign.value?.advanced_finale ?? '') : null);
 const reward = computed(() => campaign.value?.pending_reward ?? null);
 const currentDeck = computed(() => deckSummary(campaign.value?.deck ?? {}, cards.value));
+const advancedFinaleFrames = ['advanced-finale-1', 'advanced-finale-2', 'advanced-finale-3'];
 const advancedEntry = computed(() => levels.value.find(l => l.tier === 'advanced' && canPlay(l, mode.value)));
 const locked = computed(() => busy.value || playing.value || uncertain.value);
 const revealed = computed(() => state.value?.turn_phase === 'decision');
@@ -101,7 +102,8 @@ function toggleKeep(instanceId: string): void {
         ? keep.value.filter(id => id !== instanceId)
         : canKeepMore.value ? [...keep.value, instanceId] : keep.value;
 }
-function asset(name: string): string { return `/assets/p04/${name}.webp`; }
+const p06Assets = new Set(['yan-chen-stern', 'yan-chen-pleased', 'student-silhouette', 'apostle-empty-cup', 'apostle-noon-fold', 'apostle-meter-feast', 'apostle-mirror-shade', 'apostle-stored-night', 'scene-noon-fold', 'scene-meter-feast', 'scene-mirror-shade', 'scene-stored-night', 'skill-water-2', 'skill-heat-2', 'skill-land-2', 'skill-ultimate', 'defense-success-1', 'defense-success-2', 'victory-2', 'victory-3', 'advanced-finale-1', 'advanced-finale-2', 'advanced-finale-3']);
+function asset(name: string): string { return `/assets/${p06Assets.has(name) ? 'p06' : 'p04'}/${name}.webp`; }
 function focusHeading(): void { void nextTick(() => document.querySelector<HTMLElement>('main h1, main h2')?.focus()); }
 function showRun(value: Run, briefing = false): void {
     run.value = value;
@@ -164,7 +166,7 @@ async function start(retry = false, levelId?: string): Promise<void> {
             retry ? {} : { level_id: target, mode: mode.value },
         );
         showRun(result.data, true);
-        for (const name of ['city', 'apostle', 'yan-chen', 'victory', 'water', 'heat', 'land']) { const image = new Image(); image.src = asset(name); }
+        for (const name of [sceneAsset(result.data.level_id), apostleAsset(result.data.level_id), briefingAsset(result.data.level_id), reportAsset('player_victory', result.data.level_id), reportAsset('city_held', result.data.level_id), 'skill-water-2', 'skill-heat-2', 'skill-land-2', 'skill-ultimate']) { const image = new Image(); image.src = asset(name); }
     } catch (e) { handleError(e); } finally { busy.value = false; }
 }
 /** 挑一張獎勵牌。它只影響**下一局**：已經開始的那一局在開局時就凍結了牌組。 */
@@ -315,6 +317,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
             <template v-if="page === 'lobby'">
                 <section class="hero">
                     <img class="hero-art" :src="asset('hero')" alt="學員帶著巨型畢業計畫，望向懸浮的陶片學院與虛構城市" fetchpriority="high">
+                    <img class="hero-student" :src="asset('student-silhouette')" alt="" aria-hidden="true">
                     <div class="hero-copy"><p class="eyebrow">五門禁術 · 從第一堂課開始</p><h1 tabindex="-1">超認真<br>毀滅新竹<span>計畫。</span></h1><p class="lead">城市有它的修復計畫。<br>而你，是計畫之外的那一筆。</p>
                         <fieldset class="mode-picker"><legend>選擇模式</legend>
                             <label :class="{ on: mode === 'challenge' }"><input v-model="mode" type="radio" value="challenge"><b>限時挑戰</b><small>每回合 {{ decisionSeconds }} 秒決策；逾時只執行城市回應。</small></label>
@@ -359,7 +362,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
             </template>
             <template v-else-if="run && state">
                 <section v-if="page === 'briefing'" class="briefing content-width">
-                    <div class="briefing-art"><img :src="asset('yan-chen')" alt="枯潮教授晏沉，身穿深紫學院長袍，平靜地端著一只空杯"><span>枯潮教授 / 晏沉</span></div>
+                    <div class="briefing-art"><img :src="asset(briefingAsset(run.level_id))" alt="枯潮教授晏沉，身穿深紫學院長袍，平靜地端著一只空杯"><span>枯潮教授 / 晏沉</span></div>
                     <div><p class="eyebrow">作戰簡報 · 第 {{ level?.sequence }} 關 {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p>
                         <h1 tabindex="-1"><template v-for="(line, index) in briefingLines(level)" :key="index">{{ line }}<br v-if="index < briefingLines(level).length - 1"></template></h1>
                         <blockquote class="professor-quote">{{ level?.briefing?.quote }}<small>{{ level?.briefing?.quote_note }}</small></blockquote>
@@ -380,7 +383,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         </div>
                     </div>
                     <div class="city-strip">
-                        <div class="city-core"><img :src="asset('city')" alt="虚構丘陵城市的水系防守光網"><div class="core-panel"><span>城市核心韌性</span><strong>{{ state.core_resilience }}</strong><progress aria-label="城市核心韌性" :value="state.core_resilience" max="100"></progress></div></div>
+                        <div class="city-core"><img :src="asset(sceneAsset(run.level_id))" :alt="`${level?.name}的虛構城市防線`"><img class="apostle-mark" :src="asset(apostleAsset(run.level_id))" :alt="`${level?.name}的禁術使徒`"><div class="core-panel"><span>城市核心韌性</span><strong>{{ state.core_resilience }}</strong><progress aria-label="城市核心韌性" :value="state.core_resilience" max="100"></progress></div></div>
                         <div class="city-read">
                             <div class="intent-card" :class="{ interruptible: state.intent?.interruptible }"><small>下一步 · 城市預告</small><p>{{ state.intent?.description ?? '對局已結束' }}</p><span v-if="state.intent?.interruptible" class="tag">可用{{ elementNames[state.intent.element] }}系擾序打斷</span></div>
                             <div class="defenses"><div v-for="element in elements" :key="element" :class="element"><b>{{ elementNames[element] }}系防線 <strong>{{ state.defenses[element] }}</strong></b><progress :aria-label="`${elementNames[element]}系防線`" :value="state.defenses[element]" max="100"></progress><small>抗性 {{ state.resistance[element] }} 層 · 印記 {{ state.sigils[element] }}/{{ state.sigil_cap }}</small></div></div>
@@ -423,10 +426,10 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     </template>
                     <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="intent in level?.forecast" :key="intent.scheduled_turn">{{ intent.description }}</li></ol></details>
                 </section>
-                <section v-if="page === 'report'" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }"><img :src="asset(run.outcome === 'player_victory' ? 'victory' : 'city')" :alt="run.outcome === 'player_victory' ? '虛構城市化為懸浮陶片，金色光幕宣告枯潮試煉通關' : '守住的虛構城市'">
+                <section v-if="page === 'report'" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }"><img :src="asset(reportAsset(run.outcome, run.level_id))" :alt="run.outcome === 'player_victory' ? '虛構城市化為懸浮陶片，金色光幕宣告禁術修習通關' : '重新穩定的虛構城市防線'">
                     <div><p class="eyebrow">ACADEMY FIELD REPORT / 第 {{ level?.sequence }} 關戰報 · {{ level?.name }}｜{{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ run.outcome === 'player_victory' ? '毀滅成功。' : '城市守住了。' }}</h1><p class="lead">{{ run.outcome === 'player_victory' ? `第 ${level?.sequence} 門禁術・${level?.name}，修習通過。晏沉抬杯，向你致意。` : '本次試煉結束。把城市的回應，變成下一次的計畫。' }}</p><p>第 {{ state.turn }} 回合 · 核心剩餘 {{ state.core_resilience }} · 逾時 {{ state.timeouts }} 次</p><p>{{ run.outcome === 'player_victory' ? '晏沉的結語：「一座城市若把每次撐過去，都當成不必改變的理由，最後就會連下一次也沒有。」以下列出你如何使這一局走到終點。' : '晏沉收回空杯：「你讓它喘過氣了。看看是哪一回合。」以下依你的實際行動複盤，再挑一個決策重試。' }}</p><p v-if="run.mode === 'practice'" class="small">練習成績單獨記錄，不會登記為限時挑戰通關。</p><div class="report-actions"><button v-if="run.outcome === 'player_victory' && nextLevel && nextLevel.level_id !== run.level_id" class="primary" :disabled="locked" @click="start(false, nextLevel.level_id)">前往第 {{ nextLevel.sequence }} 關 · {{ nextLevel.name }} ↗</button><button :class="{ primary: run.outcome !== 'player_victory' }" :disabled="locked || !run.compatible" @click="start(true)">同情境再試一次 ↗</button><button :disabled="locked" @click="replay">重播本局演出</button><button :disabled="locked" @click="loadLobby">回學院</button></div></div>
                 </section>
-                <section v-if="page === 'report' && ending === 'main'" class="content-width ending main">
+                <section v-if="page === 'report' && ending === 'main'" class="content-width ending main"><img class="ending-art" :src="asset('victory-2')" alt="浮空陶片與學院的銅色焰火">
                     <p class="eyebrow">CAMPAIGN ENDING / 主線目標達成</p>
                     <h2 tabindex="-1">新竹縣模擬防線，失守。</h2>
                     <p class="lead">晏沉在名冊上蓋下「{{ campaign?.titles?.main_cleared ?? '毀滅計畫通過' }}」。三門禁術修習完畢，這份計畫已經可以結案。</p>
@@ -437,7 +440,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     </div>
                     <p class="small">收手之後仍可從同一份存檔回來挑戰進階；這不是失敗，也不是少拿一個結局。</p>
                 </section>
-                <section v-if="page === 'report' && ending === 'advanced'" class="content-width ending advanced">
+                <section v-if="page === 'report' && ending === 'advanced'" class="content-width ending advanced"><img v-for="(frame, index) in advancedFinaleFrames" :key="frame" class="ending-art" :src="asset(frame)" :alt="`進階終幕第 ${index + 1} 幕`">
                     <p class="eyebrow">CAMPAIGN ENDING / 進階終幕</p>
                     <h2 tabindex="-1">蓄夜之後，沒有下一個夜晚。</h2>
                     <p class="lead">五門禁術全數修習完畢。晏沉把空杯倒扣在桌上：「{{ campaign?.titles?.advanced_cleared ?? '首席反派' }}。這個稱號，學院只發給把最後一次重整也打斷的人。」</p>
@@ -454,8 +457,8 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                 <section v-if="run.history.length" class="content-width history"><details><summary>完整行動紀錄 · {{ run.history.length }} 次</summary><article v-for="entry in run.history" :key="entry.sequence"><h3>第 {{ entry.events[0]?.turn }} 回合 / {{ playedName(run, entry.input) }}</h3><ul><li v-for="event in entry.events" :key="event.sequence">{{ eventText(event) }}</li></ul></article></details></section>
             </template>
         </main>
-        <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><a href="/docs/ASSET-SOURCES.md" @click.prevent="notice = '圖片：OpenAI image_gen 原創生成。音效：Kenney Impact Sounds（CC0）。完整來源與提示詞見專案 assets/p04-generation.json、assets/third-party/manifest.json。'">素材來源</a></footer>
+        <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><a href="/docs/ASSET-SOURCES.md" @click.prevent="notice = '圖片：OpenAI image_gen 原創生成。音效：Kenney Impact Sounds（CC0）。完整來源與提示詞見 assets/p06-generation.json、assets/p04-generation.json、assets/third-party/manifest.json。'">素材來源</a></footer>
         </div>
-        <div v-if="currentEvent" class="cutscene" :class="{ ultimate: currentEvent.cue_id.includes('ultimate'), triumph: currentEvent.after.outcome === 'player_victory' }" role="dialog" aria-modal="true" aria-label="戰鬥演出"><img :src="asset(cueImage(currentEvent))" :alt="eventText(currentEvent)"><div class="cutscene-copy"><p class="eyebrow">第 {{ currentEvent.turn }} 回合 / {{ currentEvent.target ? elementNames[currentEvent.target] + '系' : (level?.name ?? '') }}</p><h2>{{ currentEvent.cue_id.includes('ultimate') && currentEvent.type !== 'outcome' ? '揮霍無度・新竹歸寂' : eventText(currentEvent) }}</h2><p v-if="currentEvent.type === 'outcome'">{{ currentEvent.after.outcome === 'player_victory' ? '枯潮修習通過。這一局，城市已無下一次。' : '城市尚存韌性。回到課堂，檢查這次的決策。' }}</p><p v-if="currentEvent.type === 'action_missed'">決策時間用完了。這一回合你沒有出手，城市照預告行動。</p><p v-if="currentEvent.type === 'impact'">護盾吸收 {{ currentEvent.delta.absorbed }} · 命中前有效防線 {{ currentEvent.delta.effective_defense }}</p></div><button @click="skip">跳過演出 · Esc</button></div>
+        <div v-if="currentEvent" class="cutscene" :class="{ ultimate: currentEvent.cue_id.includes('ultimate'), triumph: currentEvent.after.outcome === 'player_victory' }" role="dialog" aria-modal="true" aria-label="戰鬥演出"><img :src="asset(cueImage(currentEvent, run?.level_id))" :alt="eventText(currentEvent)"><div class="cutscene-copy"><p class="eyebrow">第 {{ currentEvent.turn }} 回合 / {{ currentEvent.target ? elementNames[currentEvent.target] + '系' : (level?.name ?? '') }}</p><h2>{{ currentEvent.cue_id.includes('ultimate') && currentEvent.type !== 'outcome' ? '揮霍無度・新竹歸寂' : eventText(currentEvent) }}</h2><p v-if="currentEvent.type === 'outcome'">{{ currentEvent.after.outcome === 'player_victory' ? '枯潮修習通過。這一局，城市已無下一次。' : '城市尚存韌性。回到課堂，檢查這次的決策。' }}</p><p v-if="currentEvent.type === 'action_missed'">決策時間用完了。這一回合你沒有出手，城市照預告行動。</p><p v-if="currentEvent.type === 'impact'">護盾吸收 {{ currentEvent.delta.absorbed }} · 命中前有效防線 {{ currentEvent.delta.effective_defense }}</p></div><button @click="skip">跳過演出 · Esc</button></div>
     </div>
 </template>

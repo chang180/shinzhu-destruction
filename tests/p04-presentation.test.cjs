@@ -10,7 +10,7 @@ const source = ts.transpileModule(fs.readFileSync('resources/js/game.ts', 'utf8'
 }).outputText;
 const context = { exports: {}, crypto: globalThis.crypto };
 vm.runInNewContext(source, context);
-const { cueImage, cueDuration, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, playedName } = context.exports;
+const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, playedName } = context.exports;
 const event = (type, turn, delta = {}, after = {}) => ({ type, turn, delta, after, cue_id: '', reason_code: '', actor: 'player', target: 'water' });
 // 牌組與卡面在真實回應裡一定存在；戰報要靠它們把 card_id 翻成玩家看到的卡名。
 const deck = { 'c1': 'long-flow', 'c2': 'final-waste' };
@@ -30,9 +30,23 @@ test('victory and city defense use distinct art and ending duration even after a
   const held = event('outcome', 10, {}, { outcome: 'city_held' });
   assert.equal(cueImage(victory), 'victory');
   assert.equal(cueDuration(victory), 8000);
-  assert.equal(cueImage(held), 'city');
+  assert.equal(cueImage(held), 'defense-success-1');
   assert.equal(cueDuration(held), 3000);
-  assert.equal(cueImage({ ...victory, type: 'impact' }), 'apostle');
+  assert.equal(cueImage({ ...victory, type: 'impact' }), 'skill-ultimate');
+});
+
+test('P06 selects the generated scene, apostle, cut-in and ending art by stable level and event IDs', () => {
+  const victory = { ...event('outcome', 12, {}, { outcome: 'player_victory' }), cue_id: 'cue.ultimate.victory' };
+  const cityEvent = { ...event('city_repair', 3), actor: 'city', target: 'land' };
+  assert.equal(sceneAsset('mirror-shade'), 'scene-mirror-shade');
+  assert.equal(apostleAsset('stored-night'), 'apostle-stored-night');
+  assert.equal(briefingAsset('stored-night'), 'yan-chen-pleased');
+  assert.equal(reportAsset('city_held', 'stored-night'), 'defense-success-2');
+  assert.equal(reportAsset('player_victory', 'meter-feast'), 'victory-2');
+  assert.equal(cueImage(cityEvent, 'mirror-shade'), 'scene-mirror-shade');
+  assert.equal(cueImage({ ...victory, type: 'impact' }, 'meter-feast'), 'skill-ultimate');
+  assert.equal(cueImage(event('impact', 4), 'meter-feast'), 'skill-water-2');
+  assert.equal(cueImage(victory, 'stored-night'), 'victory-3');
 });
 
 test('victory findings cite actual interrupted turns, repairs and strongest hit', () => {

@@ -111,4 +111,11 @@
 .ending h2{font-size:clamp(1.9rem,3.4vw,2.9rem);margin-bottom:16px}
 .ending.main h2,.ending.advanced h2{color:var(--copper)}
 .ending .report-actions{margin:20px 0 14px}
+.ending-art{display:block;width:min(100%,720px);max-height:320px;object-fit:cover;border:1px solid var(--line);margin:0 0 24px}
 @media(max-width:760px){.reward-options,.deck-list{grid-template-columns:1fr}.reward-options li{padding:18px}}
+
+/* P06 原創資產：玩家、使徒與終幕都有獨立實際圖片，仍保留 UI 可讀區。 */
+.hero-student{position:absolute;z-index:1;right:8%;bottom:-11%;height:72%;width:auto;opacity:.46;filter:drop-shadow(0 12px 25px #0008);pointer-events:none}
+.city-core .apostle-mark{position:absolute;z-index:1;right:4%;bottom:-22%;height:114%;width:auto;opacity:.43;object-fit:contain;object-position:bottom right;pointer-events:none;filter:drop-shadow(0 10px 16px #0009)}
+.ending-art{display:block;width:min(100%,720px);max-height:320px;object-fit:cover;border:1px solid var(--line);margin:0 0 24px}
+@media(max-width:760px){.hero-student{right:-8%;height:57%;opacity:.3}.city-core .apostle-mark{right:-8%;height:105%;opacity:.35}.ending-art{max-height:210px}}

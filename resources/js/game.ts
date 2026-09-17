@@ -98,6 +98,21 @@ export function briefingLines(level: Level | undefined): string[] {
 export function soundStatusText(muted: boolean): string {
     return muted ? '目前靜音' : '目前有聲';
 }
+/** P06 資產只依既有穩定的關卡與事件 ID 選擇；圖片不參與戰鬥結算。 */
+export function sceneAsset(levelId: string): string {
+    return levelId === 'empty-cup' ? 'city' : `scene-${levelId}`;
+}
+export function apostleAsset(levelId: string): string {
+    return `apostle-${levelId}`;
+}
+export function briefingAsset(levelId: string): string {
+    return levelId === 'stored-night' ? 'yan-chen-pleased' : 'yan-chen-stern';
+}
+export function reportAsset(outcome: Outcome, levelId: string): string {
+    if (outcome === 'city_held') return levelId === 'stored-night' ? 'defense-success-2' : 'defense-success-1';
+    if (levelId === 'stored-night') return 'victory-3';
+    return levelId === 'empty-cup' ? 'victory' : 'victory-2';
+}
 export function skillName(id: string): string { const [kind, element] = id.split('.'); return (element ? `${elementNames[element as Element]}系・` : '') + (kindNames[kind] ?? kind); }
 export function unavailableText(choice: Choice | undefined, state: BattleState, card: Card): string {
     if (!choice) return '目前無法施放';
@@ -131,11 +146,12 @@ export function eventText(event: BattleEvent): string {
     else if (typeof event.delta.malice === 'number') detail = `｜惡意 ${event.delta.malice > 0 ? '+' : ''}${event.delta.malice}`;
     return `${eventNames[event.type] ?? '戰況更新'}${detail}`;
 }
-export function cueImage(event: BattleEvent): string {
-    if (event.type === 'outcome') return event.after.outcome === 'player_victory' ? 'victory' : 'city';
-    if (event.cue_id.includes('ultimate')) return 'apostle';
-    if (event.actor === 'city') return 'city';
-    return event.target ?? 'apostle';
+export function cueImage(event: BattleEvent, levelId = 'empty-cup'): string {
+    if (event.type === 'outcome') return reportAsset(event.after.outcome as Outcome, levelId);
+    if (event.cue_id.includes('ultimate')) return 'skill-ultimate';
+    if (event.actor === 'city') return sceneAsset(levelId);
+    if (event.target && levelId !== 'empty-cup') return `skill-${event.target}-2`;
+    return event.target ?? apostleAsset(levelId);
 }
 export function cueDuration(event: BattleEvent): number {
     if (event.type === 'outcome') return event.after.outcome === 'player_victory' ? 8000 : 3000;
