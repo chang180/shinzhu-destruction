@@ -7,6 +7,7 @@ use App\Domain\Game\LevelRepository;
 use App\Domain\Game\SkillCatalog;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\LevelResource;
+use App\Services\Game\CampaignProgress;
 use App\Services\Game\CampaignResolver;
 use App\Services\OpenData\OpenDataRegistry;
 use App\Services\OpenData\SnapshotRepository;
@@ -23,6 +24,7 @@ class LevelController extends Controller
         CampaignResolver $campaigns,
         SnapshotRepository $snapshots,
         OpenDataRegistry $sources,
+        CampaignProgress $progress,
     ): JsonResponse {
         // 唯讀端點：還沒開過局的訪客看預設解鎖狀態，不為了讀一份清單就建立戰役。
         $campaign = $campaigns->existing($request);
@@ -59,6 +61,7 @@ class LevelController extends Controller
             'hand' => config('game.hand'),
             'fixed_actions' => config('game.fixed_actions'),
             'decision_seconds' => config('game.timer.decision_seconds'),
+            'campaign' => $progress->payload($campaign),
             'data_status' => $snapshots->status($sources->sourceIds()),
         ]);
     }

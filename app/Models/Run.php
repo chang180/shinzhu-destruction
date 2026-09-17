@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property string $public_id
  * @property array<string, mixed> $state
+ * @property array<string, int>|null $deck 開局凍結的牌組組成；舊局為 null，代表用關卡預設牌組
  * @property array<string, string> $snapshot_ids
  * @property array<string, mixed> $scenario_modifiers
  * @property Outcome $outcome
@@ -36,6 +37,7 @@ class Run extends Model
     {
         return [
             'state' => 'array',
+            'deck' => 'array',
             'snapshot_ids' => 'array',
             'snapshot_metadata' => 'array',
             'scenario_modifiers' => 'array',

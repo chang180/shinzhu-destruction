@@ -38,6 +38,7 @@ class RunService
         private readonly LevelRepository $levels,
         private readonly SnapshotResolver $snapshots,
         private readonly ScenarioModifierCalculator $calculator,
+        private readonly DeckComposer $decks,
     ) {}
 
     /**
@@ -49,7 +50,12 @@ class RunService
         $snapshots = $this->snapshots->resolveSet();
         $modifiers = $this->calculator->calculate($snapshots);
         $seed ??= random_int(1, PHP_INT_MAX);
-        $state = $this->engine->start($level, $seed);
+        /*
+         * 牌組獎勵是戰役層級的選擇，但一局開始後就凍結進 runs.deck：同情境重試與
+         * 重播都得抽到同一副牌，不能因為之後又挑了一張新牌而改變過去那一局。
+         */
+        $composition = $this->decks->compose($level, $campaign);
+        $state = $this->engine->start($level, $seed, $composition);
 
         $snapshotIds = [];
         $metadata = [];
@@ -65,7 +71,7 @@ class RunService
             ];
         }
 
-        return DB::transaction(function () use ($campaign, $level, $snapshotIds, $metadata, $modifiers, $state, $seed, $mode): Run {
+        return DB::transaction(function () use ($campaign, $level, $snapshotIds, $metadata, $modifiers, $state, $seed, $mode, $composition): Run {
             $campaign->forceFill(['last_activity_at' => Carbon::now()])->save();
 
             return Run::query()->create([
@@ -78,6 +84,7 @@ class RunService
                 'snapshot_metadata' => $metadata,
                 'scenario_modifiers' => $modifiers->toArray(),
                 'seed' => $seed,
+                'deck' => $composition,
                 'state' => $state->toArray(),
                 'version' => $state->version,
                 'outcome' => $state->outcome,
@@ -98,7 +105,11 @@ class RunService
     public function retry(Run $original): Run
     {
         $this->assertCompatible($original);
-        $state = $this->engine->start($this->levels->get($original->level_id), (int) $original->seed);
+        $state = $this->engine->start(
+            $this->levels->get($original->level_id),
+            (int) $original->seed,
+            $original->deck,
+        );
 
         return DB::transaction(function () use ($original, $state): Run {
             $original->campaign()->update(['last_activity_at' => Carbon::now()]);
@@ -113,6 +124,7 @@ class RunService
                 'snapshot_metadata' => $original->snapshot_metadata,
                 'scenario_modifiers' => $original->scenario_modifiers,
                 'seed' => $original->seed,
+                'deck' => $original->deck,
                 'state' => $state->toArray(),
                 'version' => $state->version,
                 'outcome' => $state->outcome,
@@ -294,9 +306,38 @@ class RunService
             }
         }
 
-        $campaign->forceFill($practice
+        $attributes = $practice
             ? ['practice_results' => $best, 'practice_unlocked' => $unlocked]
-            : ['best_results' => $best, 'unlocked' => $unlocked],
-        )->save();
+            : ['best_results' => $best, 'unlocked' => $unlocked] + $this->progression($campaign, $run->level_id);
+
+        $campaign->forceFill($attributes)->save();
+    }
+
+    /**
+     * 限時挑戰通關才會推進戰役：牌組獎勵與里程碑都只認挑戰軌，練習不冒充通關
+     * （P04-REVISION-PLAN §2、§5）。
+     *
+     * @return array<string, mixed>
+     */
+    private function progression(Campaign $campaign, string $levelId): array
+    {
+        $level = $this->levels->get($levelId);
+        $attributes = [];
+
+        if ($this->decks->hasPendingReward($level, $campaign) && $campaign->pending_reward === null) {
+            $attributes['pending_reward'] = $levelId;
+        }
+
+        $milestone = match ($levelId) {
+            (string) config('game.campaign.main_finale') => 'main_cleared',
+            (string) config('game.campaign.advanced_finale') => 'advanced_cleared',
+            default => null,
+        };
+
+        if ($milestone !== null && ! $campaign->hasMilestone($milestone)) {
+            $attributes['milestones'] = [...$campaign->milestones(), $milestone];
+        }
+
+        return $attributes;
     }
 }

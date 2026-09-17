@@ -51,12 +51,14 @@ class BattleEngine
 
     /**
      * 開局。牌組在這裡展開成實體牌並依 seed 洗好，手牌要等玩家揭牌才發。
+     *
+     * @param  array<string, int>|null  $composition  牌組獎勵換過的牌組；null 代表用關卡預設牌組
      */
-    public function start(LevelDefinition $level, int $seed): BattleState
+    public function start(LevelDefinition $level, int $seed, ?array $composition = null): BattleState
     {
         $initial = $this->config['initial'];
         $hand = $this->config['hand'];
-        $deck = Deck::expand($level->deck);
+        $deck = Deck::expand($composition ?? $level->deck);
 
         return new BattleState(
             turn: 1,
@@ -634,13 +636,13 @@ class BattleEngine
 
         $environment = $isUltimate
             ? $this->averageModifier($level, $modifiers)
-            : ($level->affectsElement($skill->element) ? $modifiers->for($skill->element) : 0.0);
+            : ($level->affectsElement($skill->element) ? $level->cappedModifier($modifiers->for($skill->element)) : 0.0);
 
         $reduction = min($damage['defense_reduction_cap'], $effectiveDefense / $damage['defense_divisor']);
         $raw = (int) floor($skill->baseImpact * (1 + $environment) * $comboMultiplier * (1 - $reduction));
         $raw = max(0, $raw);
 
-        $absorbed = $this->absorbWithShields($state, $raw);
+        $absorbed = $this->absorbWithShields($state, $raw, $skill->element);
         $coreBefore = $state->coreResilience;
         $coreDamage = max(0, min($raw - $absorbed, $coreBefore));
         $state->coreResilience = $coreBefore - $coreDamage;
@@ -701,13 +703,20 @@ class BattleEngine
         $values = [];
 
         foreach (Element::all() as $element) {
-            $values[] = $level->affectsElement($element) ? $modifiers->for($element) : 0.0;
+            $values[] = $level->affectsElement($element) ? $level->cappedModifier($modifiers->for($element)) : 0.0;
         }
 
         return array_sum($values) / count($values);
     }
 
-    private function absorbWithShields(BattleState $state, int $raw): int
+    /**
+     * 護盾只吸收同系的攻擊（3.0.0 起）。換一個系別打過去就繞開了那道盾——
+     * 這是第 2 關「留強牌等窗口，或換系繞盾」成立的前提。
+     *
+     * 終招沒有系別：它是三系合擊，任何一道盾都會吃掉一部分，否則終招會變成
+     * 無視所有城市防禦的萬用解答。
+     */
+    private function absorbWithShields(BattleState $state, int $raw, ?Element $element): int
     {
         $absorbed = 0;
         $remaining = $raw;
@@ -715,6 +724,10 @@ class BattleEngine
         foreach ($state->shields as $index => $shield) {
             if ($remaining <= 0) {
                 break;
+            }
+
+            if ($element !== null && $shield['element'] !== $element->value) {
+                continue;
             }
 
             $taken = min($shield['amount'], $remaining);
@@ -1179,7 +1192,10 @@ class BattleEngine
             );
         }
 
-        return $level->intentForTurn($state->turn);
+        return $level->intentForTurn(
+            $state->turn,
+            $state->lastAttackElement === null ? null : Element::from($state->lastAttackElement),
+        );
     }
 
     private function finish(BattleState $state, Outcome $outcome, string $reasonCode): void

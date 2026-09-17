@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\CampaignController;
 use App\Http\Controllers\Api\V1\DataStatusController;
 use App\Http\Controllers\Api\V1\LevelController;
 use App\Http\Controllers\Api\V1\ReplayController;
@@ -19,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('levels', [LevelController::class, 'index'])->name('levels.index');
+Route::get('campaign', [CampaignController::class, 'show'])->name('campaign.show');
+Route::post('campaign/reward', [CampaignController::class, 'reward'])->middleware('throttle:game-actions')->name('campaign.reward');
+Route::post('campaign/stand-down', [CampaignController::class, 'standDown'])->middleware('throttle:game-actions')->name('campaign.stand-down');
 Route::get('runs', [RunController::class, 'index'])->name('runs.index');
 Route::post('runs/{run}/retry', [RunController::class, 'retry'])->middleware('throttle:game-actions')->name('runs.retry');
 Route::post('runs', [RunController::class, 'store'])->name('runs.store');

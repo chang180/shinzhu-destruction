@@ -27,6 +27,8 @@ class Campaign extends Model
             'best_results' => 'array',
             'practice_unlocked' => 'array',
             'practice_results' => 'array',
+            'deck_choices' => 'array',
+            'milestones' => 'array',
             'last_activity_at' => 'immutable_datetime',
         ];
     }
@@ -64,6 +66,31 @@ class Campaign extends Model
     public function practiceResults(): array
     {
         return $this->practice_results ?? [];
+    }
+
+    /**
+     * 牌組獎勵的選擇：關卡代碼 => 選項代碼。舊戰役沒有這一欄。
+     *
+     * @return array<string, string>
+     */
+    public function deckChoices(): array
+    {
+        return $this->deck_choices ?? [];
+    }
+
+    /**
+     * 已達成的戰役里程碑（主線完成、收手、進階完成）。
+     *
+     * @return list<string>
+     */
+    public function milestones(): array
+    {
+        return $this->milestones ?? [];
+    }
+
+    public function hasMilestone(string $milestone): bool
+    {
+        return in_array($milestone, $this->milestones(), true);
     }
 
     public function hasCleared(string $levelId): bool

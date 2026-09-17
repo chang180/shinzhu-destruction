@@ -27,8 +27,8 @@ use Tests\TestCase;
  * 完整矩陣用 `php artisan game:simulate` 產生；這裡跑的是同一批策略、
  * 同樣的固定 seed，只是斷言驗收門檻。
  *
- * 只對 `available` 的關卡斷言。第 2～5 關的回合數與防線是 P05 的起點，還沒有
- * 依模擬訂定——對還沒平衡的數值斷言 70% 勝率，等於把「尚未驗證」寫成「已通過」。
+ * 只對 `available` 的關卡斷言：內容未交付的關卡沒有平衡可言，對它斷言 70% 勝率
+ * 等於把「尚未驗證」寫成「已通過」。P05 之後五關都在掃描範圍內。
  */
 class StrategyMatrixTest extends TestCase
 {
@@ -118,8 +118,9 @@ class StrategyMatrixTest extends TestCase
      * 讀預告也一定贏**的必勝按鈕。
      *
      * 「固定套路不能普遍通關」這條驗收由
-     * test_a_fixed_line_of_play_cannot_carry_every_scenario 跨情境驗證；
-     * 真正要靠護盾與脈衝懲罰它的是第 2 關之後，門檻在 P05 依模擬訂定。
+     * test_a_fixed_line_of_play_cannot_carry_every_scenario 跨情境驗證。
+     * 第 2 關之後改由同系護盾、需求脈衝與鏡射護盾懲罰它：P05 的 100 seed 模擬中
+     * 這條循環在第 2、4 關是 0%，第 3 關最高 38%，第 5 關最高 30%。
      */
     public function test_the_legacy_sigil_then_ultimate_loop_is_not_an_automatic_win(): void
     {
@@ -235,12 +236,18 @@ class StrategyMatrixTest extends TestCase
         }
     }
 
-    public function test_levels_whose_balance_is_not_verified_yet_are_marked_unavailable(): void
+    public function test_every_delivered_level_is_covered_by_this_matrix(): void
     {
         $levels = app(LevelRepository::class)->all();
 
-        // P04 只交付第 1 關。其餘四關佔住路線與機制，但不得被當成已平衡的內容。
-        $this->assertSame(['empty-cup'], $this->levelIds());
+        /*
+         * P05 交付全部五關。available 只能在該關真的通過上面這些門檻後才打開，
+         * 所以這裡反過來釘住：五關全部 available，就代表上面每一條斷言都掃過它們。
+         */
+        $this->assertSame(
+            ['empty-cup', 'noon-fold', 'meter-feast', 'mirror-shade', 'stored-night'],
+            $this->levelIds(),
+        );
         $this->assertCount(5, $levels);
         $this->assertSame(
             ['main', 'main', 'main', 'advanced', 'advanced'],

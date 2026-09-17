@@ -151,7 +151,11 @@ class RunApiTest extends TestCase
 
     public function test_a_level_whose_content_is_not_delivered_yet_cannot_be_started(): void
     {
-        // available 是「內容做完了沒有」，不是玩家進度。P04 只交付第 1 關。
+        // available 是「內容做完了沒有」，不是玩家進度。P05 五關都已交付，
+        // 所以這條規則改用暫時標成未交付的關卡驗證，而不是宣稱某一關還沒做。
+        config(['game.levels.noon-fold.available' => false]);
+        $this->app->forgetInstance(LevelRepository::class);
+
         $this->startRun('noon-fold')
             ->assertStatus(409)
             ->assertJsonPath('reason_code', 'level_unavailable');
@@ -159,21 +163,9 @@ class RunApiTest extends TestCase
 
     public function test_a_locked_level_cannot_be_started(): void
     {
-        $this->markLevelAvailable('noon-fold');
-
         $this->startRun('noon-fold')
             ->assertForbidden()
             ->assertJsonPath('reason_code', 'level_locked');
-    }
-
-    /**
-     * 把某一關暫時標成內容已交付，用來驗「解鎖」這條規則本身。
-     * 這不是宣稱那一關做完了——只有這個測試程序內有效。
-     */
-    private function markLevelAvailable(string $levelId): void
-    {
-        config(['game.levels.'.$levelId.'.available' => true]);
-        $this->app->forgetInstance(LevelRepository::class);
     }
 
     public function test_an_unknown_level_is_rejected_with_a_traditional_chinese_message(): void
@@ -450,14 +442,12 @@ class RunApiTest extends TestCase
         $this->assertGreaterThan(0, $campaign->best_results['empty-cup']['turns']);
         $this->assertContains('noon-fold', $campaign->unlocked);
 
-        // 解鎖了，但第 2 關的內容要到 P05 才交付，所以還開不起來。
-        $this->startRun('noon-fold')
-            ->assertStatus(409)
-            ->assertJsonPath('reason_code', 'level_unavailable');
+        // 解鎖之後第 2 關就開得起來了（P05 已交付內容）。
+        $this->startRun('noon-fold')->assertCreated();
 
         $this->getJson(route('api.v1.levels.index'))
             ->assertJsonPath('levels.1.unlocked', true)
-            ->assertJsonPath('levels.1.available', false)
+            ->assertJsonPath('levels.1.available', true)
             ->assertJsonPath('levels.0.best.run_id', $runId);
     }
 

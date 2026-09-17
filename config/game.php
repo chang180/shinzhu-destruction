@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'rules_version' => '2.0.0',
+    'rules_version' => '3.0.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -223,6 +223,36 @@ return [
             'role' => '土地系擾序：打斷可打斷的土地系城市行動。',
         ],
 
+        /*
+         * P05 牌組獎勵的四張新牌。它們只是既有技能的另一種包裝——成本、冷卻與
+         * 衝擊仍然從技能表讀，所以獎勵改變的是牌組結構（多一張破陣還是多一張擾序），
+         * 不是給玩家一組更大的數字。
+         */
+        'tide-siege' => [
+            'skill' => 'breach.water',
+            'name' => '潮圍夜巷',
+            'text' => '深夜把整排水管接出來灌進巷子，讓供水防線一次撐破。',
+            'role' => '水系破陣：用一張試探的位置換一次爆發。',
+        ],
+        'smoke-screen' => [
+            'skill' => 'disrupt.heat',
+            'name' => '煙幕遮巡',
+            'text' => '趁巡檢時間點火造煙，讓城市連自己哪裡在發燙都看不見。',
+            'role' => '熱系擾序：用一張試探的位置換一次打斷。',
+        ],
+        'hollow-ground' => [
+            'skill' => 'breach.land',
+            'name' => '掏空地基',
+            'text' => '偷挖砂石把路基掏空，讓地面自己塌下去。',
+            'role' => '土地系破陣：用一張試探的位置換一次爆發。',
+        ],
+        'sluice-jam' => [
+            'skill' => 'disrupt.water',
+            'name' => '閘門卡死',
+            'text' => '把雜物塞進閘門，逼城市先回頭救自己的水門。',
+            'role' => '水系擾序：用一張試探的位置換一次打斷。',
+        ],
+
         'hold-spite' => [
             'skill' => 'gather',
             'name' => '屏息蓄惡',
@@ -267,6 +297,16 @@ return [
     |
     */
 
+    'campaign' => [
+        // 主線最後一關通關＝完成主線目標，可以收手結束；進階最後一關通關＝進階終幕。
+        'main_finale' => 'meter-feast',
+        'advanced_finale' => 'stored-night',
+        'titles' => [
+            'main_cleared' => '毀滅計畫通過',
+            'advanced_cleared' => '首席反派',
+        ],
+    ],
+
     'levels' => [
 
         'empty-cup' => [
@@ -279,6 +319,15 @@ return [
             'max_turns' => 8,
             'requires' => null,
             'mechanic' => '固定、完整預告的修復窗口：城市什麼時候補血全部寫在預告上。',
+            'lesson' => '現在出破陣，或留擾序等修復窗口。',
+            'briefing' => [
+                'headline' => "讓城市\n喊渴。",
+                'quote' => '「杯子空了，補水就好。城市空了呢？」',
+                'quote_note' => '晏沉將空杯推到你面前。「這就是你今天的作業。」',
+                'lessons' => [
+                    '讀預告。第 3、6 回合城市會修復核心；同系擾序牌可以取消它，首次打斷還會返還 2 點惡意。',
+                ],
+            ],
             'defenses' => [
                 Element::Water->value => 30,
                 Element::Heat->value => 26,
@@ -303,16 +352,26 @@ return [
         'noon-fold' => [
             'sequence' => 2,
             'tier' => 'main',
-            'available' => false,
+            'available' => true,
             'name' => '折晝・竹北長晝',
             'subtitle' => '在系別間輪替的護盾',
             'apostle' => 'noon-fold',
-            'max_turns' => 8,
+            'max_turns' => 9,
             'requires' => 'empty-cup',
             'mechanic' => '護盾在系別之間輪替：留強牌等窗口，或換系繞過盾。',
+            'lesson' => '留強牌等護盾退場，或直接換一系繞過去。',
+            'briefing' => [
+                'headline' => "折斷\n這一天。",
+                'quote' => '「街區學會了輪班守夜。哪一系被盯上，那一系就擋得住。」',
+                'quote_note' => '晏沉把三張排班表攤開。「所以你要嘛等它換班，要嘛去打它沒排班的那一邊。」',
+                'lessons' => [
+                    '護盾會輪替。第 2、4、6、8 回合城市各架起一道不同系的護盾，護盾同時只會有一道，兩回合後退場。',
+                    '護盾吸收的是核心衝擊，不是防線。擋不過就換系打，或用同系擾序直接取消那道預告。',
+                ],
+            ],
             'defenses' => [
                 Element::Water->value => 36,
-                Element::Heat->value => 36,
+                Element::Heat->value => 34,
                 Element::Land->value => 34,
             ],
             'data_elements' => [Element::Heat->value],
@@ -325,27 +384,48 @@ return [
             'apostle_power_value' => 2,
             'intents' => [
                 2 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
+                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 20, 'interruptible' => true],
                 4 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
                 6 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                7 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
+                8 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
             ],
-            'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 5, 'interruptible' => false],
+            'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 4, 'interruptible' => false],
+            'reward' => [
+                'prompt' => '折晝結束。晏沉讓你把一張試探換成一張真正的手段——只能挑一張，牌組仍然是 15 張。',
+                'options' => [
+                    'tide-siege' => ['add' => 'tide-siege', 'remove' => 'long-flow', 'style' => '爆發'],
+                    'smoke-screen' => ['add' => 'smoke-screen', 'remove' => 'open-chill', 'style' => '干擾'],
+                ],
+            ],
             'phases' => [],
         ],
 
         'meter-feast' => [
             'sequence' => 3,
             'tier' => 'main',
-            'available' => false,
+            'available' => true,
             'name' => '饗表・園區無底帳',
             'subtitle' => '預告的需求脈衝',
             'apostle' => 'meter-feast',
             'max_turns' => 10,
             'requires' => 'noon-fold',
             'mechanic' => '預告的需求脈衝：修復與進攻窗口互相排擠，得為關鍵回合留牌。',
+            'lesson' => '為脈衝回合留牌、留惡意，並決定何時交出終招。',
+            'briefing' => [
+                'headline' => "把帳\n結乾淨。",
+                'quote' => '「園區的表從不回頭看。它只問下一筆要多少。」',
+                'quote_note' => '晏沉指著跳動的數字。「這是你的畢業考——主線的最後一關。」',
+                'lessons' => [
+                    '需求脈衝在第 4、8 回合。那兩回合完成跨系連攜會多返還 1 點惡意。',
+                    '城市的修復與護盾輪流出現，回合又只有 10 個。想清楚哪一回合留牌、哪一回合放終招。',
+                    '通關即完成主線目標。你可以收下戰果結束計畫，也可以接受進階畢業考。',
+                ],
+            ],
             'defenses' => [
-                Element::Water->value => 40,
-                Element::Heat->value => 40,
-                Element::Land->value => 38,
+                Element::Water->value => 24,
+                Element::Heat->value => 24,
+                Element::Land->value => 22,
             ],
             'data_elements' => [Element::Water->value, Element::Heat->value],
             'deck' => [
@@ -357,29 +437,42 @@ return [
             'apostle_power_value' => 1,
             'pulse_turns' => [4, 8],
             'intents' => [
-                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
-                5 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
-                7 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
-                9 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 20, 'interruptible' => true],
+                2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
+                5 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
+                6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                7 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
+                9 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
             ],
-            'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 5, 'interruptible' => false],
+            'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 4, 'interruptible' => false],
             'phases' => [],
         ],
 
         'mirror-shade' => [
             'sequence' => 4,
             'tier' => 'advanced',
-            'available' => false,
+            'available' => true,
             'name' => '鏡蔭・丘陵借影',
             'subtitle' => '城市開始讀你的牌',
             'apostle' => 'mirror-shade',
             'max_turns' => 10,
             'requires' => 'meter-feast',
             'mechanic' => '城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。',
+            'lesson' => '誘出城市的反制，再換系打它沒防到的那一邊。',
+            'briefing' => [
+                'headline' => "它在\n看你出牌。",
+                'quote' => '「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」',
+                'quote_note' => '晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」',
+                'lessons' => [
+                    '沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。',
+                    '這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。',
+                    '第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。',
+                ],
+            ],
             'defenses' => [
-                Element::Water->value => 42,
-                Element::Heat->value => 42,
-                Element::Land->value => 44,
+                Element::Water->value => 40,
+                Element::Heat->value => 38,
+                Element::Land->value => 38,
             ],
             'data_elements' => [Element::Heat->value, Element::Land->value],
             'deck' => [
@@ -389,31 +482,55 @@ return [
             ],
             'apostle_power' => 'interrupt_refund',
             'apostle_power_value' => 2,
+            'adaptive_shield' => [
+                'magnitude' => 20,
+                'from_turn' => 2,
+            ],
             'intents' => [
                 3 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
                 6 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
                 9 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
             ],
-            'default_intent' => ['type' => 'shield', 'element' => 'land', 'magnitude' => 14, 'interruptible' => true],
+            'default_intent' => ['type' => 'shield', 'element' => 'land', 'magnitude' => 12, 'interruptible' => true],
+            'reward' => [
+                'prompt' => '鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。',
+                'options' => [
+                    'hollow-ground' => ['add' => 'hollow-ground', 'remove' => 'trample-green', 'style' => '爆發'],
+                    'sluice-jam' => ['add' => 'sluice-jam', 'remove' => 'long-flow', 'style' => '干擾'],
+                ],
+            ],
             'phases' => [],
         ],
 
         'stored-night' => [
             'sequence' => 5,
             'tier' => 'advanced',
-            'available' => false,
+            'available' => true,
             'name' => '蓄夜・全縣最後重整',
             'subtitle' => '兩回合重整',
             'apostle' => 'stored-night',
             'max_turns' => 12,
             'requires' => 'mirror-shade',
             'mechanic' => '核心到門檻就啟動兩回合重整：兩次不同系干擾中止，或搶先結束。',
+            'lesson' => '以兩次不同系干擾中止重整，或集中輸出搶先結束。',
+            'briefing' => [
+                'headline' => "在它\n重整之前。",
+                'quote' => '「全縣會把最後的力氣留到夜裡，一次修回來。」',
+                'quote_note' => '晏沉熄掉最後一盞燈。「你只有兩個選擇：打斷它，或比它快。」',
+                'lessons' => [
+                    '核心降到 50 以下，城市啟動兩回合重整；完成就一次回復 34 點核心韌性。',
+                    '用兩種不同系的擾序打斷重整倒數即可中止，並換來全系破綻；或者在倒數結束前把核心打完。',
+                    '通關取得「首席反派」與進階終幕。失敗不會撤銷主線通關。',
+                ],
+            ],
             'defenses' => [
-                Element::Water->value => 46,
-                Element::Heat->value => 44,
-                Element::Land->value => 46,
+                Element::Water->value => 32,
+                Element::Heat->value => 30,
+                Element::Land->value => 32,
             ],
             'data_elements' => [Element::Water->value, Element::Heat->value, Element::Land->value],
+            // 三系同時採用：每系的情境修正再夾一次，避免「資料好壞」本身決定勝負。
+            'modifier_cap' => 0.08,
             'deck' => [
                 'long-flow' => 3, 'spend-tide' => 1, 'foul-current' => 1,
                 'open-chill' => 3, 'hundred-smoke' => 1, 'idle-fume' => 1,
@@ -424,16 +541,19 @@ return [
             'overhaul' => [
                 'trigger_core' => 50,
                 'countdown_turns' => 2,
-                'repair_magnitude' => 40,
+                'repair_magnitude' => 48,
                 'required_interrupts' => 2,
             ],
             'intents' => [
-                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+                2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
+                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
                 5 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                8 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
-                11 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
+                6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 20, 'interruptible' => true],
+                8 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 22, 'interruptible' => true],
+                10 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
+                11 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 24, 'interruptible' => true],
             ],
-            'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 6, 'interruptible' => false],
+            'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 5, 'interruptible' => false],
             'phases' => ['standby', 'overhaul'],
         ],
     ],
