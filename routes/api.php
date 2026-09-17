@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\CampaignController;
+use App\Http\Controllers\Api\V1\CounterfactualController;
 use App\Http\Controllers\Api\V1\DataStatusController;
 use App\Http\Controllers\Api\V1\LevelController;
 use App\Http\Controllers\Api\V1\ReplayController;
@@ -36,4 +37,11 @@ Route::post('runs/{run}/actions', [RunActionController::class, 'store'])
     ->middleware('throttle:game-actions')
     ->name('runs.actions.store');
 Route::get('runs/{run}/replay', [ReplayController::class, 'show'])->name('runs.replay');
+/*
+ * P07 反事實比較：只讀計算，不寫入 runs 或 run_actions。仍套用行動限流，
+ * 避免有人拿它當免費的批次模擬服務打。
+ */
+Route::post('runs/{run}/counterfactual', [CounterfactualController::class, 'store'])
+    ->middleware('throttle:game-actions')
+    ->name('runs.counterfactual');
 Route::get('data-status', [DataStatusController::class, 'show'])->name('data-status');

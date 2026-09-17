@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset } from './game';
-import type { BattleEvent, Campaign, Card, Choice, Level, Run, RunMode, SavedRun, Settlement } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
+import type { BattleEvent, Campaign, Card, Choice, CounterfactualComparison, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
 const page = ref<'lobby' | 'briefing' | 'battle' | 'report' | 'reward'>('lobby');
@@ -34,6 +34,15 @@ const effectsVolume = ref(0.45);
 const musicVolume = ref(0.2);
 let stopWait: (() => void) | undefined;
 let presentation = 0;
+// P07 反事實比較：依行動序號記結果，換一局就清空，不讓上一局的比較留在畫面上。
+const counterfactuals = ref<Record<number, CounterfactualComparison | 'loading' | 'error'>>({});
+async function tryCounterfactual(sequence: number, alternative: { type: 'play' | 'timeout'; fixed?: string }): Promise<void> {
+    if (!run.value) return;
+    counterfactuals.value[sequence] = 'loading';
+    try {
+        counterfactuals.value[sequence] = await fetchCounterfactual(run.value.run_id, sequence, alternative);
+    } catch { counterfactuals.value[sequence] = 'error'; }
+}
 /*
  * 倒數只是顯示。判定逾時的是伺服器截止時間，所以這裡保存的是「伺服器時間減本機
  * 時間」，畫面用它換算剩餘秒數；本機時鐘不準也不會讓玩家多拿或少拿決策時間。
@@ -109,7 +118,7 @@ function showRun(value: Run, briefing = false): void {
     run.value = value;
     mode.value = value.mode;
     clockOffset.value = serverOffset(value.server_time);
-    previewedCard.value = undefined; keep.value = [];
+    previewedCard.value = undefined; keep.value = []; counterfactuals.value = {};
     page.value = value.outcome !== 'in_progress' ? 'report' : briefing ? 'briefing' : 'battle';
     if (!value.compatible) notice.value = '這一局使用舊版規則。可以查看紀錄，請回學院另開新局。';
     focusHeading();
@@ -454,7 +463,14 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                 </section>
                 <section v-if="page === 'report'" class="content-width"><h2>關鍵回合 · 依實際紀錄</h2><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></section>
                 <section class="content-width data-panel"><details :open="page === 'briefing'"><summary>本局情境情報 · 開局後不變</summary><p class="small">以下是遊戲情境修正，不是災害預測。正值有利進攻；缺值採中性修正。標示「本關未採用」的系別不會在這一局生效。</p><div class="data-grid"><div v-for="element in elements" :key="element"><b>{{ elementNames[element] }}系 {{ run.data_notes[element]?.applied ? ((run.data_notes[element].modifier ?? 0) * 100).toFixed(1) + '%' : '本關未採用' }}</b><p>{{ run.data_notes[element]?.reason ?? run.scenario.reasons[element]?.message }}</p></div></div><div v-if="!Object.keys(run.snapshots).length" class="message">舊局未保存來源品質。保留原情境數值，不以今日資料冒充。</div><div v-for="(snapshot, source) in run.snapshots" :key="source" class="source-row"><b>{{ sourceNames[source] ?? source }}</b><span>{{ qualityNames[snapshot.quality] ?? snapshot.quality }}</span><small>觀測：{{ snapshot.observed_at ?? (snapshot.period ? Object.values(snapshot.period).join(' / ') : '無觀測日期') }}</small><p v-for="warning in snapshot.warnings" :key="warning" class="small">{{ warning }}</p></div></details></section>
-                <section v-if="run.history.length" class="content-width history"><details><summary>完整行動紀錄 · {{ run.history.length }} 次</summary><article v-for="entry in run.history" :key="entry.sequence"><h3>第 {{ entry.events[0]?.turn }} 回合 / {{ playedName(run, entry.input) }}</h3><ul><li v-for="event in entry.events" :key="event.sequence">{{ eventText(event) }}</li></ul></article></details></section>
+                <section v-if="run.history.length" class="content-width history"><details><summary>完整行動紀錄 · {{ run.history.length }} 次</summary><article v-for="entry in run.history" :key="entry.sequence"><h3>第 {{ entry.events[0]?.turn }} 回合 / {{ playedName(run, entry.input) }}</h3><ul><li v-for="event in entry.events" :key="event.sequence">{{ eventText(event) }}</li></ul>
+                    <div v-if="entry.input.type === 'play'" class="counterfactual">
+                        <button :disabled="counterfactuals[entry.sequence] === 'loading'" @click="tryCounterfactual(entry.sequence, { type: 'play', fixed: 'gather' })">如果這回合改蓄勢，結果會怎樣？</button>
+                        <p v-if="counterfactuals[entry.sequence] === 'loading'" class="small">模擬中…</p>
+                        <p v-else-if="counterfactuals[entry.sequence] === 'error'" class="small">這個比較目前算不出來，可以再試一次。</p>
+                        <p v-else-if="counterfactuals[entry.sequence]" class="small">{{ counterfactualText(counterfactuals[entry.sequence] as CounterfactualComparison) }}</p>
+                    </div>
+                </article></details></section>
             </template>
         </main>
         <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><a href="/docs/ASSET-SOURCES.md" @click.prevent="notice = '圖片：OpenAI image_gen 原創生成。音效：Kenney Impact Sounds（CC0）。完整來源與提示詞見 assets/p06-generation.json、assets/p04-generation.json、assets/third-party/manifest.json。'">素材來源</a></footer>

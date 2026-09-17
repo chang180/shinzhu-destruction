@@ -4,7 +4,7 @@
 
 ## 新版開發計畫（2026-09-09）
 
-預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **限時卡牌策略遊戲，規劃 3 關主線＋2 關進階挑戰**。P01 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；P02 已完成三個中央部會資料 adapter、正規化快照與示範情境備援；P03 已完成伺服器權威戰鬥引擎、事件契約與平衡鎖版。P04 已交付首關的五張手牌、留牌／換牌、30 秒決策窗口與不限時練習；進入戰鬥會自動發牌，出牌演出後直接接續下一個決策窗口，卡牌單擊即施放。P05 已交付其餘四關的城市機制、數值與牌組、第 2 與第 4 關後的牌組獎勵，以及主線收手與進階兩種戰役終幕，規則升至 `rules_version 3.0.0`。P06 已交付 23 張原創插畫、WebP 正式資產、來源 manifest 與關卡／事件實際載入；音效試聽、真人試玩與 Hostinger 實機驗證仍按階段進行。詳見[試玩後改版計畫](docs/P04-REVISION-PLAN.md)、[P05 報告](docs/phase-reports/P05.md)與 [P06 報告](docs/phase-reports/P06.md)。
+預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **限時卡牌策略遊戲，規劃 3 關主線＋2 關進階挑戰**。P01 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；P02 已完成三個中央部會資料 adapter、正規化快照與示範情境備援；P03 已完成伺服器權威戰鬥引擎、事件契約與平衡鎖版。P04 已交付首關的五張手牌、留牌／換牌、30 秒決策窗口與不限時練習；進入戰鬥會自動發牌，出牌演出後直接接續下一個決策窗口，卡牌單擊即施放。P05 已交付其餘四關的城市機制、數值與牌組、第 2 與第 4 關後的牌組獎勵，以及主線收手與進階兩種戰役終幕，規則升至 `rules_version 3.0.0`。P06 已交付 23 張原創插畫、WebP 正式資產、來源 manifest 與關卡／事件實際載入。P07 已交付規則式反事實比較服務（換掉一次決策，交給模擬策略接手續局）與戰報頁的一鍵比較，並確認兩套獨立結局文案／畫面／音效完備。音效試聽、真人試玩與 Hostinger 實機驗證仍按階段進行。詳見[試玩後改版計畫](docs/P04-REVISION-PLAN.md)、[P06 報告](docs/phase-reports/P06.md)與 [P07 報告](docs/phase-reports/P07.md)。
 
 - [分階段開發計畫](docs/DEVELOPMENT-PLAN.md)：P00～P09 依賴、交付與驗收，可逐階段派給其他 AI。
 - [技術規格](docs/TECHNICAL-SPEC.md)：版本、Boost 非互動全選、SQLite、資料來源及 Hostinger 部署。

@@ -15,7 +15,7 @@
 | P04 首關限時手牌改版 | 待驗收 | [P04 報告](phase-reports/P04.md)：五張手牌、留牌／換牌、進場與演出後自動發牌、連續 30 秒窗口、hover／focus 預覽與單擊施放已實作，`rules_version` 維持 `2.0.0`；145 個後端測試、桌機及 390×844 響應式瀏覽器檢查通過。**完整真人試玩、操作錄影與手機實機仍待補** |
 | P05 五關戰役 | 待驗收 | [P05 報告](phase-reports/P05.md)：第 2～5 關的機制、數值與牌組已依 100 seed 模擬訂定並打開 `available`；同系護盾、鏡射護盾、逐關修正上限升版至 `3.0.0`；牌組獎勵（第 2、4 關後）、主線收手結局與進階終幕已交付。164 個後端測試、39 個前端純邏輯測試、桌機瀏覽器檢查通過。**3.0.0 的真人試玩、獎勵牌組的模擬與手機檢查仍待補** |
 | P06 正式視聽 | 待驗收 | [P06 報告](phase-reports/P06.md)：23 張原創 PNG 已生成、轉成 23 個 WebP（約 9.1 MiB）、寫入 manifest 並依關卡／事件接入前端，commit `a0073b0`。音效仍缺 14 個原創 cue（現況只有 4 個 Kenney CC0 命中音＋程式合成的施法／結局純音），已寫出可外派的 [P06 音效生成派工單](P06-AUDIO-GENERATION-BRIEF.md)，尚未回收。手機實機、瀏覽器實機與真人試玩仍未完成，不能視為完整 P06 驗收。 |
-| P07 結局複盤 | 未開始 | 10 份關卡勝敗樣本、主線與進階兩種終幕 |
+| P07 行動複盤與反事實比較 | 待驗收 | [P07 報告](phase-reports/P07.md)：新增規則式反事實比較服務（`CounterfactualComparator`＋`POST /api/v1/runs/{run}/counterfactual`），換掉一次已結算的決策後交給模擬策略接手續局；戰報頁新增「如果這回合改蓄勢」即時比較。兩套獨立結局文案／畫面／音效確認為 P04～P06 已完成。全五關各一勝一敗共 10 份機器策略樣本已抽查。172 個後端測試（新增 8 個）、41 個前端純邏輯測試、`npm run build` 全部通過。**真人試玩、手機 viewport 檢查與音效試聽仍待補** |
 | P08 全面驗收 | 未開始 | 策略矩陣、真人試玩與主機前驗證 |
 | P09 正式部署 | 未開始 | Hostinger 實測、備份還原及 README 切換 |
 
@@ -58,19 +58,21 @@
 
 | 項目 | 內容 |
 |---|---|
-| 本次指派階段 | P06 正式視聽（驗收美術交付＋補音效派工） |
+| 本次指派階段 | P07 行動複盤與反事實比較 |
 | 執行者及日期 | Claude Sonnet 5，2026-09-17 |
-| 基準／交付 commit 或未提交變更 | 基準 `69c452a`；交付 `a0073b0`（23 張美術資產與前端接線，經本 session 覆核後提交推送）；本次另有未提交變更（新增 `docs/P06-AUDIO-GENERATION-BRIEF.md`，更新本檔） |
-| 階段報告相對路徑 | `docs/phase-reports/P06.md`（由 OpenAI Codex 建立，本 session 已核對其驗收證據屬實） |
-| 已通過項目 | 核對 23 張圖與 manifest 的 SHA-256 一致、抽查 2 張圖確認原創無既有角色、重跑 `npm run typecheck`／`npm run probe:test`（40 通過）／`php artisan test --compact`（164 通過）／`npm run build` 全部通過，已 commit 並 push 到 `origin/main`；另盤點現有音效缺口並寫出 14 個 cue 的生成派工單 |
-| 尚未驗證／受阻原因 | 本 session 沒有音效／音樂生成工具，已外派給使用者另找的 AI，尚未回收；回收前無法做正規化、瀏覽器相容性測試或程式接線。手機實機、跨瀏覽器實機與真人試玩仍需使用者執行。P07～P09 的真人試玩、手機實機、Hostinger 部署仍需使用者親自執行或提供帳號 |
-| 下一位執行者第一步 | 先問使用者音效產出是否已回收：若有，依 `docs/P06-AUDIO-GENERATION-BRIEF.md` §3 交回格式核對 14 個檔案，做正規化與瀏覽器相容轉檔、接上 `resources/js/audio.ts`，更新 `docs/phase-reports/P06.md` 補齊音效驗收項；若還沒回收，繼續處理不依賴音效的自動化項目——下一個是 P07 行動複盤與兩種獨立結局（見 `docs/DEVELOPMENT-PLAN.md` §P07），把純人工項目留在報告待辦清單 |
+| 基準／交付 commit 或未提交變更 | 基準 `aded63a`；本次為未提交變更（`CounterfactualComparator`、`CounterfactualController`、路由、`BattleSimulator::continueFrom`、前端 `fetchCounterfactual`／UI、`CounterfactualTest`、`docs/phase-reports/P07.md`、本檔更新） |
+| 階段報告相對路徑 | `docs/phase-reports/P07.md` |
+| 已通過項目 | 新增 8 個後端測試（含同輸入同結果、換掉致勝一擊必改變、非法替換／揭牌拒絕、擁有者隔離、未結束局面拒絕）；`php artisan test --compact` 重跑 3 次共 172 tests 全綠；`CounterfactualTest` 額外重跑 5 次驗證不因隨機 seed 而 flaky；`vendor/bin/pint`、`npm run typecheck`、`npm run probe:test`（41 tests）、`npm run build` 全部通過；`php artisan game:simulate --seeds=30` 抽出全五關各一勝一敗共 10 份樣本 |
+| 尚未驗證／受阻原因 | 反事實比較功能沒有真人試玩過；新按鈕沒有做手機 390×844 viewport 檢查；10 份樣本全部來自機器策略，不是真人試玩紀錄；P06 音效仍在等使用者外派回收（見 `docs/P06-AUDIO-GENERATION-BRIEF.md`）；P08／P09 的真人試玩、手機實機、Hostinger 部署仍需使用者親自執行或提供帳號 |
+| 下一位執行者第一步 | 先問使用者 P06 音效是否已回收（若有，依 `docs/P06-AUDIO-GENERATION-BRIEF.md` §3 整合並補齊 `phase-reports/P06.md` 的音效驗收項）；音效之外，依 `docs/DEVELOPMENT-PLAN.md` §P08 進入全面驗收，可自動化的部分（效能量測、既有測試延伸）可以先做，真人試玩與手機實機留在報告待辦清單 |
 
 
 ## 決策變更紀錄
 
 | 日期 | 決策 | 理由與影響 |
 |---|---|---|
+| 2026-09-17 | P07 反事實比較用既有的 `BattleSimulator`／策略類別接手續局，不另外設計新的評分或提示系統 | `game:simulate` 已經是「給定局面用策略打到底」的通用機制，P03 就把它設計成關卡開局以外也能重用；重構成 `continueFrom()` 直接得到「結果來自模擬」的驗收要求，不必新造一套規則 |
+| 2026-09-17 | P07 前端只做「換成蓄勢」一鍵比較，沒有做任選手牌的完整介面 | 完整選牌介面要重建當時的手牌與留牌／換牌邊界情況，超出本階段最小可驗收範圍；後端服務已支援任意合法替代行動（測試涵蓋換成實際打過的牌），之後擴充 UI 不需要改 API |
 | 2026-09-17 | P06 美術由 OpenAI Codex 依派工單生成並整合，經 Claude Code session 核對驗收證據（SHA-256、抽查構圖、全套測試與建置）後 commit `a0073b0` 並 push | 派工單與整合工作可以分給不同 AI 執行；負責推送的 session 仍要親自重跑驗收項目，不能只憑對方報告就直接提交 |
 | 2026-09-17 | P06 音效同樣外派給其他 AI 生成，本 repo 內的 Claude Code session 只負責寫派工單與後續整合 | 本 session 沒有音效／音樂生成工具；派工單見 `docs/P06-AUDIO-GENERATION-BRIEF.md`，涵蓋現有 Kenney CC0 與程式合成音沒有覆蓋到的 14 個 cue |
 | 2026-09-17 | P06 原創插畫改由使用者外派給其他 AI 生成，本 repo 內的 Claude Code session 只負責寫派工單與後續整合 | 本 session 沒有圖片生成工具；依 `docs/AI-HANDOFF.md` 與 `.ai/rules` 的既有規則，沒有生成工具的執行者可以做其他工作但素材交付保持未完成，不能用占位圖或宣稱完成代替。派工單見 `docs/P06-ART-GENERATION-BRIEF.md` |

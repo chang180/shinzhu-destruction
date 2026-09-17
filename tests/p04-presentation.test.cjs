@@ -10,7 +10,7 @@ const source = ts.transpileModule(fs.readFileSync('resources/js/game.ts', 'utf8'
 }).outputText;
 const context = { exports: {}, crypto: globalThis.crypto };
 vm.runInNewContext(source, context);
-const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, playedName } = context.exports;
+const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, counterfactualText, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, playedName } = context.exports;
 const event = (type, turn, delta = {}, after = {}) => ({ type, turn, delta, after, cue_id: '', reason_code: '', actor: 'player', target: 'water' });
 // 牌組與卡面在真實回應裡一定存在；戰報要靠它們把 card_id 翻成玩家看到的卡名。
 const deck = { 'c1': 'long-flow', 'c2': 'final-waste' };
@@ -47,6 +47,15 @@ test('P06 selects the generated scene, apostle, cut-in and ending art by stable 
   assert.equal(cueImage({ ...victory, type: 'impact' }, 'meter-feast'), 'skill-ultimate');
   assert.equal(cueImage(event('impact', 4), 'meter-feast'), 'skill-water-2');
   assert.equal(cueImage(victory, 'stored-night'), 'victory-3');
+});
+
+test('P07 counterfactual copy names the actual strategy and states whether the outcome actually diverged', () => {
+  const same = { sequence: 3, strategy: 'planner', actual: { outcome: 'player_victory', turns: 7, core_remaining: 0 }, counterfactual: { outcome: 'player_victory', turns: 6, core_remaining: 0, diverged: false } };
+  const changed = { sequence: 3, strategy: 'planner', actual: { outcome: 'player_victory', turns: 7, core_remaining: 0 }, counterfactual: { outcome: 'city_held', turns: 8, core_remaining: 40, diverged: true } };
+  assert.match(counterfactualText(same), /仍然是毀滅成功/);
+  assert.match(counterfactualText(same), /planner/);
+  assert.match(counterfactualText(changed), /會走向城市守住/);
+  assert.match(counterfactualText(changed), /和實際的毀滅成功不一樣/);
 });
 
 test('victory findings cite actual interrupted turns, repairs and strongest hit', () => {

@@ -199,6 +199,23 @@ export function reportFindings(run: Run): ReportFinding[] {
     if (swaps.length) findings.push({ turn: swaps[0]!.events[0]?.turn ?? null, text: `你用掉 ${swaps.length} 次免費換牌。換掉的牌當回合離開可抽集合，所以換走的那一張不會立刻回到手上。` });
     return findings;
 }
+export interface CounterfactualComparison {
+    sequence: number; strategy: string;
+    actual: { outcome: Outcome; turns: number; core_remaining: number };
+    counterfactual: { outcome: Outcome; turns: number; core_remaining: number; diverged: boolean };
+    continuation: { turn: number; type: string; skill_id: string | null; target: Element | null }[];
+}
+/** P07 反事實比較：換掉一次已結算的決策，交給模擬策略打完剩下的回合。 */
+export function fetchCounterfactual(runId: string, sequence: number, alternative: { type: 'play' | 'timeout'; card_id?: string; fixed?: string }): Promise<CounterfactualComparison> {
+    return api<CounterfactualComparison>(`/runs/${runId}/counterfactual`, { sequence, ...alternative });
+}
+export function counterfactualText(result: CounterfactualComparison): string {
+    const label = (outcome: Outcome) => outcome === 'player_victory' ? '毀滅成功' : '城市守住';
+    const detail = `第 ${result.counterfactual.turns} 回合、核心剩餘 ${result.counterfactual.core_remaining}`;
+    return result.counterfactual.diverged
+        ? `換成這個選擇，模擬（${result.strategy}策略接手）會走向${label(result.counterfactual.outcome)}（${detail}），和實際的${label(result.actual.outcome)}不一樣。`
+        : `換成這個選擇，模擬（${result.strategy}策略接手）仍然是${label(result.counterfactual.outcome)}（${detail}），實際結果沒有被這一手決定。`;
+}
 export class PendingStorageError extends Error {}
 export class ApiError extends Error {
     constructor(public status: number, message: string, public reason: string, public retryAfter: number) { super(message); }

@@ -120,4 +120,9 @@ class InvalidActionException extends RuntimeException
     {
         return new self('not_timed_out', '這一回合的決策窗口還沒有結束');
     }
+
+    public static function sequenceNotReplayable(int $sequence): self
+    {
+        return new self('sequence_not_replayable', "第 {$sequence} 筆行動不是可以比較的決策", ['sequence' => $sequence]);
+    }
 }

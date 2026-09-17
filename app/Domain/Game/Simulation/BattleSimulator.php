@@ -32,8 +32,34 @@ class BattleSimulator
         int $seed,
         string $scenarioLabel,
     ): SimulationResult {
+        return $this->play($this->engine->start($level, $seed), $level, $modifiers, $strategy, $seed, $scenarioLabel);
+    }
+
+    /**
+     * 從一個已存在的局面（不一定是關卡開局）繼續跑到結束。P07 反事實比較用
+     * 這個入口：在某一回合換一個行動之後，剩下的回合交給策略接著打，
+     * 結果和一般模擬一樣完全由 (局面, seed) 決定。
+     */
+    public function continueFrom(
+        BattleState $state,
+        LevelDefinition $level,
+        ScenarioModifiers $modifiers,
+        Strategy $strategy,
+        int $seed,
+        string $scenarioLabel,
+    ): SimulationResult {
+        return $this->play($state, $level, $modifiers, $strategy, $seed, $scenarioLabel);
+    }
+
+    private function play(
+        BattleState $state,
+        LevelDefinition $level,
+        ScenarioModifiers $modifiers,
+        Strategy $strategy,
+        int $seed,
+        string $scenarioLabel,
+    ): SimulationResult {
         $rng = new Randomizer(new Xoshiro256StarStar($this->seedString($seed)));
-        $state = $this->engine->start($level, $seed);
         $actions = [];
         $rejected = 0;
         $counter = 0;

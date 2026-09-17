@@ -20,6 +20,14 @@
 - 只完成本次被指派的階段；若必要修改跨階段共用介面，更新契約與影響清單。
 - 未經實測不能寫「Hostinger 已可部署」「難度已平衡」「Boost 全選完成」。
 
+## P07 已交付：反事實比較服務＋前端一鍵比較
+
+2026-09-17 完成 P07：`app/Services/Game/CounterfactualComparator.php` 換掉一局已結束對局裡的某一次決策，重建那一手之前的局面，套用替代行動後交給 `BattleSimulator::continueFrom()`（`BattleSimulator` 新增的入口，可從任意局面接續模擬）用 `planner`／`greedy` 策略打完剩下的回合。新端點 `POST /api/v1/runs/{run}/counterfactual` 只讀不寫，擁有者隔離與未結束局面的檢查方式和其他端點一致。戰報頁的完整行動紀錄裡，每一筆出牌旁邊可以按「如果這回合改蓄勢，結果會怎樣？」立即看到比較結果。完整變更、10 份全五關勝敗樣本與限制見 [`phase-reports/P07.md`](phase-reports/P07.md)。
+
+「兩套獨立結局」的文案／畫面／音效判定為 P04～P06 已經做完，P07 沒有重做，只在報告裡確認。
+
+接手時：先問使用者 P06 音效是否已回收（見下一段）；音效之外，下一步是 `DEVELOPMENT-PLAN.md` §P08 全面驗收——真人試玩、手機實機與跨分頁／斷線等情境。反事實比較這個新功能本身也還沒有真人試玩過，也沒做手機 viewport 檢查，不要當成已經驗收。
+
 ## P06：美術已交付並已 push，音效還在等回收
 
 2026-09-17 已依 [`P06-ART-GENERATION-BRIEF.md`](P06-ART-GENERATION-BRIEF.md) 生成、回收與整合 23 張原創插畫，並經另一個 Claude Code session 核對 SHA-256、抽查構圖與全套測試／建置後，commit `a0073b0` push 上 `origin/main`。原稿為 `assets/generated/p06/`，正式 WebP 為 `public/assets/p06/`；來源、提示詞、hash、尺寸與轉檔關係見 `assets/p06-generation.json`，完整變更與限制見 [`phase-reports/P06.md`](phase-reports/P06.md)。美術部分接手時不必再問是否回收，直接視為已整合。
