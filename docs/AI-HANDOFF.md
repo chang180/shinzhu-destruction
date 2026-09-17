@@ -20,11 +20,16 @@
 - 只完成本次被指派的階段；若必要修改跨階段共用介面，更新契約與影響清單。
 - 未經實測不能寫「Hostinger 已可部署」「難度已平衡」「Boost 全選完成」。
 
-## P06 已交付，等待人工視聽驗收
+## P06：美術已交付並已 push，音效還在等回收
 
-2026-09-17 已依 [`P06-ART-GENERATION-BRIEF.md`](P06-ART-GENERATION-BRIEF.md) 生成、回收與整合 23 張原創插畫。原稿為 `assets/generated/p06/`，正式 WebP 為 `public/assets/p06/`；來源、提示詞、hash、尺寸與轉檔關係見 `assets/p06-generation.json`，完整變更與限制見 [`phase-reports/P06.md`](phase-reports/P06.md)。
+2026-09-17 已依 [`P06-ART-GENERATION-BRIEF.md`](P06-ART-GENERATION-BRIEF.md) 生成、回收與整合 23 張原創插畫，並經另一個 Claude Code session 核對 SHA-256、抽查構圖與全套測試／建置後，commit `a0073b0` push 上 `origin/main`。原稿為 `assets/generated/p06/`，正式 WebP 為 `public/assets/p06/`；來源、提示詞、hash、尺寸與轉檔關係見 `assets/p06-generation.json`，完整變更與限制見 [`phase-reports/P06.md`](phase-reports/P06.md)。美術部分接手時不必再問是否回收，直接視為已整合。
 
-接手時不必再問是否回收素材。應在本機 Herd 依序檢查五關、勝敗與進階終幕的桌機及 390×844 視圖，確認使徒疊圖與文字不互相遮擋；音效、手機實機與真人試玩仍是未完成項，不能把本次資產整合稱為完整視聽或真人驗收。
+**音效還沒有。** 現況只有 4 個 Kenney CC0 命中音（`public/assets/p04/*.ogg`）與程式即時合成的施法／結局純音，沒有原創錄製或生成的音效檔。已寫出可外派的 [`P06-AUDIO-GENERATION-BRIEF.md`](P06-AUDIO-GENERATION-BRIEF.md)（14 個 cue：4 個 UI 提示音、3 個系別施法音、1 個修復音、3 個終招音層、3 個結局樂句）。接手時先問使用者音效產出是否已回收：
+
+- 沒回收：不要卡住，去做不依賴音效／美術的自動化項目，目前是 P07 行動複盤與兩種獨立結局（見 `DEVELOPMENT-PLAN.md` §P07）。
+- 已回收：依派工單 §3 交回格式核對 14 個檔案，正規化並轉出瀏覽器相容格式，接上 `resources/js/audio.ts`，回頭補齊 `phase-reports/P06.md` 的音效驗收項，才能把 P06 狀態從「待驗收」推進到「完成」。
+
+手機實機、跨瀏覽器實機與真人試玩仍是未完成項，不能把本次資產整合稱為完整視聽或真人驗收。
 
 P07～P09 涉及真人試玩、手機實機操作與 Hostinger 正式主機帳號，這些是這個純終端 AI session 做不到的事；依使用者指示，這些項目要在對應階段報告中列成明確的人工待辦清單，而不是卡住其他可自動化工作的進度。
 
