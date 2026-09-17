@@ -8,3 +8,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Domain/Game/** | .ai/rules/game.md |
 | app/Services/OpenData/** | .ai/rules/open-data.md |
 | app/Services/Game/** | .ai/rules/services-game.md |
+| package.json, vite.config.mts | .ai/rules/deployment.md |
