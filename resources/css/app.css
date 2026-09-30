@@ -55,8 +55,6 @@
 .card-top em{font-style:normal;font-size:.63rem;color:var(--element,var(--muted));border:1px solid var(--element,var(--line));padding:2px 6px;white-space:nowrap}
 .card-cost{font-size:.68rem;letter-spacing:.08em;color:var(--copper)}
 .card-text{font-size:.75rem;line-height:1.75;color:#d4c8d4}
-.card-role{font-size:.68rem;line-height:1.6;color:var(--muted);margin-top:auto}
-.card-data{font-size:.64rem;line-height:1.5;color:var(--water);border-top:1px solid var(--line);padding-top:8px}
 .card-block{font-size:.66rem;color:#ec9789}
 .card-tools{display:flex;gap:6px}
 .card-tools button{flex:1;padding:7px 4px;font-size:.64rem;border-color:#ffffff18}
@@ -119,3 +117,72 @@
 .city-core .apostle-mark{position:absolute;z-index:1;right:4%;bottom:-22%;height:114%;width:auto;opacity:.43;object-fit:contain;object-position:bottom right;pointer-events:none;filter:drop-shadow(0 10px 16px #0009)}
 .ending-art{display:block;width:min(100%,720px);max-height:320px;object-fit:cover;border:1px solid var(--line);margin:0 0 24px}
 @media(max-width:760px){.hero-student{right:-8%;height:57%;opacity:.3}.city-core .apostle-mark{right:-8%;height:105%;opacity:.35}.ending-art{max-height:210px}}
+
+/* P08：必要資訊 16px、輔助資訊 14px；用途入口與施放分開。 */
+body{min-width:0}
+small,.small,.eyebrow,summary,.settings,.settings summary,.mode-picker legend,.mode-picker small,.route small,.save-list button span small,.campaign-state .tag,.campaign-state em,.deck-list small,.reward-options em,.reward-options .cost,.source-row,footer{font-size:.875rem}
+.mode-picker b,.route b,.route span,.route li button,.deck-list b,.reward-options p,.lesson,.forecast p,.forecast li,.data-grid b,.data-grid p,.history h3,.history li,.counterfactual button,.report-actions button,.campaign-state .primary{font-size:1rem}
+.topbar{min-height:94px;height:auto;padding-top:14px;padding-bottom:14px}
+.hero{height:auto;min-height:700px}
+.hero-art{position:absolute;inset:0}
+.hero-copy{position:relative;left:auto;top:auto;max-width:1280px;margin:auto;padding:58px 40px 44px}
+.hero-copy .mode-picker{max-width:620px}
+.battle-heading{flex-wrap:wrap}
+.battle-heading>div{min-width:0}
+.battle-goal{padding:16px 20px;margin-bottom:20px;border-left:3px solid var(--copper);background:#d3a06e12;line-height:1.7}
+.battle-goal b,.battle-goal p{font-size:1rem}
+.battle-goal p{margin:6px 0 0;color:#d4c8d4}
+.core-panel span,.intent-card p,.defenses b,.table-bar .professor-note,.malice span{font-size:1rem}
+.city-core .core-panel{z-index:2;background:#171321b8}
+.intent-card small,.intent-card .tag,.defenses small,.turn span,.countdown span,.table-bar .counts{font-size:.875rem}
+.city-read .defenses{gap:12px}
+.defenses b{flex-wrap:wrap}
+.defenses small{display:block}
+.card-face{min-height:300px;padding:16px 12px;gap:12px}
+.card-top{flex-wrap:wrap}
+.card-top b{font-size:1.125rem}
+.card-top em,.card-cost,.card-text,.card-target,.card-cast,.card-block{font-size:1rem;line-height:1.6;letter-spacing:0}
+.card-target{color:var(--element,var(--paper));border-top:1px solid var(--line);padding-top:10px}
+.card-cast{margin-top:auto;font-weight:700;color:var(--paper)}
+.card-face:disabled{opacity:.85}
+.card-help{border:1px solid var(--line);padding:10px 12px;background:#211b2b}
+.card-help summary{font-size:.875rem;color:var(--water);min-height:24px}
+.card-help p{font-size:1rem;line-height:1.7;margin:12px 0}
+.card-help small{font-size:.875rem}
+.card-tools{flex-wrap:wrap}
+.card-tools button{font-size:.875rem;min-height:44px;flex:1 1 90px}
+.preview-bar p,.preview-bar b,.fixed-actions b,.fixed-actions span,.fixed-actions strong{font-size:1rem}
+.preview-bar small,.fixed-actions small{font-size:.875rem}
+.fixed-action{flex:1 1 260px;min-width:0}
+.fixed-action>button{width:100%;min-height:120px}
+.fixed-action span,.fixed-action strong{display:block;line-height:1.7;margin-top:6px}
+.fixed-action .card-help{margin-top:8px}
+.report{grid-template-columns:minmax(0,1fr) 240px;gap:32px;align-items:start;padding-top:30px;padding-bottom:30px}
+.report>div{min-width:0}
+.report>img{height:260px;object-fit:cover}
+.report h1{font-size:clamp(2rem,4vw,3.5rem);margin-bottom:16px;line-height:1.3}
+.report p,.report-causes{font-size:1rem}
+.report .eyebrow{font-size:.875rem;margin-bottom:12px}
+.report-condition{font-weight:700;color:var(--paper);margin-bottom:16px}
+.report-stats{display:flex;flex-wrap:wrap;gap:20px;margin:0 0 18px;padding:16px;background:#eee2ca0b;border:1px solid var(--line)}
+.report-stats dt{font-size:.875rem;color:var(--muted)}
+.report-stats dd{margin:4px 0 0;font-size:1.4rem;font-weight:700;color:var(--copper)}
+.final-move{border-left:3px solid var(--water);padding-left:14px}
+.report-causes{padding-left:22px;line-height:1.7;margin-bottom:20px}
+.report-causes li{margin-bottom:8px}
+.report-causes b{color:var(--copper)}
+.report-details{padding:24px 0;border-top:1px solid var(--line)}
+.report-details details>p{margin-top:16px}
+.highlights li{font-size:1rem;flex-wrap:wrap;gap:8px}
+.report-actions button{white-space:normal;min-width:0}
+@media(max-width:1050px){.hero-copy{padding-left:24px;padding-right:24px}.report{grid-template-columns:minmax(0,1fr) 180px}.report>img{height:230px}}
+@media(max-width:760px){
+    .topbar{min-height:76px;padding:12px 16px}.brand{letter-spacing:0}.settings summary{padding:8px 4px}
+    .hero-copy{padding:40px 24px}.hero{min-height:740px}.hero h1{font-size:clamp(2.75rem,12vw,4.8rem)}
+    .battle-heading h1{font-size:1.6rem}.battle-heading .eyebrow{font-size:.875rem}.clock{flex-wrap:wrap}
+    .battle-goal{padding:14px}.hand li{flex-basis:88%}.card-face{min-height:300px}
+    .city-read .defenses{grid-template-columns:1fr;gap:14px}.defenses b{justify-content:flex-start}.defenses small{margin-top:6px}
+    .fixed-action{flex-basis:100%}.report{grid-template-columns:1fr;gap:24px}.report>img{height:180px}
+    .report-stats{gap:14px}.report-stats dd{font-size:1.2rem}.report .small{font-size:.875rem}
+    .briefing .lead,.cutscene-copy p{font-size:1rem}.message{font-size:1rem}.eyebrow{letter-spacing:.1em}
+}

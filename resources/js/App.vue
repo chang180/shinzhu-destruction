@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
 import type { BattleEvent, Campaign, Card, Choice, CounterfactualComparison, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
@@ -67,6 +67,7 @@ const revealed = computed(() => state.value?.turn_phase === 'decision');
 const remaining = computed(() => secondsLeft(state.value?.deadline_at ?? null, clockOffset.value, tick.value));
 const urgent = computed(() => remaining.value !== null && remaining.value <= 10);
 const allEvents = computed(() => run.value?.history.flatMap(h => h.events) ?? []);
+const summary = computed(() => run.value ? reportSummary(run.value) : null);
 const highlights = computed(() => run.value ? reportFindings(run.value) : []);
 const hand = computed(() => (state.value?.hand ?? []).map(id => ({ id, card: cardFor(id) })).filter(entry => !!entry.card));
 const fixedCards = computed(() => Object.values(run.value?.cards ?? {}).filter(card => ['gather', 'ultimate'].includes(card.skill_id)));
@@ -243,8 +244,11 @@ async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, k
         pending.clear(); uncertain.value = false;
         if (input.type === 'play' || input.type === 'timeout') await present(response.data.events);
         if (latest.outcome !== 'in_progress') {
-            // 通關才會有新的里程碑與牌組獎勵；戰報要顯示它們，所以這裡重新取一次戰役狀態。
-            try { campaign.value = (await api<{ data: Campaign }>('/campaign')).data; } catch { /* 戰報照樣顯示。 */ }
+            // 戰報的下一關需要最新解鎖與最佳成績，不能沿用開局前的關卡列表。
+            try {
+                const catalog = await api<{ levels: Level[]; campaign: Campaign }>('/levels');
+                levels.value = catalog.levels; campaign.value = catalog.campaign;
+            } catch { /* 戰報照樣顯示；回學院可重新取得進度。 */ }
         }
         showRun(latest);
         automaticallyReveal = (input.type === 'play' || input.type === 'timeout') && shouldAutoReveal(latest);
@@ -391,8 +395,9 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                             <div v-else-if="revealed" class="countdown practice"><strong>∞</strong><span>不限時</span></div>
                         </div>
                     </div>
+                    <div class="battle-goal"><b>你的目標：在 {{ state.max_turns }} 回合內，把城市核心打到 0。</b><p>牌的系別 → 對應防線減傷 → 城市核心。不必先打破防線，也能傷到核心；直接出牌即可，城市接著按預告回應。</p></div>
                     <div class="city-strip">
-                        <div class="city-core"><img :src="asset(sceneAsset(run.level_id))" :alt="`${level?.name}的虛構城市防線`"><img class="apostle-mark" :src="asset(apostleAsset(run.level_id))" :alt="`${level?.name}的禁術使徒`"><div class="core-panel"><span>城市核心韌性</span><strong>{{ state.core_resilience }}</strong><progress aria-label="城市核心韌性" :value="state.core_resilience" max="100"></progress></div></div>
+                        <div class="city-core"><img :src="asset(sceneAsset(run.level_id))" :alt="`${level?.name}的虛構城市防線`"><img class="apostle-mark" :src="asset(apostleAsset(run.level_id))" :alt="`${level?.name}的禁術使徒`"><div class="core-panel"><span>城市核心 · 打到 0 通關</span><strong>{{ state.core_resilience }}</strong><progress aria-label="城市核心韌性" :value="state.core_resilience" max="100"></progress></div></div>
                         <div class="city-read">
                             <div class="intent-card" :class="{ interruptible: state.intent?.interruptible }"><small>下一步 · 城市預告</small><p>{{ state.intent?.description ?? '對局已結束' }}</p><span v-if="state.intent?.interruptible" class="tag">可用{{ elementNames[state.intent.element] }}系擾序打斷</span></div>
                             <div class="defenses"><div v-for="element in elements" :key="element" :class="element"><b>{{ elementNames[element] }}系防線 <strong>{{ state.defenses[element] }}</strong></b><progress :aria-label="`${elementNames[element]}系防線`" :value="state.defenses[element]" max="100"></progress><small>抗性 {{ state.resistance[element] }} 層 · 印記 {{ state.sigils[element] }}/{{ state.sigil_cap }}</small></div></div>
@@ -413,11 +418,12 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                                 <button class="card-face" :disabled="locked || !!reasonFor(entry.id) || !run.compatible" :title="reasonFor(entry.id) || `點擊立即施放 ${entry.card!.name}`" @mouseenter="previewedCard = entry.card" @mouseleave="previewedCard = undefined" @focus="previewedCard = entry.card" @blur="previewedCard = undefined" @click="castCard(entry.id)">
                                     <span class="card-top"><b>{{ entry.card!.name }}</b><em>{{ entry.card!.element ? elementNames[entry.card!.element] + '系' : '無系' }}</em></span>
                                     <span class="card-cost">惡意 {{ entry.card!.malice_cost }}<template v-if="entry.card!.cooldown"> · 冷卻 {{ entry.card!.cooldown }}</template></span>
-                                    <span class="card-text">{{ entry.card!.text }}</span>
-                                    <span class="card-role">{{ entry.card!.role }}</span>
-                                    <span class="card-data">{{ noteFor(entry.card!) }}</span>
+                                    <span class="card-target">{{ cardGuide(entry.card!).target }}</span>
+                                    <span class="card-text">{{ cardGuide(entry.card!).timing }}</span>
+                                    <span class="card-cast">立即施放 ↗</span>
                                     <span v-if="reasonFor(entry.id)" class="card-block">{{ reasonFor(entry.id) }}</span>
                                 </button>
+                                <details class="card-help"><summary>看用途（不出牌）</summary><p>{{ cardGuide(entry.card!).example }}</p><p>{{ entry.card!.text }}</p><p>基礎衝擊 {{ entry.card!.base_impact }} · 防線削弱 {{ -entry.card!.defense_delta }}<br>花費 {{ entry.card!.malice_cost }} 惡意；{{ entry.card!.cooldown ? `使用後，接下來 ${entry.card!.cooldown} 回合不能再用同招。` : '沒有冷卻，可在下一手再次使用。' }}</p><small>{{ noteFor(entry.card!) }}<br>實際傷害會受防線、抗性與護盾影響。</small></details>
                                 <div class="card-tools">
                                     <button :disabled="locked || !canKeepCard(state, entry.id) || (!keep.includes(entry.id) && !canKeepMore)" :aria-pressed="keep.includes(entry.id)" @click="toggleKeep(entry.id)">{{ !canKeepCard(state, entry.id) ? '上手已留，不能再留' : keep.includes(entry.id) ? '已留牌' : '留到下回合' }}</button>
                                     <button :disabled="locked || !!swapChoice(entry.id)?.reason" @click="swap(entry.id)">{{ state.swap_used ? '已換過' : '換這張' }}</button>
@@ -430,13 +436,34 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         </div>
                         <div class="fixed-actions">
                             <p class="eyebrow">手牌旁的固定行動 · 不佔手牌</p>
-                            <button v-for="card in fixedCards" :key="card.skill_id" :class="{ unavailable: !!fixedReason(card) }" :disabled="locked || !!fixedReason(card) || !run.compatible" :title="fixedReason(card) || `點擊立即執行 ${card.name}`" @mouseenter="previewedCard = card" @mouseleave="previewedCard = undefined" @focus="previewedCard = card" @blur="previewedCard = undefined" @click="castFixed(card.skill_id)"><b>{{ card.name }}</b><small>{{ fixedReason(card) || `${card.role}，點擊立即執行` }}</small></button>
+                            <div v-for="card in fixedCards" :key="card.skill_id" class="fixed-action">
+                                <button :class="{ unavailable: !!fixedReason(card) }" :disabled="locked || !!fixedReason(card) || !run.compatible" :title="fixedReason(card) || `點擊立即執行 ${card.name}`" @click="castFixed(card.skill_id)"><b>{{ card.name }}</b><span>{{ cardGuide(card).target }}</span><small>花費 {{ card.malice_cost }} 惡意<template v-if="card.required_sigils"> · 三系印記各 {{ card.required_sigils }} 枚</template></small><strong>{{ fixedReason(card) || '立即執行 ↗' }}</strong></button>
+                                <details class="card-help"><summary>看用途（不執行）</summary><p>{{ cardGuide(card).timing }}</p><p>{{ cardGuide(card).example }}</p><p>{{ card.role }}</p><small v-if="card.cooldown">使用後，接下來 {{ card.cooldown }} 回合不能再用同招。</small></details>
+                            </div>
                         </div>
                     </template>
                     <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，同一張只能留到下一手；換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="intent in level?.forecast" :key="intent.scheduled_turn">{{ intent.description }}</li></ol></details>
                 </section>
-                <section v-if="page === 'report'" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }"><img :src="asset(reportAsset(run.outcome, run.level_id))" :alt="run.outcome === 'player_victory' ? '虛構城市化為懸浮陶片，金色光幕宣告禁術修習通關' : '重新穩定的虛構城市防線'">
-                    <div><p class="eyebrow">ACADEMY FIELD REPORT / 第 {{ level?.sequence }} 關戰報 · {{ level?.name }}｜{{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ run.outcome === 'player_victory' ? '毀滅成功。' : '城市守住了。' }}</h1><p class="lead">{{ run.outcome === 'player_victory' ? `第 ${level?.sequence} 門禁術・${level?.name}，修習通過。晏沉抬杯，向你致意。` : '本次試煉結束。把城市的回應，變成下一次的計畫。' }}</p><p>第 {{ state.turn }} 回合 · 核心剩餘 {{ state.core_resilience }} · 逾時 {{ state.timeouts }} 次</p><p>{{ run.outcome === 'player_victory' ? '晏沉的結語：「一座城市若把每次撐過去，都當成不必改變的理由，最後就會連下一次也沒有。」以下列出你如何使這一局走到終點。' : '晏沉收回空杯：「你讓它喘過氣了。看看是哪一回合。」以下依你的實際行動複盤，再挑一個決策重試。' }}</p><p v-if="run.mode === 'practice'" class="small">練習成績單獨記錄，不會登記為限時挑戰通關。</p><div class="report-actions"><button v-if="run.outcome === 'player_victory' && nextLevel && nextLevel.level_id !== run.level_id" class="primary" :disabled="locked" @click="start(false, nextLevel.level_id)">前往第 {{ nextLevel.sequence }} 關 · {{ nextLevel.name }} ↗</button><button :class="{ primary: run.outcome !== 'player_victory' }" :disabled="locked || !run.compatible" @click="start(true)">同情境再試一次 ↗</button><button :disabled="locked" @click="replay">重播本局演出</button><button :disabled="locked" @click="loadLobby">回學院</button></div></div>
+                <section v-if="page === 'report' && summary" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }">
+                    <div><p class="eyebrow">第 {{ level?.sequence }} 關 · {{ level?.name }}｜{{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p>
+                        <h1 tabindex="-1">{{ run.outcome === 'player_victory' ? '毀滅成功，通關！' : '城市守住，未通關。' }}</h1>
+                        <p class="report-condition">{{ summary.condition }}</p>
+                        <dl class="report-stats"><div><dt>城市核心</dt><dd>{{ summary.initialCore ?? '開局值未保存' }} → {{ state.core_resilience }}</dd></div><div><dt>結束回合</dt><dd>{{ summary.turn }} / {{ state.max_turns }}</dd></div><div><dt>逾時</dt><dd>{{ state.timeouts }} 次</dd></div></dl>
+                        <p class="final-move">{{ summary.finalMove }}</p>
+                        <ol class="report-causes"><li v-for="(finding, index) in summary.findings" :key="index"><b>{{ finding.turn === null ? '全局' : `第 ${finding.turn} 回合` }}</b> {{ finding.text }}</li></ol>
+                        <p v-if="run.mode === 'practice'" class="small">這是練習成績；練習關卡進度分開記錄，限時挑戰仍需自行通關。</p>
+                        <p v-if="ending === 'main'">主線三關已通過。你可以收下戰果，或繼續兩關進階畢業考。</p>
+                        <p v-else-if="ending === 'advanced'">五關全數通過，已取得進階終幕。</p>
+                        <p v-else-if="reward && reward.level_id === run.level_id && run.outcome === 'player_victory'">已取得牌組獎勵，先挑一張新禁術，再繼續挑戰。</p>
+                        <div class="report-actions">
+                            <button v-if="ending === 'main'" class="primary" :disabled="locked" @click="standDown">收下戰果，完成主線</button>
+                            <button v-if="reward" class="primary" :disabled="locked" @click="openReward">挑選新禁術 ↗</button>
+                            <button v-else-if="run.outcome === 'player_victory' && nextLevel && nextLevel.level_id !== run.level_id" :class="{ primary: !ending }" :disabled="locked" @click="start(false, nextLevel.level_id)">{{ ending === 'main' ? '接受進階畢業考' : `前往第 ${nextLevel.sequence} 關` }} · {{ nextLevel.name }} ↗</button>
+                            <button :class="{ primary: run.outcome !== 'player_victory' }" :disabled="locked || !run.compatible" @click="start(true)">同情境再試一次 ↗</button>
+                            <button :disabled="locked" @click="loadLobby">回學院</button>
+                        </div>
+                    </div>
+                    <img :src="asset(reportAsset(run.outcome, run.level_id))" :alt="run.outcome === 'player_victory' ? '虛構城市化為懸浮陶片，宣告通關' : '重新穩定的虛構城市防線'">
                 </section>
                 <section v-if="page === 'report' && ending === 'main'" class="content-width ending main"><img class="ending-art" :src="asset('victory-2')" alt="浮空陶片與學院的銅色焰火">
                     <p class="eyebrow">CAMPAIGN ENDING / 主線目標達成</p>
@@ -461,7 +488,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     <p class="lead">{{ reward?.prompt }}</p>
                     <div class="report-actions"><button class="primary" :disabled="locked" @click="openReward">去挑一張 ↗</button></div>
                 </section>
-                <section v-if="page === 'report'" class="content-width"><h2>關鍵回合 · 依實際紀錄</h2><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></section>
+                <section v-if="page === 'report'" class="content-width report-details"><details><summary>展開完整戰報與演出</summary><p>{{ run.outcome === 'player_victory' ? '晏沉抬杯：「你讓城市沒有下一次。」以下依本局的實際紀錄複盤。' : '晏沉收回空杯：「看看是哪一回合。」以下依本局的實際紀錄複盤。' }}</p><button :disabled="locked" @click="replay">重播本局演出</button><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></details></section>
                 <section class="content-width data-panel"><details :open="page === 'briefing'"><summary>本局情境情報 · 開局後不變</summary><p class="small">以下是遊戲情境修正，不是災害預測。正值有利進攻；缺值採中性修正。標示「本關未採用」的系別不會在這一局生效。</p><div class="data-grid"><div v-for="element in elements" :key="element"><b>{{ elementNames[element] }}系 {{ run.data_notes[element]?.applied ? ((run.data_notes[element].modifier ?? 0) * 100).toFixed(1) + '%' : '本關未採用' }}</b><p>{{ run.data_notes[element]?.reason ?? run.scenario.reasons[element]?.message }}</p></div></div><div v-if="!Object.keys(run.snapshots).length" class="message">舊局未保存來源品質。保留原情境數值，不以今日資料冒充。</div><div v-for="(snapshot, source) in run.snapshots" :key="source" class="source-row"><b>{{ sourceNames[source] ?? source }}</b><span>{{ qualityNames[snapshot.quality] ?? snapshot.quality }}</span><small>觀測：{{ snapshot.observed_at ?? (snapshot.period ? Object.values(snapshot.period).join(' / ') : '無觀測日期') }}</small><p v-for="warning in snapshot.warnings" :key="warning" class="small">{{ warning }}</p></div></details></section>
                 <section v-if="run.history.length" class="content-width history"><details><summary>完整行動紀錄 · {{ run.history.length }} 次</summary><article v-for="entry in run.history" :key="entry.sequence"><h3>第 {{ entry.events[0]?.turn }} 回合 / {{ playedName(run, entry.input) }}</h3><ul><li v-for="event in entry.events" :key="event.sequence">{{ eventText(event) }}</li></ul>
                     <div v-if="entry.input.type === 'play'" class="counterfactual">

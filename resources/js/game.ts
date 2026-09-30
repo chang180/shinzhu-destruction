@@ -77,6 +77,18 @@ export interface Settlement { events: BattleEvent[]; version: number; state: Bat
 export const elements: Element[] = ['water', 'heat', 'land'];
 export const elementNames = { water: '水', heat: '熱', land: '土地' };
 export const kindNames: Record<string, string> = { probe: '試探', breach: '破陣', disrupt: '擾序', gather: '蓄勢', ultimate: '萬川歸寂' };
+export function cardGuide(card: Card): { target: string; timing: string; example: string } {
+    const element = card.element ? `${elementNames[card.element]}系` : '';
+    const target = card.kind === 'gather' ? '回復你的惡意，不攻擊城市' : card.element ? `${element}防線 → 城市核心` : '三系合擊 → 城市核心';
+    const guides: Record<string, { timing: string; example: string }> = {
+        probe: { timing: '惡意不多時，低成本進攻並累積印記。', example: `例如：想累積${element}印記，就用這張試探；防線越強，核心傷害越少。` },
+        breach: { timing: '想削弱防線，為後續攻擊開路時使用。', example: `例如：${element}防線還很厚，先用破陣削弱它；防線首次歸零會開啟破綻，下一個行動就會消耗它。` },
+        disrupt: { timing: `城市預告「可打斷」且是${element}時使用。`, example: `例如：城市準備${element}修復，用同系擾序取消它；不同系或不可打斷的預告仍會執行。` },
+        gather: { timing: '惡意不足或想緩解抗性時，花一回合準備。', example: '例如：手上的強牌付不起費用，先蓄勢回復惡意；這回合城市仍會照預告行動。' },
+        ultimate: { timing: '三系印記都足夠時，找護盾少或破綻開啟的窗口。', example: '例如：三系印記已滿足需求，施放終招消耗印記攻擊核心；城市的任何護盾都能吸收它。' },
+    };
+    return { target, ...(guides[card.kind] ?? { timing: card.role, example: card.text }) };
+}
 export function briefingTimingText(mode: RunMode): string {
     return mode === 'practice'
         ? '進入戰鬥就會自動發牌；練習模式不限時，出牌演出後直接接下一手。'
@@ -166,6 +178,37 @@ export function visibleEvents(events: BattleEvent[]): BattleEvent[] {
     return events.filter(e => ['action_accepted', 'action_missed', 'impact', 'interrupt', 'interrupt_failed', 'breach_opened', 'combo', 'city_repair', 'city_shield', 'city_reinforce', 'outcome'].includes(e.type));
 }
 export interface ReportFinding { turn: number | null; text: string }
+export interface ReportSummary { turn: number; initialCore: number | null; condition: string; finalMove: string; findings: ReportFinding[] }
+export function reportSummary(run: Run): ReportSummary {
+    const events = run.history.flatMap(entry => entry.events);
+    const outcome = events.findLast(event => event.type === 'outcome');
+    const turn = outcome?.turn ?? run.state.turn;
+    const initialCore = events.find(event => typeof event.before.core_resilience === 'number')?.before.core_resilience;
+    const finalHit = events.findLast(event => event.type === 'impact' && event.after.core_resilience === 0 && Number(event.delta.core_resilience) < 0);
+    const entry = finalHit ? run.history.find(history => history.events.includes(finalHit)) : undefined;
+    const condition = run.outcome === 'player_victory'
+        ? '城市核心已歸零，達成通關目標。'
+        : outcome?.reason_code === 'turns_exhausted' ? `${run.state.max_turns} 回合已用完，城市核心仍未歸零。` : '城市守住；結束條件以完整紀錄為準。';
+    const finalMove = run.outcome === 'player_victory'
+        ? finalHit ? `第 ${finalHit.turn} 回合，你用「${playedName(run, entry?.input)}」把核心從 ${finalHit.before.core_resilience} 打到 0。` : '紀錄沒有保留最後一擊的細節。'
+        : `結束時還差 ${run.state.core_resilience} 點核心；可從下方關鍵回合找出重試的時機。`;
+    const findings: ReportFinding[] = [];
+    const strongest = events.filter(event => event.type === 'impact' && Number(event.delta.core_resilience) < 0).sort((a, b) => Number(a.delta.core_resilience) - Number(b.delta.core_resilience))[0];
+    if (strongest) {
+        const action = run.history.find(history => history.events.includes(strongest));
+        findings.push({ turn: strongest.turn, text: `「${playedName(run, action?.input)}」命中核心，削減 ${-Number(strongest.delta.core_resilience)} 點，是本局最大一擊。${events.some(event => event.turn === strongest.turn && event.type === 'breach_consumed' && event.reason_code !== 'missed_action_wasted_breach') ? '這一擊用到了破綻。' : ''}` });
+    }
+    const interrupts = events.filter(event => event.type === 'interrupt');
+    if (interrupts.length) findings.push({ turn: null, text: `第 ${interrupts.map(event => event.turn).join('、')} 回合，同系擾序成功取消 ${interrupts.length} 次城市行動，這些預告沒有執行。` });
+    const repairs = events.filter(event => event.type === 'city_repair' && Number(event.delta.core_resilience) > 0);
+    if (repairs.length) findings.push({ turn: null, text: `第 ${repairs.map(event => event.turn).join('、')} 回合，城市修復共補回 ${repairs.reduce((sum, event) => sum + Number(event.delta.core_resilience), 0)} 點核心，抵銷了部分進攻。` });
+    const missed = events.filter(event => event.type === 'action_missed');
+    if (missed.length) findings.push({ turn: null, text: `第 ${missed.map(event => event.turn).join('、')} 回合逾時，共 ${missed.length} 次沒有出手，城市仍照預告行動。` });
+    const gathered = run.history.filter(entry => entry.input.type === 'play' && entry.input.fixed === 'gather');
+    if (gathered.length) findings.push({ turn: null, text: `你用了 ${gathered.length} 回合蓄勢，這些回合沒有攻擊核心；城市仍照預告行動。` });
+    if (!findings.length) findings.push({ turn: null, text: '沒有足夠的命中、修復或打斷紀錄可整理原因；請查看完整行動紀錄。' });
+    return { turn, initialCore: typeof initialCore === 'number' ? initialCore : null, condition, finalMove, findings: findings.slice(0, 3) };
+}
 // 一次行動打出的是哪一張牌。牌名優先，找不到牌就退回招式代碼的名稱。
 export function playedName(run: Run, input: ActionInput | undefined): string {
     if (!input) return '未知行動';

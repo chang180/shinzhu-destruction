@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');
+const { execFileSync } = require('node:child_process');
 
 // Exercise the shipped TypeScript helpers without a second implementation or browser dependency.
 const source = ts.transpileModule(fs.readFileSync('resources/js/game.ts', 'utf8'), {
@@ -10,7 +11,7 @@ const source = ts.transpileModule(fs.readFileSync('resources/js/game.ts', 'utf8'
 }).outputText;
 const context = { exports: {}, crypto: globalThis.crypto };
 vm.runInNewContext(source, context);
-const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, counterfactualText, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, playedName } = context.exports;
+const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, counterfactualText, reportFindings, reportSummary, cardGuide, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, playedName } = context.exports;
 const event = (type, turn, delta = {}, after = {}) => ({ type, turn, delta, after, cue_id: '', reason_code: '', actor: 'player', target: 'water' });
 // 牌組與卡面在真實回應裡一定存在；戰報要靠它們把 card_id 翻成玩家看到的卡名。
 const deck = { 'c1': 'long-flow', 'c2': 'final-waste' };
@@ -183,6 +184,94 @@ test('a wasted breach window is reported from its own recorded reason code', () 
   const wasted = { ...event('breach_consumed', 4), reason_code: 'missed_action_wasted_breach' };
   const report = reportFindings(run('city_held', [event('action_missed', 4), wasted], [{ type: 'timeout', keep: [] }, { type: 'timeout', keep: [] }]));
   assert.match(report.find(f => /逾時/.test(f.text)).text, /破綻窗口過期/);
+});
+
+test('card guidance explains automatic targets and the timing of all five actions', () => {
+  const guide = kind => cardGuide({ kind, element: ['gather', 'ultimate'].includes(kind) ? null : 'land' });
+  assert.equal(guide('probe').target, '土地系防線 → 城市核心');
+  assert.match(guide('probe').timing, /低成本.*印記/);
+  assert.match(guide('breach').example, /土地系防線.*首次歸零/);
+  assert.match(guide('disrupt').timing, /可打斷.*土地系/);
+  assert.match(guide('disrupt').example, /不同系.*仍會執行/);
+  assert.match(guide('gather').target, /不攻擊城市/);
+  assert.match(guide('gather').example, /城市仍會照預告/);
+  assert.match(guide('ultimate').target, /三系合擊/);
+  assert.match(guide('ultimate').example, /任何護盾/);
+});
+
+test('the result summary identifies the recorded final blow rather than the strongest hit', () => {
+  const first = { ...event('impact', 2, { core_resilience: -70 }, { core_resilience: 30 }), before: { core_resilience: 100 } };
+  const last = { ...event('impact', 4, { core_resilience: -30 }, { core_resilience: 0 }), before: { core_resilience: 30 } };
+  const finish = { ...event('outcome', 4, {}, { outcome: 'player_victory' }), before: {} };
+  const battle = run('player_victory', [first, last, finish], ['c2', 'c1', 'c1']);
+  battle.state = { ...battle.state, turn: 5, max_turns: 8, core_resilience: 0 };
+
+  const summary = reportSummary(battle);
+
+  assert.equal(summary.turn, 4);
+  assert.equal(summary.initialCore, 100);
+  assert.match(summary.condition, /核心已歸零/);
+  assert.match(summary.finalMove, /第 4 回合.*千戶長流.*30 打到 0/);
+  assert.match(summary.findings[0].text, /揮霍無度.*70.*最大一擊/);
+});
+
+test('a loss summary cites exhausted turns and limits its causes to three recorded findings', () => {
+  const finish = { ...event('outcome', 8, {}, { outcome: 'city_held' }), reason_code: 'turns_exhausted', before: {} };
+  const battle = run('city_held', [
+    { ...event('impact', 1, { core_resilience: -10 }, { core_resilience: 90 }), before: { core_resilience: 100 } },
+    { ...event('interrupt', 3), before: {} },
+    { ...event('city_repair', 6, { core_resilience: 12 }), before: { core_resilience: 50 } },
+    { ...event('action_missed', 7), before: {} }, finish,
+  ]);
+  battle.state = { ...battle.state, turn: 9, max_turns: 8, core_resilience: 62 };
+
+  const summary = reportSummary(battle);
+
+  assert.equal(summary.turn, 8);
+  assert.match(summary.condition, /8 回合已用完/);
+  assert.match(summary.finalMove, /還差 62 點/);
+  assert.equal(summary.findings.length, 3);
+  assert.match(summary.findings[1].text, /取消 1 次/);
+  assert.match(summary.findings[2].text, /補回 12 點/);
+  assert.equal(summary.findings[2].turn, null);
+  assert.match(summary.findings[2].text, /第 6 回合/);
+});
+
+test('incomplete old reports do not invent an initial core or a winning move', () => {
+  const battle = run('player_victory', []);
+  battle.state = { ...battle.state, turn: 6, core_resilience: 0 };
+
+  const summary = reportSummary(battle);
+
+  assert.equal(summary.initialCore, null);
+  assert.match(summary.finalMove, /沒有保留最後一擊/);
+  assert.match(summary.findings[0].text, /沒有足夠/);
+});
+
+test('all five levels produce truthful victory and defeat summaries from the real PHP engine', () => {
+  const samples = JSON.parse(execFileSync('php', ['tests/Fixtures/p08-reports.php'], { maxBuffer: 2 * 1024 * 1024 }).toString());
+
+  assert.equal(samples.length, 10);
+  for (const sample of samples) {
+    const summary = reportSummary(sample);
+    const events = sample.history.flatMap(entry => entry.events);
+    const outcome = events.findLast(event => event.type === 'outcome');
+    assert.equal(summary.initialCore, 100, sample.level_id);
+    assert.equal(summary.turn, outcome.turn, sample.level_id);
+    assert.ok(summary.findings.length <= 3);
+    if (sample.strategy === 'planner') {
+      assert.equal(sample.outcome, 'player_victory', sample.level_id);
+      const hit = events.findLast(event => event.type === 'impact');
+      assert.match(summary.finalMove, new RegExp(`第 ${hit.turn} 回合.*${hit.before.core_resilience} 打到 0`));
+      assert.equal(hit.after.core_resilience, 0);
+    } else {
+      assert.equal(sample.outcome, 'city_held', sample.level_id);
+      assert.match(summary.condition, new RegExp(`${sample.state.max_turns} 回合已用完`));
+      assert.match(summary.finalMove, new RegExp(`還差 ${sample.state.core_resilience} 點`));
+      assert.match(summary.findings[0].text, new RegExp(`用了 ${sample.state.max_turns} 回合蓄勢`));
+      assert.doesNotMatch(summary.findings.map(finding => finding.text).join(''), /最大一擊|成功取消/);
+    }
+  }
 });
 
 function audioHarness() {
