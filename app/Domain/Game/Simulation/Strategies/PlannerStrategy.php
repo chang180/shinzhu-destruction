@@ -81,7 +81,7 @@ class PlannerStrategy extends LookaheadStrategy
         $candidates = [];
 
         foreach ($state->hand as $instanceId) {
-            if ($instanceId === ($action['card_id'] ?? null)) {
+            if ($instanceId === ($action['card_id'] ?? null) || in_array($instanceId, $state->keptLastTurn, true)) {
                 continue;
             }
 

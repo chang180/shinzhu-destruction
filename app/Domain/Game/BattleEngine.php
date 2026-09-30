@@ -83,6 +83,7 @@ class BattleEngine
             outcome: Outcome::InProgress,
             deck: $deck,
             hand: [],
+            keptLastTurn: [],
             drawPile: Deck::openingOrder($deck, $this->cards, $seed),
             discardPile: [],
             handSize: $hand['size'],
@@ -427,6 +428,12 @@ class BattleEngine
         if ($unknown !== []) {
             throw InvalidActionException::keepNotInHand($unknown);
         }
+
+        $keptAgain = array_values(array_intersect($action->keep, $state->keptLastTurn));
+
+        if ($keptAgain !== []) {
+            throw InvalidActionException::keepConsecutiveTurns($keptAgain);
+        }
     }
 
     /**
@@ -489,6 +496,7 @@ class BattleEngine
 
         $state->discardPile = array_merge($state->discardPile, $discarded);
         $state->hand = array_values($action->keep);
+        $state->keptLastTurn = $state->hand;
 
         $this->record($state, 'hand_settled', BattleEvent::PLAYER, null, 'played_and_discarded',
             ['hand' => $before],
@@ -507,6 +515,7 @@ class BattleEngine
         $before = $state->hand;
         $state->discardPile = array_merge($state->discardPile, $state->hand);
         $state->hand = [];
+        $state->keptLastTurn = [];
 
         $this->record($state, 'hand_settled', BattleEvent::PLAYER, null, 'missed_action_discarded',
             ['hand' => $before],

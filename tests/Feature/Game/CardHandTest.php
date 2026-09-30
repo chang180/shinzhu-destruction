@@ -115,6 +115,68 @@ class CardHandTest extends TestCase
         }
     }
 
+    public function test_a_card_cannot_be_kept_for_two_consecutive_turns(): void
+    {
+        $state = $this->reveal($this->startState());
+        $keptCard = $state->hand[1];
+
+        $nextTurn = $this->apply($state, new ActionRequest(
+            actionId: 'keep-once',
+            expectedVersion: $state->version,
+            type: ActionType::Play,
+            cardId: $state->hand[0],
+            keep: [$keptCard],
+        ))->state;
+        $this->assertSame([$keptCard], $nextTurn->toPublicArray()['kept_last_turn']);
+        $nextTurn = BattleState::fromArray($nextTurn->toArray());
+        $nextTurn = $this->reveal($nextTurn);
+        $before = $nextTurn->toArray();
+
+        try {
+            $this->apply($nextTurn, new ActionRequest(
+                actionId: 'keep-twice',
+                expectedVersion: $nextTurn->version,
+                type: ActionType::Play,
+                cardId: null,
+                fixedSkillId: 'gather',
+                keep: [$keptCard],
+            ));
+            $this->fail('同一張牌不能連續留到第三手');
+        } catch (InvalidActionException $exception) {
+            $this->assertSame('keep_consecutive_turns', $exception->reasonCode);
+            $this->assertSame($before, $nextTurn->toArray());
+        }
+    }
+
+    public function test_a_new_card_can_still_be_kept_after_a_previous_card_was_kept(): void
+    {
+        $state = $this->reveal($this->startState());
+        $previousCard = $state->hand[1];
+
+        $nextTurn = $this->apply($state, new ActionRequest(
+            actionId: 'keep-first',
+            expectedVersion: $state->version,
+            type: ActionType::Play,
+            cardId: $state->hand[0],
+            keep: [$previousCard],
+        ))->state;
+        $nextTurn = $this->reveal($nextTurn);
+        $newCard = $nextTurn->hand[1];
+
+        $after = $this->apply($nextTurn, new ActionRequest(
+            actionId: 'keep-new',
+            expectedVersion: $nextTurn->version,
+            type: ActionType::Play,
+            cardId: null,
+            fixedSkillId: 'gather',
+            keep: [$newCard],
+        ))->state;
+
+        $this->assertSame([$newCard], $after->hand);
+        $this->assertContains($previousCard, $after->discardPile);
+        $this->assertSame(15, $this->totalCards($after));
+    }
+
     public function test_a_swap_replaces_one_card_without_advancing_the_turn_or_resetting_the_deadline(): void
     {
         $state = $this->reveal($this->startState(), null, '2026-09-09T00:00:30.000Z');

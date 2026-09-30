@@ -106,6 +106,14 @@ class InvalidActionException extends RuntimeException
         ]);
     }
 
+    /**
+     * @param  list<string>  $cards
+     */
+    public static function keepConsecutiveTurns(array $cards): self
+    {
+        return new self('keep_consecutive_turns', '同一張牌只能留到下一手，不能連續再留', ['cards' => $cards]);
+    }
+
     public static function fixedActionNotAllowed(string $skillId): self
     {
         return new self('fixed_action_not_allowed', "{$skillId} 不是手牌旁的固定行動", ['skill_id' => $skillId]);

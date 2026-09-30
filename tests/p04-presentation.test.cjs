@@ -10,7 +10,7 @@ const source = ts.transpileModule(fs.readFileSync('resources/js/game.ts', 'utf8'
 }).outputText;
 const context = { exports: {}, crypto: globalThis.crypto };
 vm.runInNewContext(source, context);
-const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, counterfactualText, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, playedName } = context.exports;
+const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, counterfactualText, reportFindings, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, playedName } = context.exports;
 const event = (type, turn, delta = {}, after = {}) => ({ type, turn, delta, after, cue_id: '', reason_code: '', actor: 'player', target: 'water' });
 // 牌組與卡面在真實回應裡一定存在；戰報要靠它們把 card_id 翻成玩家看到的卡名。
 const deck = { 'c1': 'long-flow', 'c2': 'final-waste' };
@@ -138,6 +138,12 @@ test('only compatible in-progress runs between hands are automatically revealed'
 
 test('clicking a kept card plays it instead of trying to retain the same physical card', () => {
   assert.deepEqual(keptCardsForPlay(['card-1', 'card-2'], 'card-1'), ['card-2']);
+});
+
+test('a card carried from the previous hand cannot be marked for keeping again', () => {
+  const state = { kept_last_turn: ['card-1'] };
+  assert.equal(canKeepCard(state, 'card-1'), false);
+  assert.equal(canKeepCard(state, 'card-2'), true);
 });
 
 test('the lobby sound label reflects the current preference instead of claiming a default', () => {

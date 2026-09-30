@@ -29,6 +29,7 @@ final class BattleState
      * @param  array<string, bool>  $breachedElements  防線曾降到 0 且尚未回補到可再觸發
      * @param  array<string, string>  $deck  實體牌 ID => 牌型
      * @param  list<string>  $hand  已揭示的手牌
+     * @param  list<string>  $keptLastTurn  上回合留到這手的牌，本回合不可再留
      * @param  list<string>  $drawPile  抽牌堆順序——機密，不送到前端
      * @param  list<string>  $discardPile  棄牌堆
      * @param  array<string, mixed>  $flags  一次性觸發旗標與關卡計數器
@@ -56,6 +57,7 @@ final class BattleState
         public Outcome $outcome,
         public array $deck,
         public array $hand,
+        public array $keptLastTurn,
         public array $drawPile,
         public array $discardPile,
         public int $handSize,
@@ -93,6 +95,7 @@ final class BattleState
             $this->outcome,
             $this->deck,
             $this->hand,
+            $this->keptLastTurn,
             $this->drawPile,
             $this->discardPile,
             $this->handSize,
@@ -210,6 +213,7 @@ final class BattleState
             'outcome' => $this->outcome->value,
             'deck' => $this->deck,
             'hand' => $this->hand,
+            'kept_last_turn' => $this->keptLastTurn,
             'discard_pile' => $this->discardPile,
             'hand_size' => $this->handSize,
             'max_keep' => $this->maxKeep,
@@ -261,6 +265,7 @@ final class BattleState
             Outcome::from($state['outcome']),
             $state['deck'],
             $state['hand'],
+            $state['kept_last_turn'] ?? [],
             $state['draw_pile'],
             $state['discard_pile'],
             $state['hand_size'],

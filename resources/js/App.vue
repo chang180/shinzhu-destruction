@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
 import type { BattleEvent, Campaign, Card, Choice, CounterfactualComparison, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
@@ -106,7 +106,7 @@ function noteFor(card: Card | undefined): string {
     return card ? dataNoteText(run.value?.data_notes[card.element as never], card.element) : '';
 }
 function toggleKeep(instanceId: string): void {
-    if (locked.value || !revealed.value) return;
+    if (locked.value || !revealed.value || !state.value || !canKeepCard(state.value, instanceId)) return;
     keep.value = keep.value.includes(instanceId)
         ? keep.value.filter(id => id !== instanceId)
         : canKeepMore.value ? [...keep.value, instanceId] : keep.value;
@@ -378,7 +378,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         <p class="lead">你有 {{ state.max_turns }} 回合、一副 {{ level?.deck_size }} 張的牌組。核心歸零便通關；回合用盡而城市仍站著，這次試煉就結束。</p>
                         <ol class="lesson">
                             <li><b>每回合五張手牌，點一張立即施放。</b>{{ briefingTimingText(mode) }}</li>
-                            <li><b>最多留 2 張。</b>先標記要留下的牌，再點另一張施放；留下的牌會佔住下一手的位置。另有每回合一次的免費換牌。</li>
+                            <li><b>最多留 2 張到下一手。</b>同一張不能連續再留；先標記留牌，再點另一張施放。每回合只能免費換 1 張。</li>
                             <li v-for="(lesson, index) in level?.briefing?.lessons ?? []" :key="index">{{ lesson }}</li>
                             <li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，點擊同樣立即執行。</li>
                         </ol>
@@ -419,21 +419,21 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                                     <span v-if="reasonFor(entry.id)" class="card-block">{{ reasonFor(entry.id) }}</span>
                                 </button>
                                 <div class="card-tools">
-                                    <button :disabled="locked || (!keep.includes(entry.id) && !canKeepMore)" :aria-pressed="keep.includes(entry.id)" @click="toggleKeep(entry.id)">{{ keep.includes(entry.id) ? '已留牌' : '留到下回合' }}</button>
+                                    <button :disabled="locked || !canKeepCard(state, entry.id) || (!keep.includes(entry.id) && !canKeepMore)" :aria-pressed="keep.includes(entry.id)" @click="toggleKeep(entry.id)">{{ !canKeepCard(state, entry.id) ? '上手已留，不能再留' : keep.includes(entry.id) ? '已留牌' : '留到下回合' }}</button>
                                     <button :disabled="locked || !!swapChoice(entry.id)?.reason" @click="swap(entry.id)">{{ state.swap_used ? '已換過' : '換這張' }}</button>
                                 </div>
                             </li>
                         </ul>
                         <div class="preview-bar" aria-live="polite">
                             <template v-if="previewedCard"><b>{{ previewedCard.name }}</b><p>{{ previewedCard.role }}</p><small>基礎衝擊 {{ previewedCard.base_impact }} · 防線 {{ previewedCard.defense_delta }}｜{{ noteFor(previewedCard) }}<br>點擊立即施放；實際戰果由伺服器依防線、抗性、護盾與情境結算。</small></template>
-                            <template v-else><b>先留牌，再出手</b><p>先勾選最多 2 張要留到下一手的牌；移到卡牌上可預覽，點擊卡牌立即施放。</p></template>
+                            <template v-else><b>先留牌，再出手</b><p>最多留 2 張到下一手，同一張不能連續再留；點擊卡牌立即施放。</p></template>
                         </div>
                         <div class="fixed-actions">
                             <p class="eyebrow">手牌旁的固定行動 · 不佔手牌</p>
                             <button v-for="card in fixedCards" :key="card.skill_id" :class="{ unavailable: !!fixedReason(card) }" :disabled="locked || !!fixedReason(card) || !run.compatible" :title="fixedReason(card) || `點擊立即執行 ${card.name}`" @mouseenter="previewedCard = card" @mouseleave="previewedCard = undefined" @focus="previewedCard = card" @blur="previewedCard = undefined" @click="castFixed(card.skill_id)"><b>{{ card.name }}</b><small>{{ fixedReason(card) || `${card.role}，點擊立即執行` }}</small></button>
                         </div>
                     </template>
-                    <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="intent in level?.forecast" :key="intent.scheduled_turn">{{ intent.description }}</li></ol></details>
+                    <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，同一張只能留到下一手；換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="intent in level?.forecast" :key="intent.scheduled_turn">{{ intent.description }}</li></ol></details>
                 </section>
                 <section v-if="page === 'report'" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }"><img :src="asset(reportAsset(run.outcome, run.level_id))" :alt="run.outcome === 'player_victory' ? '虛構城市化為懸浮陶片，金色光幕宣告禁術修習通關' : '重新穩定的虛構城市防線'">
                     <div><p class="eyebrow">ACADEMY FIELD REPORT / 第 {{ level?.sequence }} 關戰報 · {{ level?.name }}｜{{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ run.outcome === 'player_victory' ? '毀滅成功。' : '城市守住了。' }}</h1><p class="lead">{{ run.outcome === 'player_victory' ? `第 ${level?.sequence} 門禁術・${level?.name}，修習通過。晏沉抬杯，向你致意。` : '本次試煉結束。把城市的回應，變成下一次的計畫。' }}</p><p>第 {{ state.turn }} 回合 · 核心剩餘 {{ state.core_resilience }} · 逾時 {{ state.timeouts }} 次</p><p>{{ run.outcome === 'player_victory' ? '晏沉的結語：「一座城市若把每次撐過去，都當成不必改變的理由，最後就會連下一次也沒有。」以下列出你如何使這一局走到終點。' : '晏沉收回空杯：「你讓它喘過氣了。看看是哪一回合。」以下依你的實際行動複盤，再挑一個決策重試。' }}</p><p v-if="run.mode === 'practice'" class="small">練習成績單獨記錄，不會登記為限時挑戰通關。</p><div class="report-actions"><button v-if="run.outcome === 'player_victory' && nextLevel && nextLevel.level_id !== run.level_id" class="primary" :disabled="locked" @click="start(false, nextLevel.level_id)">前往第 {{ nextLevel.sequence }} 關 · {{ nextLevel.name }} ↗</button><button :class="{ primary: run.outcome !== 'player_victory' }" :disabled="locked || !run.compatible" @click="start(true)">同情境再試一次 ↗</button><button :disabled="locked" @click="replay">重播本局演出</button><button :disabled="locked" @click="loadLobby">回學院</button></div></div>

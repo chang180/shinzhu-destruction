@@ -46,3 +46,9 @@ rules_version 目前是 3.0.0（P05 五關戰役）。三條和 2.0.0 不同的�
 3. 關卡可以設 modifier_cap，把每一系的情境修正再夾一次（第 5 關 0.08）。三系同時採用資料時不夾，low/high 的資料情境會直接決定勝負，而玩家選不了資料。
 
 關卡的 available 只能在該關通過 tests/Feature/Game/StrategyMatrixTest.php 的門檻後才打開：planner/greedy >= 70%、planner - random >= 25 點、legacy-cycle < 80%（第 1 關 < 95%）、單系連按 < 80%、非法選擇 0。數值與矩陣以 docs/BALANCE.md 為準。
+
+## Consecutive keep limit from P08
+Since rules_version 3.1.0, a physical card kept into the next hand cannot be kept again on the immediately following turn. Keep up to 2 cards per turn and one free swap per turn remain. Persist kept_last_turn in BattleState, reject invalid keep before mutation, and keep strategies/UI aligned with the public state.
+
+## Current game rule version
+The 3.0.0 city-rules section above records the P05 baseline. Current rules_version is 3.1.0 after the P08 consecutive keep limit; consult config/game.php and docs/BALANCE.md for the current version. Old 3.0.0 runs remain readable/replayable but cannot accept new actions.

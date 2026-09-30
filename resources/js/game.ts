@@ -10,7 +10,7 @@ export interface BattleState {
     cooldowns: Record<string, number>; shields: { element: string; amount: number }[];
     combo_chain: Element[]; breach_available: boolean; intent: Intent | null; outcome: Outcome;
     // 牌桌狀態。抽牌堆只送剩餘張數，未抽牌序留在伺服器。
-    deck: Record<string, string>; hand: string[]; discard_pile: string[]; draw_pile_count: number;
+    deck: Record<string, string>; hand: string[]; kept_last_turn: string[]; discard_pile: string[]; draw_pile_count: number;
     hand_size: number; max_keep: number; turn_phase: TurnPhase; deadline_at: string | null;
     swap_used: boolean; timeouts: number;
 }
@@ -90,6 +90,9 @@ export function shouldAutoReveal(run: Pick<Run, 'outcome' | 'compatible' | 'stat
 }
 export function keptCardsForPlay(keptCards: string[], playedCardId: string): string[] {
     return keptCards.filter(cardId => cardId !== playedCardId);
+}
+export function canKeepCard(state: Pick<BattleState, 'kept_last_turn'>, cardId: string): boolean {
+    return !state.kept_last_turn.includes(cardId);
 }
 /** 簡報標題是設定檔裡的兩行字；不在前端硬寫任何一關的文案。 */
 export function briefingLines(level: Level | undefined): string[] {
