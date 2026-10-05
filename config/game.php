@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'rules_version' => '5.0.1',
+    'rules_version' => '6.0.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -546,7 +546,7 @@ return [
             'name' => '鏡蔭・丘陵借影',
             'subtitle' => '城市開始讀你的牌',
             'apostle' => 'mirror-shade',
-            'max_turns' => 10,
+            'max_turns' => 9,
             'requires' => 'meter-feast',
             'mechanic' => '城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。',
             'lesson' => '誘出城市的反制，再換系打它沒防到的那一邊。',
@@ -557,7 +557,7 @@ return [
                 'lessons' => [
                     '沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。',
                     '這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。',
-                    '第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。',
+                    '照影先練誘盾換系；借影的第 4、6 回合與反制考核的第 8、9 回合是排定修復，可用同系擾序打斷。第 9 回合是最後期限。',
                 ],
             ],
             'defenses' => [
@@ -566,6 +566,7 @@ return [
                 Element::Land->value => 38,
             ],
             'data_elements' => [Element::Heat->value, Element::Land->value],
+            'modifier_cap' => 0.04,
             'deck' => [
                 'long-flow' => 3, 'spend-tide' => 1, 'foul-current' => 1,
                 'open-chill' => 3, 'hundred-smoke' => 1, 'idle-fume' => 1,
@@ -574,19 +575,37 @@ return [
             'apostle_power' => 'interrupt_refund',
             'apostle_power_value' => 2,
             'adaptive_shield' => [
-                'magnitude' => 20,
+                'magnitude' => 28,
                 'from_turn' => 2,
             ],
             'level_phases' => [
                 [
-                    'id' => 'main',
-                    'label' => '全關',
-                    'objective' => '誘出城市的反制，再換系打它沒防到的那一邊。',
+                    'id' => 'reflection',
+                    'label' => '第一幕・照影',
+                    'objective' => '誘出同系護盾，再換系命中。',
                     'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+                    'intents' => [],
+                    'default_intent' => ['type' => 'shield', 'element' => 'land', 'magnitude' => 12, 'interruptible' => true],
+                ],
+                [
+                    'id' => 'borrowed-shadow',
+                    'label' => '第二幕・借影',
+                    'objective' => '在鏡射與排定修復之間，留牌處理窗口。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 4],
                     'intents' => [
-                        3 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                        6 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
-                        9 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
+                        4 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                        6 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'shield', 'element' => 'land', 'magnitude' => 12, 'interruptible' => true],
+                ],
+                [
+                    'id' => 'counter-exam',
+                    'label' => '第三幕・反制考核',
+                    'objective' => '誘盾後換系高衝擊，抓住修復之間的輸出窗口。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 7],
+                    'intents' => [
+                        8 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 20, 'interruptible' => true],
+                        9 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 26, 'interruptible' => true],
                     ],
                     'default_intent' => ['type' => 'shield', 'element' => 'land', 'magnitude' => 12, 'interruptible' => true],
                 ],

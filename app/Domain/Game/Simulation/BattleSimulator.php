@@ -84,6 +84,7 @@ class BattleSimulator
         $phaseChanges = [];
         $levelPhaseChanges = [];
         $ultimateTurns = [];
+        $mirrorShield = null;
 
         if ($strategy instanceof InstrumentedStrategy) {
             $strategy->beginGame();
@@ -97,7 +98,7 @@ class BattleSimulator
                     $level,
                     $modifiers,
                 );
-                $this->measure($state, $result, $level, $metrics, $phaseChanges, $levelPhaseChanges, $ultimateTurns);
+                $this->measure($state, $result, $level, $metrics, $phaseChanges, $levelPhaseChanges, $ultimateTurns, $mirrorShield);
                 $state = $result->state;
 
                 continue;
@@ -138,7 +139,7 @@ class BattleSimulator
                 'skill_id' => $choice['skill_id'] ?? null,
                 'target' => $choice['target'] ?? null,
             ];
-            $this->measure($state, $result, $level, $metrics, $phaseChanges, $levelPhaseChanges, $ultimateTurns);
+            $this->measure($state, $result, $level, $metrics, $phaseChanges, $levelPhaseChanges, $ultimateTurns, $mirrorShield);
             $state = $result->state;
         }
 
@@ -195,6 +196,11 @@ class BattleSimulator
             'ultimate_uses' => 0,
             'pulse_windows' => 0,
             'repair_windows' => 0,
+            'mirror_baits' => 0,
+            'mirror_followup_windows' => 0,
+            'mirror_switch_hits' => 0,
+            'mirror_switch_breaches' => 0,
+            'mirror_switch_core_damage' => 0,
         ];
     }
 
@@ -209,9 +215,10 @@ class BattleSimulator
      *                                       重整啟動不會被算成進入下一幕。
      * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges
      * @param  list<array{turn: int, from: string|null, to: string, reason_code: string}>  $levelPhaseChanges
+     * @param  array{turn: int, element: string}|null  $mirrorShield
      * @param  list<int>  $ultimateTurns
      */
-    private function measure(BattleState $before, TurnResult $result, LevelDefinition $level, array &$metrics, array &$phaseChanges, array &$levelPhaseChanges, array &$ultimateTurns): void
+    private function measure(BattleState $before, TurnResult $result, LevelDefinition $level, array &$metrics, array &$phaseChanges, array &$levelPhaseChanges, array &$ultimateTurns, ?array &$mirrorShield): void
     {
         foreach ($result->events as $event) {
             if ($event->type === 'sigil_spent' && $event->reasonCode === 'ultimate_consumed_all') {
@@ -230,6 +237,8 @@ class BattleSimulator
                 ];
             }
         }
+
+        $this->measureMirror($before, $result, $level, $metrics, $mirrorShield);
 
         $pendingBreach = false;
 
@@ -252,6 +261,42 @@ class BattleSimulator
                 'to' => $result->state->phase,
                 'reason_code' => $reason,
             ];
+        }
+    }
+
+    /**
+     * Attribute only observed mirrored city shields, followed immediately by an actual core hit.
+     * A static shield, a forecast without a raised shield, an ultimate or an expired shield is not a lure.
+     *
+     * @param  array<string, int>  $metrics
+     * @param  array{turn: int, element: string}|null  $mirrorShield
+     */
+    private function measureMirror(BattleState $before, TurnResult $result, LevelDefinition $level, array &$metrics, ?array &$mirrorShield): void
+    {
+        $settled = array_any($result->events, static fn (BattleEvent $event): bool => in_array($event->type, ['action_accepted', 'action_missed'], true));
+        if (! $settled) {
+            return;
+        }
+
+        $standing = $mirrorShield !== null && $before->turn === $mirrorShield['turn'] + 1
+            && array_any($before->shields, static fn (array $shield): bool => $shield['element'] === $mirrorShield['element'] && $shield['amount'] > 0 && $shield['expires_on_turn'] > $before->turn);
+        if ($standing) {
+            $metrics['mirror_followup_windows']++;
+            foreach ($result->events as $event) {
+                if ($event->type === 'impact' && $event->target !== null && $event->target !== $mirrorShield['element'] && ($event->delta['core_resilience'] ?? 0) < 0) {
+                    $metrics['mirror_switch_hits']++;
+                    $metrics['mirror_switch_core_damage'] -= (int) $event->delta['core_resilience'];
+                    $metrics['mirror_switch_breaches'] += $event->cueId === 'cue.impact.breach' ? 1 : 0;
+                }
+            }
+        }
+        $mirrorShield = null;
+
+        foreach ($result->events as $event) {
+            if ($event->type === 'city_shield' && $before->lastAttackElement !== null && $event->target === $before->lastAttackElement && $level->mirrorsPlayerOnTurn($before->turn, $before->levelPhaseId)) {
+                $metrics['mirror_baits']++;
+                $mirrorShield = ['turn' => $before->turn, 'element' => $event->target];
+            }
         }
     }
 

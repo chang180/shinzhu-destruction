@@ -80,6 +80,8 @@ class DifficultyReport
         'terminal_games', 'terminal_malice_sum', 'terminal_wins', 'terminal_malice_wins_sum',
         'terminal_losses', 'terminal_malice_losses_sum', 'pulse_windows', 'pulse_refunds',
         'repair_windows', 'repairs_interrupted',
+        'mirror_baits', 'mirror_followup_windows', 'mirror_switch_hits', 'mirror_switch_breaches',
+        'mirror_switch_core_damage', 'mirror_breach_games', 'mirror_breach_wins',
     ];
 
     /**
@@ -305,7 +307,7 @@ class DifficultyReport
                 'weighting' => 'every (scenario, deck) cell of a level has equal weight',
                 'solver' => 'separate offline command game:solve (P10-1); planner results are not a solvability proof',
                 'level_phase_metrics' => self::LEVEL_PHASE_METRICS,
-                'mechanic_diagnostics' => 'P10-3 diagnostics only; excluded from difficulty_index. Counts/sums are pooled over games. Ultimate turns come from ultimate_consumed_all events; first-turn means include only games with an ultimate (winning mean only wins with one), never zero-filled. Terminal malice comes from finished engine states; unfinished games are excluded. Pulse/repair windows count accepted plays or timeouts facing that window, including lethal plays; refunds/interrupts are actual events.',
+                'mechanic_diagnostics' => 'P10-3 diagnostics only; excluded from difficulty_index. Counts/sums are pooled over games. Ultimate turns come from ultimate_consumed_all events; first-turn means include only games with an ultimate (winning mean only wins with one), never zero-filled. Terminal malice comes from finished engine states; unfinished games are excluded. Pulse/repair windows count accepted plays or timeouts facing that window, including lethal plays; refunds/interrupts are actual events. P10-4 mirror diagnostics require an actual mirrored city_shield matching the saved previous attack, then a next-turn core impact of a different element against that still-standing shield; breach means cue.impact.breach, not a damage threshold. Hit/breach rates divide by observed followup windows; breach win rate by games with at least one breach. These observations do not prove player intent or causality.',
             ],
             'levels' => $levels,
             'progression' => $this->progression($levels),
@@ -550,7 +552,10 @@ class DifficultyReport
                 $totals['terminal_malice_'.$group.'_sum'] += $result->terminalMalice;
             }
 
-            foreach (['pulse_windows', 'pulse_refunds', 'repair_windows', 'repairs_interrupted'] as $key) {
+            $totals['mirror_breach_games'] += ($result->metrics['mirror_switch_breaches'] ?? 0) > 0 ? 1 : 0;
+            $totals['mirror_breach_wins'] += ($result->metrics['mirror_switch_breaches'] ?? 0) > 0 && $result->won() ? 1 : 0;
+
+            foreach (['pulse_windows', 'pulse_refunds', 'repair_windows', 'repairs_interrupted', 'mirror_baits', 'mirror_followup_windows', 'mirror_switch_hits', 'mirror_switch_breaches', 'mirror_switch_core_damage'] as $key) {
                 $totals[$key] += $result->metrics[$key] ?? 0;
             }
         }
@@ -576,6 +581,9 @@ class DifficultyReport
             'avg_terminal_malice_losses' => $average('terminal_malice_losses_sum', 'terminal_losses'),
             'pulse_combo_use_rate' => $average('pulse_refunds', 'pulse_windows'),
             'repair_interrupt_rate' => $average('repairs_interrupted', 'repair_windows'),
+            'mirror_switch_hit_rate' => $average('mirror_switch_hits', 'mirror_followup_windows'),
+            'mirror_switch_breach_rate' => $average('mirror_switch_breaches', 'mirror_followup_windows'),
+            'mirror_breach_win_rate' => $average('mirror_breach_wins', 'mirror_breach_games'),
         ];
     }
 

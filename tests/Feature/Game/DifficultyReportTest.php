@@ -58,6 +58,31 @@ class DifficultyReportTest extends TestCase
         $this->assertSame(round($diagnostics['terminal_malice_losses_sum'] / $diagnostics['terminal_losses'], 4), $diagnostics['avg_terminal_malice_losses']);
     }
 
+    public function test_mirror_diagnostics_are_pooled_and_exported_with_observed_denominators(): void
+    {
+        $json = $this->scratchPath('mirror.json');
+        $csv = $this->scratchPath('mirror.csv');
+        $this->artisan('game:difficulty-report', [
+            '--seeds' => 10, '--level' => ['mirror-shade'], '--strategy' => ['planner'],
+            '--json' => $json, '--csv' => $csv,
+        ])->assertSuccessful();
+        $report = json_decode((string) file_get_contents($json), true);
+        $diagnostics = $report['levels'][0]['strategies']['planner']['mechanic_diagnostics'];
+        $this->assertGreaterThan(0, $diagnostics['mirror_switch_breaches']);
+        foreach (DifficultyReport::DIAGNOSTIC_TOTALS as $key) {
+            $this->assertSame(array_sum(array_column(array_column($report['cells'], 'mechanic_diagnostics'), $key)), $diagnostics[$key], $key);
+        }
+        $this->assertSame(round($diagnostics['mirror_switch_breaches'] / $diagnostics['mirror_followup_windows'], 4), $diagnostics['mirror_switch_breach_rate']);
+        $this->assertSame(round($diagnostics['mirror_breach_wins'] / $diagnostics['mirror_breach_games'], 4), $diagnostics['mirror_breach_win_rate']);
+        $handle = fopen($csv, 'r');
+        $headers = fgetcsv($handle, escape: '');
+        $row = array_combine($headers, fgetcsv($handle, escape: ''));
+        fclose($handle);
+        $this->assertSame((string) $report['cells'][0]['mechanic_diagnostics']['mirror_switch_breaches'], $row['diagnostic_mirror_switch_breaches']);
+        unlink($json);
+        unlink($csv);
+    }
+
     private function scratchPath(string $name): string
     {
         return sys_get_temp_dir().'/p10-'.getmypid().'-'.$name;

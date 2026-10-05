@@ -4,17 +4,25 @@ namespace Tests\Feature\Game;
 
 use App\Models\Run;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class LegacyRunCompatibilityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_a_5_0_0_in_progress_save_remains_readable_but_rejects_all_new_calculations(): void
+    /** @return list<array{string}> */
+    public static function oldRuleVersions(): array
+    {
+        return [['5.0.0'], ['5.0.1']];
+    }
+
+    #[DataProvider('oldRuleVersions')]
+    public function test_an_old_in_progress_save_remains_readable_but_rejects_all_new_calculations(string $version): void
     {
         $id = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->assertCreated()->json('data.run_id');
         $run = Run::query()->where('public_id', $id)->firstOrFail();
-        $run->forceFill(['rules_version' => '5.0.0'])->save();
+        $run->forceFill(['rules_version' => $version])->save();
         $stored = $run->state;
 
         $this->getJson("/api/v1/runs/{$id}")->assertOk()->assertJsonPath('data.compatible', false)->assertJsonPath('data.available_actions', []);

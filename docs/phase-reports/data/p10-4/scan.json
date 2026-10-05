@@ -1,0 +1,5905 @@
+{
+  "baseline_commit": "a6cd2f8",
+  "suite": "quick",
+  "seeds": 100,
+  "start_seed": 1,
+  "selected": "short-middle18",
+  "notes": "Independent candidates relative to the 5.0.1 baseline. All seven unchanged strategies, both actual reward decks. Starter greedy checks explicitly listed where run. No full acceptance inferred from quick.",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "baseline"
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 20,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "main",
+            "label": "全關",
+            "objective": "誘出城市的反制，再換系打它沒防到的那一邊。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": {
+              "3": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 20,
+                "interruptible": true
+              },
+              "9": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": []
+      },
+      "difficulty": {
+        "planner_win_rate": 0.9733,
+        "forecast_aware_win_rate": 0.7128,
+        "one_mistake_recovery_rate": 0.8567,
+        "planner_winning_turn_budget_used": 0.8328,
+        "difficulty_index": 0.2419,
+        "planner_baseline_wins": 1752,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1752,
+        "recoveries_after_mistake": 1501,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 161,
+        "walked_into_shield_mistakes": 1639,
+        "one_mistake_unconditional_win_rate": 0.8389,
+        "difficulty_index_unconditional_variant": 0.2463
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.9733,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.7128,
+            "within": false
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.8567,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.83
+    },
+    {
+      "candidate": {
+        "id": "acts-24",
+        "shield": 24,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.06
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 24,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.06
+      },
+      "difficulty": {
+        "planner_win_rate": 0.8011,
+        "forecast_aware_win_rate": 0.3733,
+        "one_mistake_recovery_rate": 0.5832,
+        "planner_winning_turn_budget_used": 0.8761,
+        "difficulty_index": 0.4619,
+        "planner_baseline_wins": 1442,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1442,
+        "recoveries_after_mistake": 841,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.5044,
+        "difficulty_index_unconditional_variant": 0.4816
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.8011,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3733,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5832,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.54
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.54
+    },
+    {
+      "candidate": {
+        "id": "acts-28",
+        "shield": 28,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.06
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.06
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7989,
+        "forecast_aware_win_rate": 0.3733,
+        "one_mistake_recovery_rate": 0.5591,
+        "planner_winning_turn_budget_used": 0.8779,
+        "difficulty_index": 0.469,
+        "planner_baseline_wins": 1438,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1438,
+        "recoveries_after_mistake": 804,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.4844,
+        "difficulty_index_unconditional_variant": 0.4877
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7989,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3733,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5591,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.55
+    },
+    {
+      "candidate": {
+        "id": "acts-24-strong",
+        "shield": 24,
+        "repairs": [
+          26,
+          28,
+          32,
+          34
+        ],
+        "cap": 0.06
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 24,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 26,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 28,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 32,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 34,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.06
+      },
+      "difficulty": {
+        "planner_win_rate": 0.5906,
+        "forecast_aware_win_rate": 0.2794,
+        "one_mistake_recovery_rate": 0.4779,
+        "planner_winning_turn_budget_used": 0.8558,
+        "difficulty_index": 0.5823,
+        "planner_baseline_wins": 1063,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1063,
+        "recoveries_after_mistake": 508,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.3233,
+        "difficulty_index_unconditional_variant": 0.621
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.5906,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.2794,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4779,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w0h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.53
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.36
+          },
+          {
+            "scenario": "w-h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.53
+          },
+          {
+            "scenario": "w+h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.53
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.42
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.49
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.36
+    },
+    {
+      "candidate": {
+        "id": "acts-28-short",
+        "shield": 28,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.06,
+        "turns": 9
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 9,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "9": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.06
+      },
+      "difficulty": {
+        "planner_win_rate": 0.4722,
+        "forecast_aware_win_rate": 0.1961,
+        "one_mistake_recovery_rate": 0.3294,
+        "planner_winning_turn_budget_used": 0.8817,
+        "difficulty_index": 0.6856,
+        "planner_baseline_wins": 850,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 850,
+        "recoveries_after_mistake": 280,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.18,
+        "difficulty_index_unconditional_variant": 0.723
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.4722,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.1961,
+            "within": false
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.3294,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w0h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.38
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.25
+          },
+          {
+            "scenario": "w+h+l+",
+            "deck": "tide-siege",
+            "win_rate": 0.51
+          },
+          {
+            "scenario": "w-h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.38
+          },
+          {
+            "scenario": "w+h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.38
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.3
+          },
+          {
+            "scenario": "w0h+l0",
+            "deck": "tide-siege",
+            "win_rate": 0.43
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.33
+          },
+          {
+            "scenario": "w0h0l+",
+            "deck": "tide-siege",
+            "win_rate": 0.45
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen",
+            "win_rate": 0.39
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "smoke-screen",
+            "win_rate": 0.51
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "smoke-screen",
+            "win_rate": 0.51
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.25
+    },
+    {
+      "candidate": {
+        "id": "acts-32",
+        "shield": 32,
+        "repairs": [
+          26,
+          28,
+          32,
+          34
+        ],
+        "cap": 0.06
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 32,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 26,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 28,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 32,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 34,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.06
+      },
+      "difficulty": {
+        "planner_win_rate": 0.5667,
+        "forecast_aware_win_rate": 0.2794,
+        "one_mistake_recovery_rate": 0.4843,
+        "planner_winning_turn_budget_used": 0.8532,
+        "difficulty_index": 0.5887,
+        "planner_baseline_wins": 1020,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1020,
+        "recoveries_after_mistake": 494,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.3139,
+        "difficulty_index_unconditional_variant": 0.6313
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.5667,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.2794,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4843,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w0h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.49
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.36
+          },
+          {
+            "scenario": "w-h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.49
+          },
+          {
+            "scenario": "w+h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.49
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.4
+          },
+          {
+            "scenario": "w0h+l0",
+            "deck": "tide-siege",
+            "win_rate": 0.54
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.45
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.36
+    },
+    {
+      "candidate": {
+        "id": "acts-48",
+        "shield": 48,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 48,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7933,
+        "forecast_aware_win_rate": 0.3739,
+        "one_mistake_recovery_rate": 0.5259,
+        "planner_winning_turn_budget_used": 0.8797,
+        "difficulty_index": 0.4793,
+        "planner_baseline_wins": 1428,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1428,
+        "recoveries_after_mistake": 751,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.4617,
+        "difficulty_index_unconditional_variant": 0.4954
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7933,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3739,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5259,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6
+    },
+    {
+      "candidate": {
+        "id": "acts-64",
+        "shield": 64,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 64,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7933,
+        "forecast_aware_win_rate": 0.3739,
+        "one_mistake_recovery_rate": 0.5259,
+        "planner_winning_turn_budget_used": 0.8797,
+        "difficulty_index": 0.4793,
+        "planner_baseline_wins": 1428,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1428,
+        "recoveries_after_mistake": 751,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.4617,
+        "difficulty_index_unconditional_variant": 0.4954
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7933,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3739,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5259,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6
+    },
+    {
+      "candidate": {
+        "id": "acts-80",
+        "shield": 80,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 80,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7933,
+        "forecast_aware_win_rate": 0.3739,
+        "one_mistake_recovery_rate": 0.5259,
+        "planner_winning_turn_budget_used": 0.8797,
+        "difficulty_index": 0.4793,
+        "planner_baseline_wins": 1428,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1428,
+        "recoveries_after_mistake": 751,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.4617,
+        "difficulty_index_unconditional_variant": 0.4954
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7933,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3739,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5259,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6
+    },
+    {
+      "candidate": {
+        "id": "exam-shield-32",
+        "shield": 48,
+        "exam": 32,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 48,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "7": {
+                "type": "shield",
+                "element": "water",
+                "magnitude": 32,
+                "interruptible": true
+              },
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.77,
+        "forecast_aware_win_rate": 0.3344,
+        "one_mistake_recovery_rate": 0.5,
+        "planner_winning_turn_budget_used": 0.8807,
+        "difficulty_index": 0.504,
+        "planner_baseline_wins": 1386,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1386,
+        "recoveries_after_mistake": 693,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.4189,
+        "difficulty_index_unconditional_variant": 0.5243
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.77,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3344,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6
+    },
+    {
+      "candidate": {
+        "id": "exam-shield-48",
+        "shield": 48,
+        "exam": 48,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 48,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "7": {
+                "type": "shield",
+                "element": "water",
+                "magnitude": 48,
+                "interruptible": true
+              },
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7628,
+        "forecast_aware_win_rate": 0.3344,
+        "one_mistake_recovery_rate": 0.5004,
+        "planner_winning_turn_budget_used": 0.8809,
+        "difficulty_index": 0.5065,
+        "planner_baseline_wins": 1373,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1373,
+        "recoveries_after_mistake": 687,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.4172,
+        "difficulty_index_unconditional_variant": 0.5273
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7628,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3344,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5004,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6
+    },
+    {
+      "candidate": {
+        "id": "exam-shield-64",
+        "shield": 48,
+        "exam": 64,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 48,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "7": {
+                "type": "shield",
+                "element": "water",
+                "magnitude": 64,
+                "interruptible": true
+              },
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7628,
+        "forecast_aware_win_rate": 0.3344,
+        "one_mistake_recovery_rate": 0.5004,
+        "planner_winning_turn_budget_used": 0.8809,
+        "difficulty_index": 0.5065,
+        "planner_baseline_wins": 1373,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1373,
+        "recoveries_after_mistake": 687,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.4172,
+        "difficulty_index_unconditional_variant": 0.5273
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7628,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3344,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5004,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6
+    },
+    {
+      "candidate": {
+        "id": "opening-28",
+        "shield": 28,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": {
+              "1": {
+                "type": "reinforce",
+                "element": "heat",
+                "magnitude": 4,
+                "interruptible": false
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7489,
+        "forecast_aware_win_rate": 0.4372,
+        "one_mistake_recovery_rate": 0.4941,
+        "planner_winning_turn_budget_used": 0.8927,
+        "difficulty_index": 0.489,
+        "planner_baseline_wins": 1348,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1348,
+        "recoveries_after_mistake": 666,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 153,
+        "walked_into_shield_mistakes": 1647,
+        "one_mistake_unconditional_win_rate": 0.3828,
+        "difficulty_index_unconditional_variant": 0.5168
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7489,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.4372,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4941,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.58
+    },
+    {
+      "candidate": {
+        "id": "opening-48",
+        "shield": 48,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 48,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": {
+              "1": {
+                "type": "reinforce",
+                "element": "heat",
+                "magnitude": 4,
+                "interruptible": false
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7294,
+        "forecast_aware_win_rate": 0.4372,
+        "one_mistake_recovery_rate": 0.4973,
+        "planner_winning_turn_budget_used": 0.8925,
+        "difficulty_index": 0.495,
+        "planner_baseline_wins": 1313,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1313,
+        "recoveries_after_mistake": 653,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 153,
+        "walked_into_shield_mistakes": 1647,
+        "one_mistake_unconditional_win_rate": 0.3822,
+        "difficulty_index_unconditional_variant": 0.5237
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7294,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.4372,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4973,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.56
+    },
+    {
+      "candidate": {
+        "id": "opening-48-repair24",
+        "shield": 48,
+        "repairs": [
+          24,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.04
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 48,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": {
+              "1": {
+                "type": "reinforce",
+                "element": "heat",
+                "magnitude": 4,
+                "interruptible": false
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 24,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.6894,
+        "forecast_aware_win_rate": 0.4039,
+        "one_mistake_recovery_rate": 0.4883,
+        "planner_winning_turn_budget_used": 0.8908,
+        "difficulty_index": 0.5193,
+        "planner_baseline_wins": 1241,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1241,
+        "recoveries_after_mistake": 606,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 153,
+        "walked_into_shield_mistakes": 1647,
+        "one_mistake_unconditional_win_rate": 0.355,
+        "difficulty_index_unconditional_variant": 0.5526
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.6894,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.4039,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4883,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.52
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.52
+    },
+    {
+      "candidate": {
+        "id": "late-repair36",
+        "shield": 28,
+        "repairs": [
+          22,
+          24,
+          36,
+          30
+        ],
+        "cap": 0.03
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 36,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.6228,
+        "forecast_aware_win_rate": 0.3406,
+        "one_mistake_recovery_rate": 0.5129,
+        "planner_winning_turn_budget_used": 0.8442,
+        "difficulty_index": 0.5453,
+        "planner_baseline_wins": 1121,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1121,
+        "recoveries_after_mistake": 575,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.3644,
+        "difficulty_index_unconditional_variant": 0.5824
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.6228,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3406,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5129,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.48
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.54
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.48
+    },
+    {
+      "candidate": {
+        "id": "late-repair44",
+        "shield": 28,
+        "repairs": [
+          22,
+          24,
+          44,
+          30
+        ],
+        "cap": 0.03
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 44,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.5494,
+        "forecast_aware_win_rate": 0.3139,
+        "one_mistake_recovery_rate": 0.5389,
+        "planner_winning_turn_budget_used": 0.8233,
+        "difficulty_index": 0.568,
+        "planner_baseline_wins": 989,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 989,
+        "recoveries_after_mistake": 533,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.3267,
+        "difficulty_index_unconditional_variant": 0.6211
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.5494,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3139,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5389,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w0h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.48
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.44
+          },
+          {
+            "scenario": "w+h+l+",
+            "deck": "tide-siege",
+            "win_rate": 0.51
+          },
+          {
+            "scenario": "w-h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.48
+          },
+          {
+            "scenario": "w+h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.48
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.46
+          },
+          {
+            "scenario": "w0h+l0",
+            "deck": "tide-siege",
+            "win_rate": 0.49
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.47
+          },
+          {
+            "scenario": "w0h0l+",
+            "deck": "tide-siege",
+            "win_rate": 0.49
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.44
+    },
+    {
+      "candidate": {
+        "id": "middle-repair30",
+        "shield": 28,
+        "repairs": [
+          22,
+          30,
+          28,
+          30
+        ],
+        "cap": 0.03
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.6717,
+        "forecast_aware_win_rate": 0.3133,
+        "one_mistake_recovery_rate": 0.5285,
+        "planner_winning_turn_budget_used": 0.8698,
+        "difficulty_index": 0.5349,
+        "planner_baseline_wins": 1209,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1209,
+        "recoveries_after_mistake": 639,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.395,
+        "difficulty_index_unconditional_variant": 0.5683
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.6717,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3133,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.5285,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.53
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.53
+    },
+    {
+      "candidate": {
+        "id": "def48-repair18",
+        "shield": 28,
+        "repairs": [
+          18,
+          20,
+          24,
+          28
+        ],
+        "cap": 0.03,
+        "def": 48
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 48,
+          "heat": 46,
+          "land": 46
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 20,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 24,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 28,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7217,
+        "forecast_aware_win_rate": 0.245,
+        "one_mistake_recovery_rate": 0.4203,
+        "planner_winning_turn_budget_used": 0.9156,
+        "difficulty_index": 0.5684,
+        "planner_baseline_wins": 1299,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1299,
+        "recoveries_after_mistake": 546,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.3239,
+        "difficulty_index_unconditional_variant": 0.5925
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7217,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.245,
+            "within": false
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4203,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.55
+    },
+    {
+      "candidate": {
+        "id": "def52-repair18",
+        "shield": 28,
+        "repairs": [
+          18,
+          20,
+          24,
+          28
+        ],
+        "cap": 0.03,
+        "def": 52
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 52,
+          "heat": 50,
+          "land": 50
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 20,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 24,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 28,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.4756,
+        "forecast_aware_win_rate": 0.1339,
+        "one_mistake_recovery_rate": 0.3236,
+        "planner_winning_turn_budget_used": 0.9365,
+        "difficulty_index": 0.7096,
+        "planner_baseline_wins": 856,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 856,
+        "recoveries_after_mistake": 277,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 76,
+        "walked_into_shield_mistakes": 1724,
+        "one_mistake_unconditional_win_rate": 0.1728,
+        "difficulty_index_unconditional_variant": 0.7473
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.4756,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.1339,
+            "within": false
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.3236,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w0h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.41
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.32
+          },
+          {
+            "scenario": "w+h+l+",
+            "deck": "tide-siege",
+            "win_rate": 0.5
+          },
+          {
+            "scenario": "w-h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.41
+          },
+          {
+            "scenario": "w+h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.41
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.36
+          },
+          {
+            "scenario": "w0h+l0",
+            "deck": "tide-siege",
+            "win_rate": 0.43
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.39
+          },
+          {
+            "scenario": "w0h0l+",
+            "deck": "tide-siege",
+            "win_rate": 0.41
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen",
+            "win_rate": 0.48
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "smoke-screen",
+            "win_rate": 0.52
+          },
+          {
+            "scenario": "w0h+l0",
+            "deck": "smoke-screen",
+            "win_rate": 0.54
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "smoke-screen",
+            "win_rate": 0.54
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.32
+    },
+    {
+      "candidate": {
+        "id": "def48-middle24",
+        "shield": 28,
+        "repairs": [
+          18,
+          24,
+          24,
+          28
+        ],
+        "cap": 0.03,
+        "def": 48
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 48,
+          "heat": 46,
+          "land": 46
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 24,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 28,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.6017,
+        "forecast_aware_win_rate": 0.2167,
+        "one_mistake_recovery_rate": 0.4211,
+        "planner_winning_turn_budget_used": 0.9119,
+        "difficulty_index": 0.6167,
+        "planner_baseline_wins": 1083,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1083,
+        "recoveries_after_mistake": 456,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.2767,
+        "difficulty_index_unconditional_variant": 0.6528
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.6017,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.2167,
+            "within": false
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4211,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.43
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.45
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.49
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.43
+    },
+    {
+      "candidate": {
+        "id": "def46-repair22",
+        "shield": 28,
+        "repairs": [
+          22,
+          24,
+          28,
+          30
+        ],
+        "cap": 0.03,
+        "def": 46
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 46,
+          "heat": 44,
+          "land": 44
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 22,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 24,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 28,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 30,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.5494,
+        "forecast_aware_win_rate": 0.2222,
+        "one_mistake_recovery_rate": 0.3873,
+        "planner_winning_turn_budget_used": 0.9007,
+        "difficulty_index": 0.6404,
+        "planner_baseline_wins": 989,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 989,
+        "recoveries_after_mistake": 383,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.2428,
+        "difficulty_index_unconditional_variant": 0.6766
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.5494,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.2222,
+            "within": false
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.3873,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w0h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.5
+          },
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.41
+          },
+          {
+            "scenario": "w+h+l+",
+            "deck": "tide-siege",
+            "win_rate": 0.54
+          },
+          {
+            "scenario": "w-h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.5
+          },
+          {
+            "scenario": "w+h0l0",
+            "deck": "tide-siege",
+            "win_rate": 0.5
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.44
+          },
+          {
+            "scenario": "w0h+l0",
+            "deck": "tide-siege",
+            "win_rate": 0.52
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.43
+          },
+          {
+            "scenario": "w0h0l+",
+            "deck": "tide-siege",
+            "win_rate": 0.5
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.41
+    },
+    {
+      "candidate": {
+        "id": "short-repair20",
+        "shield": 28,
+        "repairs": [
+          18,
+          20,
+          20,
+          26
+        ],
+        "cap": 0.04,
+        "turns": 9
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 9,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 20,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 20,
+                "interruptible": true
+              },
+              "9": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 26,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.6678,
+        "forecast_aware_win_rate": 0.3017,
+        "one_mistake_recovery_rate": 0.3644,
+        "planner_winning_turn_budget_used": 0.9079,
+        "difficulty_index": 0.5859,
+        "planner_baseline_wins": 1202,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1202,
+        "recoveries_after_mistake": 438,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.2717,
+        "difficulty_index_unconditional_variant": 0.6091
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.6678,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3017,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.3644,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.5
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.5
+    },
+    {
+      "candidate": {
+        "id": "short-repair24",
+        "shield": 28,
+        "repairs": [
+          18,
+          20,
+          24,
+          26
+        ],
+        "cap": 0.04,
+        "turns": 9
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 9,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 20,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 24,
+                "interruptible": true
+              },
+              "9": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 26,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.6189,
+        "forecast_aware_win_rate": 0.2911,
+        "one_mistake_recovery_rate": 0.3761,
+        "planner_winning_turn_budget_used": 0.9007,
+        "difficulty_index": 0.6017,
+        "planner_baseline_wins": 1114,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1114,
+        "recoveries_after_mistake": 419,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.2606,
+        "difficulty_index_unconditional_variant": 0.6306
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.6189,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.2911,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.3761,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [
+          {
+            "scenario": "w-h-l-",
+            "deck": "tide-siege",
+            "win_rate": 0.47
+          },
+          {
+            "scenario": "w0h-l0",
+            "deck": "tide-siege",
+            "win_rate": 0.51
+          },
+          {
+            "scenario": "w0h0l-",
+            "deck": "tide-siege",
+            "win_rate": 0.53
+          }
+        ],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.47
+    },
+    {
+      "candidate": {
+        "id": "short-middle18",
+        "shield": 28,
+        "repairs": [
+          18,
+          18,
+          20,
+          26
+        ],
+        "cap": 0.04,
+        "turns": 9
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 9,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 40,
+          "heat": 38,
+          "land": 38
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 18,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 20,
+                "interruptible": true
+              },
+              "9": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 26,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.04
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7156,
+        "forecast_aware_win_rate": 0.3406,
+        "one_mistake_recovery_rate": 0.3727,
+        "planner_winning_turn_budget_used": 0.9107,
+        "difficulty_index": 0.5578,
+        "planner_baseline_wins": 1288,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1288,
+        "recoveries_after_mistake": 480,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 75,
+        "walked_into_shield_mistakes": 1725,
+        "one_mistake_unconditional_win_rate": 0.2933,
+        "difficulty_index_unconditional_variant": 0.5777
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7156,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.3406,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.3727,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.58,
+      "starter_greedy": {
+        "low": 0.58,
+        "mid": 0.65,
+        "high": 0.7
+      },
+      "final_full": {
+        "difficulty": {
+          "planner_win_rate": 0.7291,
+          "forecast_aware_win_rate": 0.3587,
+          "one_mistake_recovery_rate": 0.4219,
+          "planner_winning_turn_budget_used": 0.9124,
+          "difficulty_index": 0.5365,
+          "planner_baseline_wins": 11811,
+          "eligible_mistake_coverage": 1,
+          "mistakes_injected": 16200,
+          "eligible_mistake_games": 11811,
+          "recoveries_after_mistake": 4983,
+          "no_eligible_mistake_games": 0,
+          "missed_interrupt_mistakes": 708,
+          "walked_into_shield_mistakes": 15492,
+          "one_mistake_unconditional_win_rate": 0.342,
+          "difficulty_index_unconditional_variant": 0.5565
+        },
+        "gates": {
+          "bands": {
+            "planner": {
+              "target": [
+                0.7,
+                0.82
+              ],
+              "actual": 0.7291,
+              "within": true
+            },
+            "forecast-aware": {
+              "target": [
+                0.25,
+                0.52
+              ],
+              "actual": 0.3587,
+              "within": true
+            },
+            "one-mistake-recovery": {
+              "target": [
+                0.25,
+                0.45
+              ],
+              "actual": 0.4219,
+              "within": true
+            }
+          },
+          "planner_cells_below_55": [],
+          "weak_strategy_cells_at_or_above_50": []
+        },
+        "planner_min": {
+          "win_rate": 0.6067,
+          "scenario": "w-h-l-",
+          "deck": "tide-siege"
+        },
+        "decks": {
+          "tide-siege": {
+            "planner": 0.7166666666666667,
+            "forecast-aware": 0.3851851851851852,
+            "recovery": 0.38449612403100775
+          },
+          "smoke-screen": {
+            "planner": 0.7414814814814815,
+            "forecast-aware": 0.3322222222222222,
+            "recovery": 0.458041958041958
+          }
+        },
+        "delta_from_l3_full": 0.1398,
+        "solver": "120/120 solved and replay_verified",
+        "tests": "278 passed"
+      }
+    },
+    {
+      "candidate": {
+        "id": "def47-mirror28",
+        "shield": 28,
+        "repairs": [
+          18,
+          20,
+          24,
+          28
+        ],
+        "cap": 0.03,
+        "def": 47
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 47,
+          "heat": 45,
+          "land": 45
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 28,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 20,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 24,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 28,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7539,
+        "forecast_aware_win_rate": 0.2694,
+        "one_mistake_recovery_rate": 0.4377,
+        "planner_winning_turn_budget_used": 0.9111,
+        "difficulty_index": 0.546,
+        "planner_baseline_wins": 1357,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1357,
+        "recoveries_after_mistake": 594,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.3544,
+        "difficulty_index_unconditional_variant": 0.5669
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7539,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.2694,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4377,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6,
+      "starter_greedy": {
+        "low": 0.56,
+        "mid": 0.6,
+        "high": 0.72
+      }
+    },
+    {
+      "candidate": {
+        "id": "def47-mirror40",
+        "shield": 40,
+        "repairs": [
+          18,
+          20,
+          24,
+          28
+        ],
+        "cap": 0.03,
+        "def": 47
+      },
+      "definition": {
+        "sequence": 4,
+        "tier": "advanced",
+        "available": true,
+        "name": "鏡蔭・丘陵借影",
+        "subtitle": "城市開始讀你的牌",
+        "apostle": "mirror-shade",
+        "max_turns": 10,
+        "requires": "meter-feast",
+        "mechanic": "城市依你最近出牌的系別選下一回合的護盾：誘出反制再換系。",
+        "lesson": "誘出城市的反制，再換系打它沒防到的那一邊。",
+        "briefing": {
+          "headline": "它在\n看你出牌。",
+          "quote": "「丘陵會借影子。你前一手打哪一系，它下一手就擋哪一系。」",
+          "quote_note": "晏沉在鏡面上寫下你的名字，隨即擦掉。「進階考不撤銷你的主線通過。放心輸。」",
+          "lessons": [
+            "沒有排定行程的回合，城市會鏡射你上一次進攻的系別，架起同系護盾——預告上會直接寫是哪一系。",
+            "這代表固定牌序會被反制：先用便宜的試探把它的盾引到一系，下一手換另一系打。",
+            "第 3、6、9 回合是排定的修復，鏡射不生效；那幾回合仍然可以用同系擾序打斷。"
+          ]
+        },
+        "defenses": {
+          "water": 47,
+          "heat": 45,
+          "land": 45
+        },
+        "data_elements": [
+          "heat",
+          "land"
+        ],
+        "deck": {
+          "long-flow": 3,
+          "spend-tide": 1,
+          "foul-current": 1,
+          "open-chill": 3,
+          "hundred-smoke": 1,
+          "idle-fume": 1,
+          "trample-green": 3,
+          "no-green-left": 1,
+          "filth-spread": 1
+        },
+        "apostle_power": "interrupt_refund",
+        "apostle_power_value": 2,
+        "adaptive_shield": {
+          "magnitude": 40,
+          "from_turn": 2
+        },
+        "level_phases": [
+          {
+            "id": "reflection",
+            "label": "第一幕・照影",
+            "objective": "誘出同系護盾，再換系命中。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 1
+            },
+            "intents": [],
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "borrowed-shadow",
+            "label": "第二幕・借影",
+            "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 4
+            },
+            "intents": {
+              "4": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 18,
+                "interruptible": true
+              },
+              "6": {
+                "type": "repair",
+                "element": "heat",
+                "magnitude": 20,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          },
+          {
+            "id": "counter-exam",
+            "label": "第三幕・反制考核",
+            "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+            "starts_when": {
+              "type": "turn_gte",
+              "value": 7
+            },
+            "intents": {
+              "8": {
+                "type": "repair",
+                "element": "water",
+                "magnitude": 24,
+                "interruptible": true
+              },
+              "10": {
+                "type": "repair",
+                "element": "land",
+                "magnitude": 28,
+                "interruptible": true
+              }
+            },
+            "default_intent": {
+              "type": "shield",
+              "element": "land",
+              "magnitude": 12,
+              "interruptible": true
+            }
+          }
+        ],
+        "reward": {
+          "prompt": "鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。",
+          "options": {
+            "hollow-ground": {
+              "add": "hollow-ground",
+              "remove": "trample-green",
+              "style": "爆發"
+            },
+            "sluice-jam": {
+              "add": "sluice-jam",
+              "remove": "long-flow",
+              "style": "干擾"
+            }
+          }
+        },
+        "mechanic_states": [],
+        "modifier_cap": 0.03
+      },
+      "difficulty": {
+        "planner_win_rate": 0.7317,
+        "forecast_aware_win_rate": 0.2694,
+        "one_mistake_recovery_rate": 0.4298,
+        "planner_winning_turn_budget_used": 0.9093,
+        "difficulty_index": 0.5555,
+        "planner_baseline_wins": 1317,
+        "eligible_mistake_coverage": 1,
+        "mistakes_injected": 1800,
+        "eligible_mistake_games": 1317,
+        "recoveries_after_mistake": 566,
+        "no_eligible_mistake_games": 0,
+        "missed_interrupt_mistakes": 79,
+        "walked_into_shield_mistakes": 1721,
+        "one_mistake_unconditional_win_rate": 0.3433,
+        "difficulty_index_unconditional_variant": 0.5771
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.7317,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.2694,
+            "within": true
+          },
+          "one-mistake-recovery": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.4298,
+            "within": true
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      },
+      "planner_min": 0.6,
+      "starter_greedy": {
+        "low": 0.57,
+        "mid": 0.61,
+        "high": 0.72
+      }
+    }
+  ]
+}

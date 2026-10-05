@@ -1,6 +1,16 @@
 # AI 派工與階段交接規範
 
-## 2026-10-05 P10-3 補修交接
+## 2026-10-05 P10-4 交接
+
+使用者已確認 P10-3 驗收完成；本輪從乾淨 `a6cd2f8` 接續第 4 關，交付本機單一 `feat(game): split level 4 into three acts and measure mirror followups` 提交，未推送、未部署。規則 **6.0.0**：照影／借影／反制考核起點 1／4／7、9 回合、鏡射盾 28、cap 0.04；防線 40／38／38 與通關後獎勵不變。
+
+full planner **72.91%**（最低格 **60.67%**）、forecast-aware **35.87%**、配對恢復 **42.19%**（4983／11811，覆蓋率 100%）、DI **0.5365**，L3→L4 **+0.1398**；quick 同樣全過，三種弱策略全格 0%，278 後端測試、solver 120／120 可解且重播，TypeScript／50 probe／build／Pint／diff 皆通過。兩牌組 full planner 71.67／74.15%、forecast 38.52／33.22%、恢復 38.45／45.80%，合併加權過，煙囪恢復率分支略高已揭露。
+
+Simulation/report 新增真實誘盾與下一手異系核心命中／破陣診斷，明確分母、JSON/CSV，排除靜態盾、取消鏡射、同系、終招、逾時等誤算；不改引擎公式、策略、失誤語意或量尺。99.54% planner 勝局有觀察到誘盾換系破陣，仍有例外，不宣稱是強制勝利條件或真人理解證據。
+
+第 1、2、3、5 關／共用技能／獎勵／戰役逐項相同，Vue、Pages、routes 未改；5.0.1 舊局可讀與已結束事件重播，續打／retry／已結束 counterfactual 拒絕版本衝突。Boost MCP search-docs／record-rule 回 Transport closed，直接更新共享規則的限制見報告。完整 full、quick、26 候選與測試證據見 [P10-4 報告](phase-reports/P10-4.md)。P10-4 **待驗收（自動條件具備）**，全量 solver、真人／手機／本輪瀏覽器留各工作包。本輪停止；下一包 P10-5 需另行指派。
+
+## 2026-10-05 P10-3 補修交接（歷史；使用者已確認驗收完成）
 
 基準 `7a056a3`；本輪單一修補提交 `fix(game): close P10-3 balance gap and complete resource metrics` 推送 main，未部署。規則升 **5.0.1**，只改第 3 關第 4 回合為可打斷水修復 14；原 5.0.0／70.30% 未達歷史保留於 [P10-3 報告](phase-reports/P10-3.md) §1～§7，新結果見 §8。
 

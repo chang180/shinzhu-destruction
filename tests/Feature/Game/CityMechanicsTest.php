@@ -71,11 +71,11 @@ class CityMechanicsTest extends TestCase
     {
         $level = $this->level('mirror-shade');
 
-        // 第 3 回合是排定的土地系修復；它不該被第 2 回合的出牌換掉。
-        $this->assertTrue($level->hasScheduledIntent(3));
-        $this->assertFalse($level->mirrorsPlayerOnTurn(3));
+        // 第 4 回合切入借影，排定的土地修復優先於鏡射。
+        $this->assertTrue($level->hasScheduledIntent(4, 'borrowed-shadow'));
+        $this->assertFalse($level->mirrorsPlayerOnTurn(4, 'borrowed-shadow'));
 
-        $intent = $level->intentForTurn(3, Element::Water);
+        $intent = $level->intentForTurn(4, Element::Water, 'borrowed-shadow');
 
         $this->assertSame('repair', $intent->type);
         $this->assertSame(Element::Land, $intent->element);
@@ -84,7 +84,7 @@ class CityMechanicsTest extends TestCase
     public function test_the_static_forecast_says_the_shield_mirrors_the_player_instead_of_naming_a_fixed_element(): void
     {
         $level = $this->level('mirror-shade');
-        $intent = $level->intentForTurn(4);
+        $intent = $level->intentForTurn(5, null, 'borrowed-shadow');
 
         // 還沒有人出手時不能假裝城市已經選好系別。
         $this->assertStringContainsString('鏡射', $intent->description);

@@ -20,7 +20,7 @@ use Tests\TestCase;
  * 不是由現在的程式算出來的。公開局面只比對當時就存在的欄位。
  *
  * 4.0.0（P10-2）改了第 1、2 關的內容，那兩關的錄製只代表 3.1.0 舊局，改由舊局唯讀／重播測試
- * 保護（CounterfactualTest、LegacyRunCompatibilityTest）；第 3～5 關未改，仍須逐項相同。
+ * 保護（CounterfactualTest、LegacyRunCompatibilityTest）；P10-3／P10-4 再改了第 3、4 關；第 5 關未改，仍須逐項相同。
  */
 class LevelPhaseEquivalenceTest extends TestCase
 {
@@ -32,9 +32,9 @@ class LevelPhaseEquivalenceTest extends TestCase
     private const SCENARIOS = ['low' => -0.15, 'mid' => 0.0, 'high' => 0.15];
 
     /**
-     * 4.0.0 改了內容的關卡；它們的 3.1.0 錄製不再是現行規則的期望值。
+     * P10-2～P10-4 改了內容的關卡；它們的 3.1.0 錄製不再是現行規則的期望值。
      */
-    private const CHANGED_SINCE_RECORDING = ['empty-cup', 'noon-fold', 'meter-feast'];
+    private const CHANGED_SINCE_RECORDING = ['empty-cup', 'noon-fold', 'meter-feast', 'mirror-shade'];
 
     private function fixture(): array
     {
