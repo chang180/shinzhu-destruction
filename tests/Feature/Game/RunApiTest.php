@@ -72,6 +72,15 @@ class RunApiTest extends TestCase
     }
 
     /**
+     * 4.0.0 的第 1 關規劃策略不是 100% 勝率；改用固定 seed 重新開局，避免伺服器亂數讓「打到通關」偶發失敗。
+     */
+    private function pinSeed(Run $run, int $seed): void
+    {
+        $state = app(BattleEngine::class)->start(app(LevelRepository::class)->get($run->level_id), $seed, $run->deck);
+        $run->forceFill(['seed' => $seed, 'state' => $state->toArray(), 'version' => $state->version])->save();
+    }
+
+    /**
      * 用規劃策略把這一局打到玩家勝利，回傳最後一次回應。
      */
     private function winCurrentRun(string $runId): TestResponse
@@ -79,6 +88,7 @@ class RunApiTest extends TestCase
         $engine = app(BattleEngine::class);
         $level = app(LevelRepository::class)->get('empty-cup');
         $run = Run::query()->where('public_id', $runId)->firstOrFail();
+        $this->pinSeed($run, 1);
         $strategy = new PlannerStrategy(
             ScenarioModifiers::fromArray($run->scenario_modifiers),
             app(CardCatalog::class),

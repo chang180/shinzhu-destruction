@@ -77,18 +77,38 @@ class LevelPhaseApiTest extends TestCase
     public function test_levels_publish_their_phase_names_objectives_and_order(): void
     {
         $response = $this->getJson(route('api.v1.levels.index'))->assertOk();
+        $levels = collect($response->json('levels'))->keyBy('level_id');
 
-        foreach ($response->json('levels') as $level) {
+        // P10-2：第 1、2 關三幕，觸發都只用回合門檻；其餘關卡仍是單一等價幕次。
+        $acts = [
+            'empty-cup' => [['trial-cup', '第一幕・試杯', 1], ['cut-supply', '第二幕・斷補', 3], ['empty-cup-quiz', '第三幕・空杯小考', 5]],
+            'noon-fold' => [['single-shield', '第一幕・單盾示範', 1], ['shift-guard', '第二幕・輪班防線', 3], ['crossed-windows', '第三幕・交錯窗口', 5]],
+        ];
+
+        foreach ($acts as $levelId => $expected) {
+            $phases = $levels[$levelId]['phases'];
+            $this->assertSame(array_column($expected, 0), array_column($phases, 'id'), $levelId);
+            $this->assertSame(array_column($expected, 1), array_column($phases, 'label'), $levelId);
+            $this->assertSame([1, 2, 3], array_column($phases, 'order'), $levelId);
+            $this->assertSame(array_map(static fn (array $act): array => ['type' => 'turn_gte', 'value' => $act[2]], $expected), array_column($phases, 'starts_when'), $levelId);
+            $this->assertSame(['第 3 回合起', '第 5 回合起', null], array_column($phases, 'next_phase_summary'), $levelId);
+            $this->assertNotContains('', array_column($phases, 'objective'), $levelId);
+        }
+
+        foreach (['meter-feast', 'mirror-shade', 'stored-night'] as $levelId) {
             $this->assertSame([[
                 'id' => 'main',
                 'order' => 1,
                 'label' => '全關',
-                'objective' => $level['lesson'],
+                'objective' => $levels[$levelId]['lesson'],
                 'starts_when' => ['type' => 'turn_gte', 'value' => 1],
                 'starts_when_summary' => '第 1 回合起',
                 'next_phase_summary' => null,
-            ]], $level['phases'], $level['level_id']);
-            $this->assertCount($level['max_turns'], $level['forecast']);
+            ]], $levels[$levelId]['phases'], $levelId);
+        }
+
+        foreach ($levels as $levelId => $level) {
+            $this->assertCount($level['max_turns'], $level['forecast'], $levelId);
         }
     }
 
@@ -110,7 +130,9 @@ class LevelPhaseApiTest extends TestCase
 
         $this->getJson(route('api.v1.runs.show', ['run' => $runId]))
             ->assertJsonPath('data.state.phase', 'standard')
-            ->assertJsonPath('data.level_phase.id', 'main');
+            ->assertJsonPath('data.level_phase.id', 'trial-cup')
+            ->assertJsonPath('data.level_phase.total', 3)
+            ->assertJsonPath('data.level_phase.next_phase_summary', '第 3 回合起');
     }
 
     public function test_a_run_saved_before_level_phases_is_readable_and_can_be_continued(): void
@@ -126,7 +148,7 @@ class LevelPhaseApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.compatible', true)
             ->assertJsonPath('data.state.level_phase_id', null)
-            ->assertJsonPath('data.level_phase.id', 'main');
+            ->assertJsonPath('data.level_phase.id', 'trial-cup');
         $this->postJson(route('api.v1.runs.actions.store', ['run' => $runId]), [
             'action_id' => 'r2', 'expected_version' => 2, 'type' => 'play', 'fixed' => 'gather',
         ])->assertOk()->assertJsonPath('data.state.turn', 2);

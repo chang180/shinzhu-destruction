@@ -53,6 +53,7 @@ class CounterfactualTest extends TestCase
         $engine = app(BattleEngine::class);
         $level = app(LevelRepository::class)->get($levelId);
         $run = Run::query()->where('public_id', $runId)->firstOrFail();
+        $this->pinSeed($run, 1);
         $strategy = new PlannerStrategy(
             ScenarioModifiers::fromArray($run->scenario_modifiers),
             app(CardCatalog::class),
@@ -90,6 +91,15 @@ class CounterfactualTest extends TestCase
         $this->assertSame('player_victory', Run::query()->where('public_id', $runId)->firstOrFail()->outcome->value);
 
         return $runId;
+    }
+
+    /**
+     * 4.0.0 的第 1 關規劃策略不是 100% 勝率；改用固定 seed 重新開局，避免伺服器亂數讓「打到通關」偶發失敗。
+     */
+    private function pinSeed(Run $run, int $seed): void
+    {
+        $state = app(BattleEngine::class)->start(app(LevelRepository::class)->get($run->level_id), $seed, $run->deck);
+        $run->forceFill(['seed' => $seed, 'state' => $state->toArray(), 'version' => $state->version])->save();
     }
 
     private function firstPlaySequence(string $runId): int
@@ -214,6 +224,28 @@ class CounterfactualTest extends TestCase
 
         $run = Run::query()->where('public_id', $runId)->firstOrFail();
         $this->assertSame('player_victory', $run->outcome->value);
+    }
+
+    public function test_a_run_finished_under_older_rules_replays_unchanged_but_cannot_be_compared_or_retried(): void
+    {
+        $runId = $this->winRun();
+        $replay = $this->getJson(route('api.v1.runs.replay', ['run' => $runId]))->assertOk()->json();
+        Run::query()->where('public_id', $runId)->firstOrFail()->forceFill(['rules_version' => '3.1.0'])->save();
+
+        // 續局只能用現行規則，替 3.1.0 的局算「如果」會得到錯的答案，所以直接拒絕。
+        $this->counterfactual($runId, ['sequence' => $this->firstPlaySequence($runId), 'type' => 'play', 'fixed' => 'gather'])
+            ->assertStatus(409)
+            ->assertJsonPath('reason_code', 'rules_version_mismatch');
+        $this->postJson(route('api.v1.runs.retry', ['run' => $runId]))
+            ->assertStatus(409)
+            ->assertJsonPath('reason_code', 'rules_version_mismatch');
+
+        $old = $this->getJson(route('api.v1.runs.replay', ['run' => $runId]))
+            ->assertOk()
+            ->assertJsonPath('rules_version', '3.1.0')
+            ->json();
+        $this->assertSame(array_diff_key($replay, ['rules_version' => 1]), array_diff_key($old, ['rules_version' => 1]));
+        $this->getJson(route('api.v1.runs.show', ['run' => $runId]))->assertJsonPath('data.compatible', false);
     }
 
     public function test_an_unfinished_run_cannot_be_compared_yet(): void

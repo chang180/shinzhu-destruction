@@ -1,0 +1,254 @@
+{
+  "meta": {
+    "rules_version": "4.0.0",
+    "budget": 20000,
+    "seeds_per_cell": 20,
+    "start_seed": 1,
+    "action_model": "reveal; every legal play (cards and fixed actions) x every legal keep subset; one swap per turn; timeout",
+    "note": "exhausted_unknown means the node budget ran out; it is not a proof of no solution. Not a player strategy and not part of difficulty_index.",
+    "command": "php artisan game:solve --seeds=20 --budget=20000 --json=output/p10/solve-20.json",
+    "note_summary": "per-cell status counts; full paths are reproducible with the command"
+  },
+  "cells": [
+    {
+      "level": "empty-cup",
+      "deck": "starter",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "empty-cup",
+      "deck": "starter",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "empty-cup",
+      "deck": "starter",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "meter-feast",
+      "deck": "smoke-screen",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "meter-feast",
+      "deck": "smoke-screen",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "meter-feast",
+      "deck": "smoke-screen",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "meter-feast",
+      "deck": "tide-siege",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "meter-feast",
+      "deck": "tide-siege",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "meter-feast",
+      "deck": "tide-siege",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "mirror-shade",
+      "deck": "smoke-screen",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "mirror-shade",
+      "deck": "smoke-screen",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "mirror-shade",
+      "deck": "smoke-screen",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "mirror-shade",
+      "deck": "tide-siege",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "mirror-shade",
+      "deck": "tide-siege",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "mirror-shade",
+      "deck": "tide-siege",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "noon-fold",
+      "deck": "starter",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "noon-fold",
+      "deck": "starter",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "noon-fold",
+      "deck": "starter",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "smoke-screen+hollow-ground",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "smoke-screen+hollow-ground",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "smoke-screen+hollow-ground",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "smoke-screen+sluice-jam",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "smoke-screen+sluice-jam",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "smoke-screen+sluice-jam",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "tide-siege+hollow-ground",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "tide-siege+hollow-ground",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "tide-siege+hollow-ground",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "tide-siege+sluice-jam",
+      "scenario": "w+h+l+",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "tide-siege+sluice-jam",
+      "scenario": "w-h-l-",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    },
+    {
+      "level": "stored-night",
+      "deck": "tide-siege+sluice-jam",
+      "scenario": "w0h0l0",
+      "seeds": 20,
+      "solved": 20,
+      "replay_verified": 20
+    }
+  ]
+}

@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'rules_version' => '3.1.0',
+    'rules_version' => '4.0.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -326,7 +326,9 @@ return [
                 'quote' => '「杯子空了，補水就好。城市空了呢？」',
                 'quote_note' => '晏沉將空杯推到你面前。「這就是你今天的作業。」',
                 'lessons' => [
-                    '讀預告。第 3、6 回合城市會修復核心；同系擾序牌可以取消它，首次打斷還會返還 2 點惡意。',
+                    '第一幕・試杯（第 1～2 回合）：城市只補強防線。先看懂預告、出牌與核心傷害。',
+                    '第二幕・斷補（第 3 回合起）：第 3 回合城市修復 19 點核心；同系擾序可以取消，首次打斷返還 2 點惡意。',
+                    '第三幕・空杯小考（第 5 回合起）：第 6 回合修復 20 點。打斷或搶輸出由你決定，錯一手仍有機會補回來。',
                 ],
             ],
             'defenses' => [
@@ -344,13 +346,30 @@ return [
             'apostle_power_value' => 2,
             'level_phases' => [
                 [
-                    'id' => 'main',
-                    'label' => '全關',
-                    'objective' => '現在出破陣，或留擾序等修復窗口。',
+                    'id' => 'trial-cup',
+                    'label' => '第一幕・試杯',
+                    'objective' => '看懂城市預告，用試探與破陣打出第一波核心傷害。',
                     'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+                    'intents' => [],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'cut-supply',
+                    'label' => '第二幕・斷補',
+                    'objective' => '第 3 回合的修復可以用水系擾序取消，或用輸出把它補回的核心打回來。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 3],
                     'intents' => [
-                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 14, 'interruptible' => true],
-                        6 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 19, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'empty-cup-quiz',
+                    'label' => '第三幕・空杯小考',
+                    'objective' => '第 6 回合的修復更大：決定要打斷它，還是集中輸出在回合用完前打空核心。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 5],
+                    'intents' => [
+                        6 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 20, 'interruptible' => true],
                     ],
                     'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
                 ],
@@ -374,8 +393,9 @@ return [
                 'quote' => '「街區學會了輪班守夜。哪一系被盯上，那一系就擋得住。」',
                 'quote_note' => '晏沉把三張排班表攤開。「所以你要嘛等它換班，要嘛去打它沒排班的那一邊。」',
                 'lessons' => [
-                    '護盾會輪替。第 2、4、6、8 回合城市各架起一道不同系的護盾，護盾同時只會有一道，兩回合後退場。',
-                    '護盾吸收的是核心衝擊，不是防線。擋不過就換系打，或用同系擾序直接取消那道預告。',
+                    '第一幕・單盾示範（第 1～2 回合）：第 2 回合城市架起熱系護盾，不能打斷。護盾只擋同系攻擊——換一系打就繞過去。',
+                    '第二幕・輪班防線（第 3 回合起）：第 3、4 回合輪流架起水系、土地系護盾，新盾會換掉舊盾。留牌等它換班、改打別系，或用同系擾序取消。',
+                    '第三幕・交錯窗口（第 5 回合起）：第 5、7 回合城市修復核心，第 6、8 回合架盾。決定先打斷修復、繞過護盾，還是保存高衝擊牌。',
                 ],
             ],
             'defenses' => [
@@ -393,17 +413,36 @@ return [
             'apostle_power_value' => 2,
             'level_phases' => [
                 [
-                    'id' => 'main',
-                    'label' => '全關',
-                    'objective' => '留強牌等護盾退場，或直接換一系繞過去。',
+                    'id' => 'single-shield',
+                    'label' => '第一幕・單盾示範',
+                    'objective' => '熱系護盾只擋熱系攻擊：換水系或土地系打過去。',
                     'starts_when' => ['type' => 'turn_gte', 'value' => 1],
                     'intents' => [
-                        2 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
-                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 20, 'interruptible' => true],
-                        4 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
-                        6 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                        7 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
-                        8 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
+                        2 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => false],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 4, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'shift-guard',
+                    'label' => '第二幕・輪班防線',
+                    'objective' => '護盾每回合換一系：看預告決定留牌、改系，或用同系擾序取消。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 3],
+                    'intents' => [
+                        3 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
+                        4 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 4, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'crossed-windows',
+                    'label' => '第三幕・交錯窗口',
+                    'objective' => '修復與護盾交錯出現：決定先打斷修復、繞過護盾，還是保存高衝擊牌。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 5],
+                    'intents' => [
+                        5 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
+                        6 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
+                        7 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 26, 'interruptible' => true],
+                        8 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
                     ],
                     'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 4, 'interruptible' => false],
                 ],

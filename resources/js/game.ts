@@ -3,7 +3,8 @@ export type Outcome = 'in_progress' | 'player_victory' | 'city_held';
 export type ActionType = 'reveal' | 'play' | 'swap' | 'timeout';
 export type RunMode = 'challenge' | 'practice';
 export type TurnPhase = 'awaiting_reveal' | 'decision';
-export interface Intent { type: string; element: Element; magnitude: number; interruptible: boolean; scheduled_turn: number; description: string }
+export interface Intent { type: string; element: Element; magnitude: number; interruptible: boolean; scheduled_turn: number; description: string; level_phase_id?: string }
+export interface LevelPhase { id: string; order: number; label: string; objective: string; starts_when_summary: string; next_phase_summary: string | null }
 export interface BattleState {
     turn: number; max_turns: number; core_resilience: number; malice: number; malice_cap: number; sigil_cap: number;
     defenses: Record<Element, number>; resistance: Record<Element, number>; sigils: Record<Element, number>;
@@ -30,7 +31,7 @@ export interface Run {
 }
 export interface Skill { id: string; kind: string; element: Element | null; malice_cost: number; cooldown: number; base_impact: number; defense_delta: number; required_sigils: number }
 export interface Briefing { headline: string; quote: string; quote_note: string; lessons: string[] }
-export interface Level { level_id: string; sequence: number; tier: 'main' | 'advanced'; available: boolean; name: string; subtitle: string; mechanic: string; lesson: string; briefing: Briefing | null; apostle: string; max_turns: number; requires: string | null; unlocked: boolean; practice_unlocked: boolean; best: { turns: number; run_id: string } | null; practice_best: { turns: number; run_id: string } | null; deck_size: number; initial_defenses: Record<Element, number>; reward: { options: string[] } | null; forecast: Intent[] }
+export interface Level { level_id: string; sequence: number; tier: 'main' | 'advanced'; available: boolean; name: string; subtitle: string; mechanic: string; lesson: string; briefing: Briefing | null; apostle: string; max_turns: number; requires: string | null; unlocked: boolean; practice_unlocked: boolean; best: { turns: number; run_id: string } | null; practice_best: { turns: number; run_id: string } | null; deck_size: number; initial_defenses: Record<Element, number>; reward: { options: string[] } | null; phases: LevelPhase[]; forecast: Intent[] }
 export interface RewardOption { key: string; style: string; add: Card; remove: Card; remove_remaining: number }
 export interface RewardOffer { level_id: string; level_name: string; prompt: string; options: RewardOption[]; chosen: string | null }
 export interface Campaign {
@@ -110,6 +111,16 @@ export function canKeepCard(state: Pick<BattleState, 'kept_last_turn'>, cardId: 
 export function briefingLines(level: Level | undefined): string[] {
     return (level?.briefing?.headline ?? '').split('\n').filter(line => line.length > 0);
 }
+/** 完整預告：多幕關卡在每一幕的第一個回合前標出幕名（P10-2）；單一幕的關卡維持原樣。 */
+export function forecastLines(level: Level | undefined): { turn: number; text: string }[] {
+    const phases = level?.phases ?? [];
+    const labels: Record<string, string> = Object.fromEntries(phases.map(phase => [phase.id, phase.label]));
+    return (level?.forecast ?? []).map((intent, index, all) => {
+        const phaseId = intent.level_phase_id;
+        const startsAct = phases.length > 1 && phaseId !== undefined && phaseId !== all[index - 1]?.level_phase_id;
+        return { turn: intent.scheduled_turn, text: startsAct ? `【${labels[phaseId] ?? phaseId}】${intent.description}` : intent.description };
+    });
+}
 export function soundStatusText(muted: boolean): string {
     return muted ? '目前靜音' : '目前有聲';
 }
@@ -153,11 +164,12 @@ export function secondsLeft(deadlineAt: string | null, serverOffsetMs: number, n
 export function serverOffset(serverTime: string, now = Date.now()): number {
     return Date.parse(serverTime) - now;
 }
-const eventNames: Record<string, string> = { hand_revealed: '揭示手牌', card_swapped: '換牌', hand_settled: '整理手牌', action_missed: '錯失行動', action_accepted: '禁術發動', impact: '核心命中', defense_shift: '防線削弱', sigil_gain: '印記累積', sigil_spent: '印記解放', resistance_change: '抗性變化', combo: '跨系連攜', breach_opened: '破綻開啟', breach_consumed: '破綻追擊', interrupt: '成功打斷修復', interrupt_failed: '未能打斷', malice_refund: '枯潮返還惡意', malice_recovered: '蓄勢回復', city_repair: '城市修復', city_reinforce: '城市補強', city_shield: '城市架盾', shield_absorbed: '護盾吸收', shield_expired: '護盾到期', phase_change: '階段轉換', turn_advanced: '進入下一回合', outcome: '對局結算' };
+const eventNames: Record<string, string> = { hand_revealed: '揭示手牌', card_swapped: '換牌', hand_settled: '整理手牌', action_missed: '錯失行動', action_accepted: '禁術發動', impact: '核心命中', defense_shift: '防線削弱', sigil_gain: '印記累積', sigil_spent: '印記解放', resistance_change: '抗性變化', combo: '跨系連攜', breach_opened: '破綻開啟', breach_consumed: '破綻追擊', interrupt: '成功打斷修復', interrupt_failed: '未能打斷', malice_refund: '枯潮返還惡意', malice_recovered: '蓄勢回復', city_repair: '城市修復', city_reinforce: '城市補強', city_shield: '城市架盾', shield_absorbed: '護盾吸收', shield_expired: '護盾到期', phase_change: '階段轉換', level_phase_change: '進入下一幕', turn_advanced: '進入下一回合', outcome: '對局結算' };
 export function eventText(event: BattleEvent): string {
     if (event.type === 'outcome') return event.after.outcome === 'player_victory' ? '毀滅成功・學院認可' : '城市守住・本次試煉結束';
     let detail = '';
-    if (typeof event.delta.core_resilience === 'number') detail = `｜核心 ${event.delta.core_resilience > 0 ? '+' : ''}${event.delta.core_resilience} → ${event.after.core_resilience}`;
+    if (event.type === 'level_phase_change' && typeof event.after.label === 'string') detail = `｜${event.after.label}`;
+    else if (typeof event.delta.core_resilience === 'number') detail = `｜核心 ${event.delta.core_resilience > 0 ? '+' : ''}${event.delta.core_resilience} → ${event.after.core_resilience}`;
     else if (typeof event.delta.malice === 'number') detail = `｜惡意 ${event.delta.malice > 0 ? '+' : ''}${event.delta.malice}`;
     return `${eventNames[event.type] ?? '戰況更新'}${detail}`;
 }

@@ -18,6 +18,9 @@ use Tests\TestCase;
  *
  * 期望值來自 P10-1 動工前錄下的 tests/Fixtures/p10-1/equivalence.json（見 meta.generated_at_commit），
  * 不是由現在的程式算出來的。公開局面只比對當時就存在的欄位。
+ *
+ * 4.0.0（P10-2）改了第 1、2 關的內容，那兩關的錄製只代表 3.1.0 舊局，改由舊局唯讀／重播測試
+ * 保護（CounterfactualTest、LegacyRunCompatibilityTest）；第 3～5 關未改，仍須逐項相同。
  */
 class LevelPhaseEquivalenceTest extends TestCase
 {
@@ -27,6 +30,11 @@ class LevelPhaseEquivalenceTest extends TestCase
     private static array $fixture = [];
 
     private const SCENARIOS = ['low' => -0.15, 'mid' => 0.0, 'high' => 0.15];
+
+    /**
+     * 4.0.0 改了內容的關卡；它們的 3.1.0 錄製不再是現行規則的期望值。
+     */
+    private const CHANGED_IN_4_0_0 = ['empty-cup', 'noon-fold'];
 
     private function fixture(): array
     {
@@ -53,6 +61,10 @@ class LevelPhaseEquivalenceTest extends TestCase
 
         foreach ($fixture['games'] as $key => $expected) {
             [$levelId, $scenario, $strategy, $seed] = explode('|', $key);
+
+            if (in_array($levelId, self::CHANGED_IN_4_0_0, true)) {
+                continue;
+            }
             $modifiers = EquivalenceRecorder::modifiers(self::SCENARIOS[$scenario]);
 
             $actual = $this->recorder()->record(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy($strategy, $modifiers), (int) $seed, $fixture['meta']['public_keys']);
@@ -65,13 +77,29 @@ class LevelPhaseEquivalenceTest extends TestCase
     {
         $fixture = $this->fixture();
 
-        foreach ($fixture['full_events'] as $levelId => $expected) {
+        foreach (array_diff_key($fixture['full_events'], array_flip(self::CHANGED_IN_4_0_0)) as $levelId => $expected) {
             $modifiers = EquivalenceRecorder::modifiers(0.0);
 
             $actual = $this->recorder()->record(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy('planner', $modifiers), 1, $fixture['meta']['public_keys'], true);
 
             $this->assertSame($expected, $actual, $levelId);
         }
+    }
+
+    public function test_levels_changed_in_4_0_0_no_longer_reproduce_their_3_1_0_recordings(): void
+    {
+        $fixture = $this->fixture();
+
+        foreach (self::CHANGED_IN_4_0_0 as $levelId) {
+            $modifiers = EquivalenceRecorder::modifiers(0.0);
+
+            $actual = $this->recorder()->record(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy('planner', $modifiers), 1, $fixture['meta']['public_keys'], true);
+
+            $this->assertNotSame($fixture['full_events'][$levelId], $actual, $levelId);
+        }
+
+        $this->assertSame('3.1.0', $fixture['meta']['rules_version']);
+        $this->assertNotSame($fixture['meta']['rules_version'], config('game.rules_version'));
     }
 
     public function test_stored_night_overhaul_start_stop_and_completion_samples_are_unchanged(): void
@@ -111,6 +139,10 @@ class LevelPhaseEquivalenceTest extends TestCase
     {
         foreach ($this->fixture()['counterfactual'] as $key => $expected) {
             [$levelId, $decision] = explode('|', $key);
+
+            if (in_array($levelId, self::CHANGED_IN_4_0_0, true)) {
+                continue;
+            }
             $modifiers = EquivalenceRecorder::modifiers(0.0);
 
             $actual = $this->recorder()->counterfactual(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy('planner', $modifiers), 1, (int) $decision);

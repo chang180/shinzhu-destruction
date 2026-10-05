@@ -38,14 +38,17 @@ class PlannerOneMistakeStrategyTest extends TestCase
 
     public function test_another_copy_of_the_best_card_is_not_counted_as_a_mistake(): void
     {
-        // noon-fold seed 17 第 2 回合：最佳是 open-chill-1，排名第二是同招的 open-chill-2。
-        $report = $this->play('noon-fold', $this->strategy(), 17)->strategyReport;
+        // 4.0.0 noon-fold seed 11 第 3 回合（第一幕的熱盾不可打斷，窗口落在第二幕的水盾）：
+        // 最佳是 long-flow-2，排名第二是同招的 long-flow-3。
+        $report = $this->play('noon-fold', $this->strategy(), 11)->strategyReport;
 
-        $this->assertSame('open-chill-2', $report['legacy_second']['card_id']);
+        $this->assertSame(3, $report['turn']);
+        $this->assertSame('long-flow-2', $report['best']['card_id']);
+        $this->assertSame('long-flow-3', $report['legacy_second']['card_id']);
         $this->assertTrue($report['legacy_second_same_semantics']);
         $this->assertSame(PlannerOneMistakeStrategy::STATUS_INJECTED, $report['status']);
         $this->assertNotSame(PlannerOneMistakeStrategy::signature($report['best']), PlannerOneMistakeStrategy::signature($report['mistake']));
-        $this->assertSame('probe.water', $report['mistake']['skill_id']);
+        $this->assertSame('probe.land', $report['mistake']['skill_id']);
     }
 
     public function test_an_action_tied_with_the_best_score_is_not_a_strictly_worse_mistake(): void

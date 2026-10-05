@@ -7,6 +7,7 @@ use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\Element;
 use App\Domain\Game\LevelDefinition;
 use App\Domain\Game\LevelRepository;
+use App\Domain\Game\Phases\LevelPhaseDefinition;
 use App\Domain\Game\Scenario\ScenarioModifiers;
 use App\Domain\Game\Simulation\BattleSimulator;
 use App\Domain\Game\Simulation\SimulationResult;
@@ -44,6 +45,16 @@ class DifficultyReport
     public const ONE_MISTAKE_RECOVERY = 'paired by (level, deck, scenario, seed): recoveries_after_mistake / eligible_mistake_games; eligible = planner won and a semantically different, strictly lower-scored mistake was injected; pooled over the level';
 
     public const SUITES = ['quick', 'full'];
+
+    /**
+     * 幕次量測（P10-2 起）。報告格式因此從 P10-0 的版本升級；difficulty_index 公式不變。
+     */
+    public const LEVEL_PHASE_METRICS = 'per cell: reach_rate = games whose run entered the act / games (act 1 = 1.0); avg_entry_turn = mean first turn played in the act among games that reached it';
+
+    /**
+     * 逐格 CSV 的幕次欄位最多列到第幾幕（P10 每關三幕）。
+     */
+    public const CSV_LEVEL_PHASES = 3;
 
     /**
      * P10 §3.4 初始發布門檻（勝率區間，0～1）。P10-0 只對照、不調整關卡。
@@ -266,7 +277,8 @@ class DifficultyReport
                 'legacy_index_version' => self::LEGACY_INDEX_VERSION,
                 'legacy_index_note' => 'difficulty_index_p10_di_1 uses the unconditional planner-one-mistake win rate; kept only for comparison',
                 'weighting' => 'every (scenario, deck) cell of a level has equal weight',
-                'solver' => 'not implemented in P10-0; planner results are not a solvability proof',
+                'solver' => 'separate offline command game:solve (P10-1); planner results are not a solvability proof',
+                'level_phase_metrics' => self::LEVEL_PHASE_METRICS,
             ],
             'levels' => $levels,
             'progression' => $this->progression($levels),
@@ -471,8 +483,45 @@ class DifficultyReport
             'avg_core_remaining_on_loss' => $losses === [] ? null : round(array_sum(array_map(static fn (SimulationResult $result): int => $result->coreRemaining, $losses)) / count($losses), 3),
             'illegal_choices' => array_sum(array_map(static fn (SimulationResult $result): int => $result->rejectedActions, $results)),
             'avg_phase_changes' => round(array_sum(array_map(static fn (SimulationResult $result): int => count($result->phaseChanges), $results)) / max(1, $games), 3),
+            'avg_level_phase_changes' => round(array_sum(array_map(static fn (SimulationResult $result): int => count($result->levelPhaseChanges), $results)) / max(1, $games), 3),
+            'level_phases' => $this->levelPhaseReach($level, $results),
             'avg_metrics' => $metrics,
         ];
+    }
+
+    /**
+     * 每一幕的到達率與平均進入回合。第一幕從第 1 回合開始，每一局都算到達。
+     *
+     * @param  list<SimulationResult>  $results
+     * @return list<array{id: string, order: int, reach_rate: float, avg_entry_turn: float|null}>
+     */
+    private function levelPhaseReach(LevelDefinition $level, array $results): array
+    {
+        $games = max(1, count($results));
+
+        return array_map(static function (LevelPhaseDefinition $phase, int $index) use ($results, $games): array {
+            if ($index === 0) {
+                return ['id' => $phase->id, 'order' => 1, 'reach_rate' => 1.0, 'avg_entry_turn' => 1.0];
+            }
+
+            $entries = [];
+
+            foreach ($results as $result) {
+                foreach ($result->levelPhaseChanges as $change) {
+                    if ($change['to'] === $phase->id) {
+                        // 切幕記在剛結束的回合，新幕從下一回合開始。
+                        $entries[] = $change['turn'] + 1;
+                    }
+                }
+            }
+
+            return [
+                'id' => $phase->id,
+                'order' => $index + 1,
+                'reach_rate' => round(count($entries) / $games, 4),
+                'avg_entry_turn' => $entries === [] ? null : round(array_sum($entries) / count($entries), 3),
+            ];
+        }, $level->levelPhases, array_keys($level->levelPhases));
     }
 
     /**
@@ -496,6 +545,14 @@ class DifficultyReport
                 'min_cell' => ['win_rate' => $rates[$minIndex], 'scenario' => $mine[$minIndex]['scenario'], 'deck' => $mine[$minIndex]['deck']],
                 'max_cell' => ['win_rate' => $rates[$maxIndex], 'scenario' => $mine[$maxIndex]['scenario'], 'deck' => $mine[$maxIndex]['deck']],
                 'illegal_choices' => array_sum(array_column($mine, 'illegal_choices')),
+                // 每格等權平均的幕次到達率，順序同設定。
+                'level_phase_reach' => array_map(
+                    static fn (int $index): array => [
+                        'id' => $mine[0]['level_phases'][$index]['id'],
+                        'reach_rate' => round(array_sum(array_map(static fn (array $cell): float => $cell['level_phases'][$index]['reach_rate'], $mine)) / count($mine), 4),
+                    ],
+                    array_keys($mine[0]['level_phases']),
+                ),
             ];
         }
 

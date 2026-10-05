@@ -1,7 +1,7 @@
 # P10 正式上線後難度曲線與關卡三幕化計畫
 
 - 建立日期：2026-10-05
-- 狀態：P10-0、P10-1 已交付待驗收（[P10-0](phase-reports/P10-0.md)、[P10-1](phase-reports/P10-1.md)）；P10-2 起尚未動工
+- 狀態：P10-0、P10-1、P10-2 已交付待驗收（[P10-0](phase-reports/P10-0.md)、[P10-1](phase-reports/P10-1.md)、[P10-2](phase-reports/P10-2.md)）；P10-3 起尚未動工；現行 `rules_version 4.0.0`
 - 基準：`rules_version 3.1.0`、五關正式版已部署
 - 目的：修正五關難度沒有穩定遞增、每關只有單段戰鬥而缺少內部節奏的問題
 - 範圍：Laravel／Vue 正式版；`docs/` GitHub Pages 歷史原型不修改
@@ -160,9 +160,9 @@ P10-1 建立了下列契約；P10-2 起的三幕內容必須沿用，改動需�
 
 - `GET /api/v1/levels`：每關新增 `phases`（`id`、`order`、`label`、`objective`、`starts_when`、`starts_when_summary`、`next_phase_summary`）。
 - `GET /api/v1/runs/{run}`：新增 `level_phase`（同上欄位＋`total`），`state` 新增 `level_phase_id`。既有欄位語意不變。
-- 尚未處理：多幕關卡的靜態 `forecast` 目前一律用第一幕的預告表，P10-2 加入第二幕時必須一併決定預告怎麼呈現。
+- 多幕關卡的靜態 `forecast`（P10-2）：每回合取該回合所在幕的預告表並帶 `level_phase_id`；所在幕只依回合門檻推進（`LevelDefinition::scheduledPhaseForTurn()`），核心與旗標條件視為未成立。只用 `turn_gte` 的關卡因此和實際對局一致；用到 `core_lte`／`flag_true` 的關卡要另外標示條件幕。
 
-**模擬量測**：`SimulationResult::$phaseChanges` 只記機制狀態，新增的 `$levelPhaseChanges` 只記幕次；P10 難度報告的 JSON／CSV 在 P10-1 刻意不加欄位，以保持 p10-di-2 quick 基線逐位元相同，幕次欄位由第一個多幕關卡（P10-2）加入。
+**模擬量測**：`SimulationResult::$phaseChanges` 只記機制狀態，`$levelPhaseChanges` 只記幕次。P10-2 起難度報告每格有 `avg_level_phase_changes` 與 `level_phases[]`（`reach_rate`、`avg_entry_turn`），CSV 為 `act_1～3_*` 欄位；`difficulty_index` 公式（`p10-di-2`）不變。
 
 **可解性 solver**：`php artisan game:solve`（`App\Domain\Game\Solver\SolvabilitySolver`）。見 [P10-1 報告](phase-reports/P10-1.md)。
 

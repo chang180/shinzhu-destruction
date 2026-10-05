@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, forecastLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
 import type { BattleEvent, Campaign, Card, Choice, CounterfactualComparison, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
@@ -442,7 +442,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                             </div>
                         </div>
                     </template>
-                    <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，同一張只能留到下一手；換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="intent in level?.forecast" :key="intent.scheduled_turn">{{ intent.description }}</li></ol></details>
+                    <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，同一張只能留到下一手；換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="line in forecastLines(level)" :key="line.turn">{{ line.text }}</li></ol></details>
                 </section>
                 <section v-if="page === 'report' && summary" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }">
                     <div><p class="eyebrow">第 {{ level?.sequence }} 關 · {{ level?.name }}｜{{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p>
@@ -491,7 +491,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                 <section v-if="page === 'report'" class="content-width report-details"><details><summary>展開完整戰報與演出</summary><p>{{ run.outcome === 'player_victory' ? '晏沉抬杯：「你讓城市沒有下一次。」以下依本局的實際紀錄複盤。' : '晏沉收回空杯：「看看是哪一回合。」以下依本局的實際紀錄複盤。' }}</p><button :disabled="locked" @click="replay">重播本局演出</button><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></details></section>
                 <section class="content-width data-panel"><details :open="page === 'briefing'"><summary>本局情境情報 · 開局後不變</summary><p class="small">以下是遊戲情境修正，不是災害預測。正值有利進攻；缺值採中性修正。標示「本關未採用」的系別不會在這一局生效。</p><div class="data-grid"><div v-for="element in elements" :key="element"><b>{{ elementNames[element] }}系 {{ run.data_notes[element]?.applied ? ((run.data_notes[element].modifier ?? 0) * 100).toFixed(1) + '%' : '本關未採用' }}</b><p>{{ run.data_notes[element]?.reason ?? run.scenario.reasons[element]?.message }}</p></div></div><div v-if="!Object.keys(run.snapshots).length" class="message">舊局未保存來源品質。保留原情境數值，不以今日資料冒充。</div><div v-for="(snapshot, source) in run.snapshots" :key="source" class="source-row"><b>{{ sourceNames[source] ?? source }}</b><span>{{ qualityNames[snapshot.quality] ?? snapshot.quality }}</span><small>觀測：{{ snapshot.observed_at ?? (snapshot.period ? Object.values(snapshot.period).join(' / ') : '無觀測日期') }}</small><p v-for="warning in snapshot.warnings" :key="warning" class="small">{{ warning }}</p></div></details></section>
                 <section v-if="run.history.length" class="content-width history"><details><summary>完整行動紀錄 · {{ run.history.length }} 次</summary><article v-for="entry in run.history" :key="entry.sequence"><h3>第 {{ entry.events[0]?.turn }} 回合 / {{ playedName(run, entry.input) }}</h3><ul><li v-for="event in entry.events" :key="event.sequence">{{ eventText(event) }}</li></ul>
-                    <div v-if="entry.input.type === 'play'" class="counterfactual">
+                    <div v-if="entry.input.type === 'play' && run.compatible" class="counterfactual">
                         <button :disabled="counterfactuals[entry.sequence] === 'loading'" @click="tryCounterfactual(entry.sequence, { type: 'play', fixed: 'gather' })">如果這回合改蓄勢，結果會怎樣？</button>
                         <p v-if="counterfactuals[entry.sequence] === 'loading'" class="small">模擬中…</p>
                         <p v-else-if="counterfactuals[entry.sequence] === 'error'" class="small">這個比較目前算不出來，可以再試一次。</p>

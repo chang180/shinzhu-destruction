@@ -23,7 +23,7 @@ class BattleSimulatorMetricsTest extends TestCase
 
     public function test_uninterrupted_repairs_are_counted_with_their_scheduled_amounts(): void
     {
-        // RandomStrategy 不會刻意打斷；找一局兩次修復（14、16）都落地的 seed。
+        // RandomStrategy 不會刻意打斷；找一局兩次修復（第二幕 19、第三幕 20）都落地的 seed。
         $level = app(LevelRepository::class)->get('empty-cup');
         $simulator = new BattleSimulator(app(BattleEngine::class));
         $found = null;
@@ -38,7 +38,7 @@ class BattleSimulatorMetricsTest extends TestCase
 
         $this->assertNotNull($found);
         $this->assertSame(0, $found->metrics['repairs_interrupted']);
-        $this->assertLessThanOrEqual(30, $found->metrics['city_repair_amount']);
+        $this->assertLessThanOrEqual(39, $found->metrics['city_repair_amount']);
         $this->assertGreaterThan(0, $found->metrics['city_repair_amount']);
     }
 

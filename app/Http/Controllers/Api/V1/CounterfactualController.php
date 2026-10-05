@@ -6,6 +6,8 @@ use App\Domain\Game\Exceptions\InvalidActionException;
 use App\Http\Controllers\Controller;
 use App\Services\Game\CampaignResolver;
 use App\Services\Game\CounterfactualComparator;
+use App\Services\Game\Exceptions\RunConflictException;
+use App\Services\Game\RunService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -21,6 +23,7 @@ class CounterfactualController extends Controller
         string $run,
         CampaignResolver $campaigns,
         CounterfactualComparator $comparator,
+        RunService $runs,
     ): JsonResponse {
         $validated = $request->validate([
             'sequence' => ['required', 'integer', 'min:1'],
@@ -45,6 +48,13 @@ class CounterfactualController extends Controller
                 'reason_code' => 'run_in_progress',
                 'message' => '這一局還沒結束，反事實比較要等結算之後',
             ], 409);
+        }
+
+        // 續局用的是現行規則；舊版規則的對局只能讀取與重播，不能拿新規則替它算「如果」。
+        try {
+            $runs->assertCompatible($model);
+        } catch (RunConflictException $exception) {
+            return response()->json(['reason_code' => $exception->reasonCode, 'message' => $exception->getMessage()], 409);
         }
 
         try {

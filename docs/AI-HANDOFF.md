@@ -1,5 +1,9 @@
 # AI 派工與階段交接規範
 
+## 2026-10-05 P10-2 第 1、2 關三幕化交接
+
+第 1 關改成試杯（第 1～2 回合只補強）／斷補（第 3 回合修復 19）／空杯小考（第 6 回合修復 20）；第 2 關改成單盾示範（第 2 回合**不可打斷**的熱盾）／輪班防線（第 3、4 回合水盾、土地盾）／交錯窗口（第 5、7 回合修復 22／26 與第 6、8 回合護盾交錯）。觸發只用 `turn_gte`，所以 `GET /api/v1/levels` 的 `forecast` 逐回合取所在幕的預告並帶 `level_phase_id`，和實際對局一致。`rules_version` 升為 **4.0.0**；3.1.0 舊局唯讀，反事實比較也改回 409 `rules_version_mismatch`（原本會用新規則替舊局算）。quick／full 矩陣兩關的 planner 與 forecast-aware 都在 P10 目標區間，第 2 關比第 1 關高 +0.109／+0.071；**失誤恢復率兩關都高於目標上限**，報告列了掃描結果與原因，沒有放寬門檻。難度報告新增幕次到達率欄位。第 3～5 關未動，五關曲線仍不單調。下一包 P10-3，入口見 [P10-2 報告](phase-reports/P10-2.md)；本包已提交、**未推送**、未部署。
+
 ## 2026-10-05 P10-1 三幕引擎交接
 
 P10-1 已完成三幕引擎前置，但**沒有任何關卡變成真正三幕**。關卡幕次存在 `BattleState::$levelPhaseId`（`state.level_phase_id`、事件 `level_phase_change`），和第 5 關重整的機制狀態 `state.phase`（standby／overhaul、事件 `phase_change`）分開；設定改為 `level_phases`（預告表在幕內）與 `mechanic_states`。觸發只有 `turn_gte`／`core_lte`／`flag_true`／`any_of`，載入時驗證。五關目前各一幕 `main`，等價證據見 `tests/Fixtures/p10-1/equivalence.json` 與 `LevelPhaseEquivalenceTest`。新增離線 solver `php artisan game:solve`，只證明存在解，不是玩家策略。P10-0／P10-0.1 報告裡「worktree 逐位元相同」的舊比對方法有誤（`vendor/` 符號連結），已用正確方法重做且結論成立。下一包 P10-2，入口見 [P10-1 報告](phase-reports/P10-1.md)；交付 commit `6f3db2b` 已推送 `main`，未部署。

@@ -137,6 +137,28 @@ final readonly class LevelDefinition
     }
 
     /**
+     * 靜態預告表上第 $turn 回合屬於哪一幕（P10-2）。
+     *
+     * 開局前沒有局面可讀，所以只依回合門檻推進，核心與旗標條件一律視為尚未成立；
+     * 每個回合邊界最多前進一幕，和引擎的切幕規則相同。只用 turn_gte 的關卡（第 1、2 關）
+     * 因此和實際對局走到的幕完全一致。
+     */
+    public function scheduledPhaseForTurn(int $turn): LevelPhaseDefinition
+    {
+        $index = 0;
+
+        for ($upcoming = 2; $upcoming <= $turn; $upcoming++) {
+            $next = $this->levelPhases[$index + 1] ?? null;
+
+            if ($next !== null && $next->startsWhen->isSatisfied($upcoming, PHP_INT_MAX, [])) {
+                $index++;
+            }
+        }
+
+        return $this->levelPhases[$index];
+    }
+
+    /**
      * 對外公開的幕次清單，依設定順序。
      *
      * @return list<array<string, mixed>>

@@ -52,8 +52,13 @@ class LevelResource extends JsonResource
             // 關卡幕次的名稱、目標、順序與可公開的進入條件（P10-1）；預告表本身仍走 forecast。
             'phases' => $this->resource->publicPhases(),
             // 預告表只在內容已交付的關卡送出，避免把未驗證的數值當成正式難度公告。
+            // 多幕關卡每回合取該回合所在幕的預告表，並標明幕次（P10-2）。
             'forecast' => $this->available
-                ? array_map(fn (int $turn): array => $this->resource->intentForTurn($turn)->toArray(), range(1, $this->maxTurns))
+                ? array_map(function (int $turn): array {
+                    $phase = $this->resource->scheduledPhaseForTurn($turn);
+
+                    return $this->resource->intentForTurn($turn, null, $phase->id)->toArray() + ['level_phase_id' => $phase->id];
+                }, range(1, $this->maxTurns))
                 : [],
         ];
     }

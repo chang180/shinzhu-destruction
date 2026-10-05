@@ -76,6 +76,7 @@ class DifficultyReportCommand extends Command
         }
 
         $this->renderLevels($result['levels']);
+        $this->renderLevelPhases($result['levels']);
         $this->renderProgression($result['progression']);
         $this->renderGates($result['levels']);
         $this->write($result);
@@ -121,6 +122,25 @@ class DifficultyReportCommand extends Command
         }
 
         $this->table(['關卡', '牌組', ...array_map(static fn (string $name): string => $name.' 加權（最低–最高）', $names), '失誤恢復（配對）', 'difficulty_index'], $rows);
+    }
+
+    /**
+     * 多幕關卡的 planner 幕次到達率；單一幕的關卡不列。
+     *
+     * @param  list<array<string, mixed>>  $levels
+     */
+    private function renderLevelPhases(array $levels): void
+    {
+        foreach ($levels as $level) {
+            $reach = $level['strategies']['planner']['level_phase_reach'] ?? [];
+
+            if (count($reach) > 1) {
+                $this->line(sprintf('  %s 幕次到達（planner）：%s', $level['level'], implode(' → ', array_map(
+                    static fn (array $phase): string => sprintf('%s %.1f%%', $phase['id'], 100 * $phase['reach_rate']),
+                    $reach,
+                ))));
+            }
+        }
     }
 
     /**
@@ -205,10 +225,16 @@ class DifficultyReportCommand extends Command
                 'mistakes_skipping_a_winning_move',
             ];
 
+            $phaseKeys = [];
+
+            for ($act = 1; $act <= DifficultyReport::CSV_LEVEL_PHASES; $act++) {
+                array_push($phaseKeys, "act_{$act}_id", "act_{$act}_reach_rate", "act_{$act}_avg_entry_turn");
+            }
+
             fputcsv($handle, [
                 'level', 'sequence', 'deck', 'scenario', 'strategy', 'games', 'wins', 'win_rate',
                 'avg_end_turn', 'avg_winning_turn_budget_used', 'avg_core_remaining_on_loss', 'illegal_choices',
-                'avg_phase_changes', ...$metricKeys, ...$recoveryKeys,
+                'avg_phase_changes', ...$metricKeys, ...$recoveryKeys, 'avg_level_phase_changes', ...$phaseKeys,
             ], escape: '');
 
             foreach ($result['cells'] as $cell) {
@@ -219,6 +245,12 @@ class DifficultyReportCommand extends Command
                     $cell['illegal_choices'], $cell['avg_phase_changes'],
                     ...array_map(static fn (string $key): float => $cell['avg_metrics'][$key], $metricKeys),
                     ...array_map(static fn (string $key): string => (string) ($cell[$key] ?? ''), $recoveryKeys),
+                    $cell['avg_level_phase_changes'],
+                    ...array_merge(...array_map(static function (int $index) use ($cell): array {
+                        $phase = $cell['level_phases'][$index] ?? null;
+
+                        return $phase === null ? ['', '', ''] : [$phase['id'], (string) $phase['reach_rate'], (string) ($phase['avg_entry_turn'] ?? '')];
+                    }, range(0, DifficultyReport::CSV_LEVEL_PHASES - 1))),
                 ], escape: '');
             }
 

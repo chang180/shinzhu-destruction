@@ -118,9 +118,10 @@ class BattleEngineTest extends TestCase
     public function test_disrupt_cancels_only_a_matching_interruptible_telegraph(): void
     {
         $state = $this->startState();
-        // 空杯關第 3 回合是可打斷的水系修復。
+        // 空杯關第二幕（斷補）第 3 回合是可打斷的水系修復。
         $state->turn = 3;
-        $state->intent = $this->level()->intentForTurn(3);
+        $state->levelPhaseId = 'cut-supply';
+        $state->intent = $this->level()->intentForTurn(3, null, 'cut-supply');
         $core = $state->coreResilience = 60;
 
         // 系別不符：打斷失敗，城市照樣完成修復。
@@ -217,7 +218,7 @@ class BattleEngineTest extends TestCase
 
     public function test_the_city_keeps_only_one_shield_at_a_time(): void
     {
-        // 折晝關第 2、4、6 回合都架盾，是驗「同時只有一道」最直接的預告表。
+        // 折晝關第 2 回合（第一幕）與第 6 回合（第三幕）都架盾，是驗「同時只有一道」最直接的預告表。
         $level = $this->level('noon-fold');
         $state = $this->startState($level);
         $state->turn = 2;
@@ -228,12 +229,13 @@ class BattleEngineTest extends TestCase
         $this->assertSame($level->intentForTurn(2)->magnitude, $state->totalShield());
 
         $state->turn = 6;
-        $state->intent = $level->intentForTurn(6);
+        $state->levelPhaseId = 'crossed-windows';
+        $state->intent = $level->intentForTurn(6, null, 'crossed-windows');
         [$state] = $this->act($state, 'gather', $level);
 
         // 新護盾取代舊護盾，不累加。
         $this->assertCount(1, $state->shields);
-        $this->assertSame($level->intentForTurn(6)->magnitude, $state->totalShield());
+        $this->assertSame($level->intentForTurn(6, null, 'crossed-windows')->magnitude, $state->totalShield());
     }
 
     public function test_the_overhaul_phase_starts_and_can_be_stopped_by_two_different_elements(): void

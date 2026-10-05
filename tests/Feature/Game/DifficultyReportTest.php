@@ -212,4 +212,23 @@ class DifficultyReportTest extends TestCase
         $this->assertNull($report['levels'][0]['difficulty']['difficulty_index']);
         $this->assertNull($report['progression']['passes']);
     }
+
+    public function test_cells_report_how_often_and_when_each_act_is_reached(): void
+    {
+        $report = app(DifficultyReport::class)->build('quick', 3, 1, ['empty-cup', 'stored-night'], ['random']);
+        $cells = collect($report['cells'])->keyBy('level');
+
+        // random 在空杯關打不完，八回合一定走過三幕，進入回合就是門檻回合。
+        $this->assertSame([
+            ['id' => 'trial-cup', 'order' => 1, 'reach_rate' => 1.0, 'avg_entry_turn' => 1.0],
+            ['id' => 'cut-supply', 'order' => 2, 'reach_rate' => 1.0, 'avg_entry_turn' => 3.0],
+            ['id' => 'empty-cup-quiz', 'order' => 3, 'reach_rate' => 1.0, 'avg_entry_turn' => 5.0],
+        ], $cells['empty-cup']['level_phases']);
+        $this->assertSame(2.0, $cells['empty-cup']['avg_level_phase_changes']);
+
+        // 單一幕的關卡只有第一幕，重整的機制狀態不算換幕。
+        $this->assertSame([['id' => 'main', 'order' => 1, 'reach_rate' => 1.0, 'avg_entry_turn' => 1.0]], $cells['stored-night']['level_phases']);
+        $this->assertSame(0.0, $cells['stored-night']['avg_level_phase_changes']);
+        $this->assertSame([['id' => 'main', 'reach_rate' => 1.0]], $report['levels'][1]['strategies']['random']['level_phase_reach']);
+    }
 }

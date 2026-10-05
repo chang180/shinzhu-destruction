@@ -12,7 +12,8 @@ use App\Domain\Game\Simulation\Strategies\ForecastAwareStrategy;
 use Tests\TestCase;
 
 /**
- * 關卡幕次切換的引擎行為。正式五關目前都是單一幕；這裡用測試專用的多幕 empty-cup 變體。
+ * 關卡幕次切換的引擎行為。用測試專用的 empty-cup 變體：第一幕固定為 3.1.0 的單一幕預告表，
+ * 再接上各測試需要的幕，所以這裡驗的是引擎，不受正式關卡數值調整影響。
  */
 class LevelPhaseTransitionTest extends TestCase
 {
@@ -20,13 +21,25 @@ class LevelPhaseTransitionTest extends TestCase
 
     private const SHIELD_NINE = ['type' => 'shield', 'element' => 'water', 'magnitude' => 9, 'interruptible' => true];
 
+    private const MAIN = [
+        'id' => 'main',
+        'label' => '全關',
+        'objective' => '現在出破陣，或留擾序等修復窗口。',
+        'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+        'intents' => [
+            3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 14, 'interruptible' => true],
+            6 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+        ],
+        'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
+    ];
+
     /**
      * @param  list<array<string, mixed>>  $extraPhases
      */
     private function variant(array $extraPhases): LevelDefinition
     {
         $config = config('game.levels.empty-cup');
-        $config['level_phases'] = [...$config['level_phases'], ...$extraPhases];
+        $config['level_phases'] = [self::MAIN, ...$extraPhases];
 
         return LevelDefinition::fromConfig('empty-cup', $config);
     }
@@ -38,7 +51,7 @@ class LevelPhaseTransitionTest extends TestCase
      */
     private function phase(string $id, array $startsWhen, ?array $defaultIntent = null, ?array $intents = null): array
     {
-        $main = config('game.levels.empty-cup.level_phases.0');
+        $main = self::MAIN;
 
         return [
             'id' => $id,
@@ -126,7 +139,7 @@ class LevelPhaseTransitionTest extends TestCase
         $same = $this->variant([$this->phase('second', ['type' => 'turn_gte', 'value' => 3])]);
 
         $withPhase = $this->gatherTurns($same, 4);
-        $without = $this->gatherTurns($this->level(), 4);
+        $without = $this->gatherTurns($this->variant([]), 4);
 
         foreach ([0, 1, 2, 3] as $turn) {
             $expected = $without[$turn][0]->toArray();
