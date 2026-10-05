@@ -56,9 +56,17 @@ class CampaignProgressionTest extends TestCase
      * 最難的一關也不是 100% 勝率，所以允許同一關重開幾局——這正是玩家失敗後
      * 再開一局的流程，不是把勝率灌成必勝。
      */
+    /**
+     * 用 planner 透過真實 API 打到通關。
+     *
+     * 重試上限刻意拉高：情境與牌序都由伺服器產生，而 planner 在第 4、5 關的最低格
+     * 只有 60.7% 與 56.7%（P10-7 發布矩陣），所以連敗四次約有百分之幾的機率，
+     * 會讓這個發布門檻每幾十次就假性失敗一次。十次之後假性失敗低於 0.1%，
+     * 而測試要守的意思沒有改：planner 必須能通過每一關。
+     */
     private function clear(string $levelId, string $mode = 'challenge'): string
     {
-        for ($attempt = 1; $attempt <= 4; $attempt++) {
+        for ($attempt = 1; $attempt <= 10; $attempt++) {
             $runId = $this->playOut($levelId, $mode, $attempt);
 
             if (Run::query()->where('public_id', $runId)->firstOrFail()->outcome->value === 'player_victory') {
@@ -66,7 +74,7 @@ class CampaignProgressionTest extends TestCase
             }
         }
 
-        $this->fail("規劃策略連開四局都沒能通關 {$levelId}");
+        $this->fail("規劃策略連開十局都沒能通關 {$levelId}");
     }
 
     private function playOut(string $levelId, string $mode, int $attempt): string

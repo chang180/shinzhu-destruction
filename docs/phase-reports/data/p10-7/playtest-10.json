@@ -1,0 +1,1628 @@
+{
+    "meta": {
+        "rules_version": "7.0.0",
+        "players": 10,
+        "attempt_cap": 12,
+        "base_seed": 1,
+        "profiles": {
+            "random": "亂打：隨便出牌",
+            "single-water": "只打水系：抓到一招就重複",
+            "legacy-cycle": "固定循環：照舊習慣輪流出牌",
+            "greedy": "貪心：只看當下最強的一張",
+            "forecast-aware": "會讀預告：看城市下一步，但不做深層前瞻"
+        },
+        "not_human_evidence": "模擬策略不是真人。本檔沒有、也無法記錄玩家是否看懂失敗原因或主觀難度感受。"
+    },
+    "players": [
+        {
+            "seed": 1,
+            "profile": "random",
+            "profile_note": "亂打：隨便出牌",
+            "deck_choices": [],
+            "levels_cleared": 0,
+            "stuck_at": "empty-cup",
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": false,
+                    "attempts_used": 12,
+                    "clearing_turn": null,
+                    "max_turns": 8,
+                    "failed_in_acts": {
+                        "empty-cup-quiz": 12
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 1001,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 49,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 1002,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 77,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 1003,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 30,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 1004,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 64,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 1005,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 51,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 1006,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 65,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 1007,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 45,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 1008,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 38,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 1009,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 13,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 1010,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 82,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 1011,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 77,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 1012,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 32,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 2,
+            "profile": "single-water",
+            "profile_note": "只打水系：抓到一招就重複",
+            "deck_choices": [],
+            "levels_cleared": 0,
+            "stuck_at": "empty-cup",
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": false,
+                    "attempts_used": 12,
+                    "clearing_turn": null,
+                    "max_turns": 8,
+                    "failed_in_acts": {
+                        "empty-cup-quiz": 12
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 2001,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 36,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 2002,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 43,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 2003,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 26,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 2004,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 38,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 2005,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 39,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 2006,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 38,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 2007,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 62,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 2008,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 47,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 2009,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 46,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 2010,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 34,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 2011,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 32,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 2012,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 71,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 3,
+            "profile": "legacy-cycle",
+            "profile_note": "固定循環：照舊習慣輪流出牌",
+            "deck_choices": [],
+            "levels_cleared": 1,
+            "stuck_at": "noon-fold",
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 5,
+                    "clearing_turn": 8,
+                    "max_turns": 8,
+                    "failed_in_acts": {
+                        "empty-cup-quiz": 4
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 3001,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 9,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 3002,
+                            "scenario": "w0h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 7,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 3003,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 7,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 3004,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 2,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 3005,
+                            "scenario": "w+h0l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "noon-fold",
+                    "sequence": 2,
+                    "deck": "starter",
+                    "cleared": false,
+                    "attempts_used": 12,
+                    "clearing_turn": null,
+                    "max_turns": 9,
+                    "failed_in_acts": {
+                        "crossed-windows": 12
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 3001,
+                            "scenario": "w0h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 77,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 3002,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 31,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 3003,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 54,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 3004,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 36,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 3005,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 38,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 3006,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 31,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 3007,
+                            "scenario": "w0h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 50,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 3008,
+                            "scenario": "w0h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 41,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 3009,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 31,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 3010,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 28,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 3011,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 52,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 3012,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 33,
+                            "ended_in_act": "crossed-windows"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 4,
+            "profile": "greedy",
+            "profile_note": "貪心：只看當下最強的一張",
+            "deck_choices": {
+                "noon-fold": "tide-siege",
+                "mirror-shade": "hollow-ground"
+            },
+            "levels_cleared": 5,
+            "stuck_at": null,
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 6,
+                    "max_turns": 8,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 4001,
+                            "scenario": "w+h0l0",
+                            "won": true,
+                            "turns": 6,
+                            "core_remaining": 0,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "noon-fold",
+                    "sequence": 2,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 7,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 4001,
+                            "scenario": "w+h+l+",
+                            "won": true,
+                            "turns": 7,
+                            "core_remaining": 0,
+                            "ended_in_act": "crossed-windows"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "meter-feast",
+                    "sequence": 3,
+                    "deck": "tide-siege",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 11,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 4001,
+                            "scenario": "w0h+l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "peak-settlement"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "mirror-shade",
+                    "sequence": 4,
+                    "deck": "tide-siege",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 9,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 4001,
+                            "scenario": "w0h-l0",
+                            "won": true,
+                            "turns": 9,
+                            "core_remaining": 0,
+                            "ended_in_act": "counter-exam"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "stored-night",
+                    "sequence": 5,
+                    "deck": "tide-siege+hollow-ground",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 4001,
+                            "scenario": "w+h+l+",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "overhaul-warning"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 5,
+            "profile": "forecast-aware",
+            "profile_note": "會讀預告：看城市下一步，但不做深層前瞻",
+            "deck_choices": {
+                "noon-fold": "tide-siege"
+            },
+            "levels_cleared": 3,
+            "stuck_at": "mirror-shade",
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 6,
+                    "max_turns": 8,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 5001,
+                            "scenario": "w+h0l0",
+                            "won": true,
+                            "turns": 6,
+                            "core_remaining": 0,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "noon-fold",
+                    "sequence": 2,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 7,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 5001,
+                            "scenario": "w0h-l0",
+                            "won": true,
+                            "turns": 7,
+                            "core_remaining": 0,
+                            "ended_in_act": "crossed-windows"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "meter-feast",
+                    "sequence": 3,
+                    "deck": "tide-siege",
+                    "cleared": true,
+                    "attempts_used": 4,
+                    "clearing_turn": 9,
+                    "max_turns": 11,
+                    "failed_in_acts": {
+                        "peak-settlement": 3
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 5001,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 11,
+                            "core_remaining": 20,
+                            "ended_in_act": "peak-settlement"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 5002,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 11,
+                            "core_remaining": 1,
+                            "ended_in_act": "peak-settlement"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 5003,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 11,
+                            "core_remaining": 6,
+                            "ended_in_act": "peak-settlement"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 5004,
+                            "scenario": "w0h+l0",
+                            "won": true,
+                            "turns": 9,
+                            "core_remaining": 0,
+                            "ended_in_act": "peak-settlement"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "mirror-shade",
+                    "sequence": 4,
+                    "deck": "tide-siege",
+                    "cleared": false,
+                    "attempts_used": 12,
+                    "clearing_turn": null,
+                    "max_turns": 9,
+                    "failed_in_acts": {
+                        "counter-exam": 12
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 5001,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 47,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 5002,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 39,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 5003,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 66,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 5004,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 44,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 5005,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 52,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 5006,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 27,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 5007,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 13,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 5008,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 38,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 5009,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 23,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 5010,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 46,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 5011,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 54,
+                            "ended_in_act": "counter-exam"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 5012,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 19,
+                            "ended_in_act": "counter-exam"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 6,
+            "profile": "random",
+            "profile_note": "亂打：隨便出牌",
+            "deck_choices": [],
+            "levels_cleared": 0,
+            "stuck_at": "empty-cup",
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": false,
+                    "attempts_used": 12,
+                    "clearing_turn": null,
+                    "max_turns": 8,
+                    "failed_in_acts": {
+                        "empty-cup-quiz": 12
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 6001,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 30,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 6002,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 39,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 6003,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 56,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 6004,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 39,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 6005,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 63,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 6006,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 70,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 6007,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 55,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 6008,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 32,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 6009,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 16,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 6010,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 69,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 6011,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 46,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 6012,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 51,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 7,
+            "profile": "single-water",
+            "profile_note": "只打水系：抓到一招就重複",
+            "deck_choices": [],
+            "levels_cleared": 0,
+            "stuck_at": "empty-cup",
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": false,
+                    "attempts_used": 12,
+                    "clearing_turn": null,
+                    "max_turns": 8,
+                    "failed_in_acts": {
+                        "empty-cup-quiz": 12
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 7001,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 38,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 7002,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 48,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 7003,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 39,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 7004,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 50,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 7005,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 48,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 7006,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 52,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 7007,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 48,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 7008,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 25,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 7009,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 71,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 7010,
+                            "scenario": "w0h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 53,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 7011,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 31,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 7012,
+                            "scenario": "w0h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 39,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 8,
+            "profile": "legacy-cycle",
+            "profile_note": "固定循環：照舊習慣輪流出牌",
+            "deck_choices": [],
+            "levels_cleared": 1,
+            "stuck_at": "noon-fold",
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 12,
+                    "clearing_turn": 8,
+                    "max_turns": 8,
+                    "failed_in_acts": {
+                        "empty-cup-quiz": 11
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 8001,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 6,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 8002,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 2,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 8003,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 16,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 8004,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 4,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 8005,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 45,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 8006,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 12,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 8007,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 7,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 8008,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 8,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 8009,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 40,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 8010,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 11,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 8011,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 8,
+                            "core_remaining": 18,
+                            "ended_in_act": "empty-cup-quiz"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 8012,
+                            "scenario": "w+h0l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "noon-fold",
+                    "sequence": 2,
+                    "deck": "starter",
+                    "cleared": false,
+                    "attempts_used": 12,
+                    "clearing_turn": null,
+                    "max_turns": 9,
+                    "failed_in_acts": {
+                        "crossed-windows": 12
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 8001,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 79,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 8002,
+                            "scenario": "w0h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 50,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 8003,
+                            "scenario": "w+h+l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 49,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 8004,
+                            "scenario": "w0h0l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 52,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 8005,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 45,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 8006,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 37,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 8007,
+                            "scenario": "w+h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 39,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 8,
+                            "seed": 8008,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 59,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 9,
+                            "seed": 8009,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 43,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 10,
+                            "seed": 8010,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 50,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 11,
+                            "seed": 8011,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 56,
+                            "ended_in_act": "crossed-windows"
+                        },
+                        {
+                            "attempt": 12,
+                            "seed": 8012,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 55,
+                            "ended_in_act": "crossed-windows"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 9,
+            "profile": "greedy",
+            "profile_note": "貪心：只看當下最強的一張",
+            "deck_choices": {
+                "noon-fold": "smoke-screen",
+                "mirror-shade": "hollow-ground"
+            },
+            "levels_cleared": 5,
+            "stuck_at": null,
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 8,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 9001,
+                            "scenario": "w0h-l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "noon-fold",
+                    "sequence": 2,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 9001,
+                            "scenario": "w+h+l+",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "crossed-windows"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "meter-feast",
+                    "sequence": 3,
+                    "deck": "smoke-screen",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 11,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 9001,
+                            "scenario": "w0h+l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "peak-settlement"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "mirror-shade",
+                    "sequence": 4,
+                    "deck": "smoke-screen",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 9001,
+                            "scenario": "w-h0l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "counter-exam"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "stored-night",
+                    "sequence": 5,
+                    "deck": "smoke-screen+hollow-ground",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 9001,
+                            "scenario": "w0h-l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "overhaul-warning"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "seed": 10,
+            "profile": "forecast-aware",
+            "profile_note": "會讀預告：看城市下一步，但不做深層前瞻",
+            "deck_choices": {
+                "noon-fold": "tide-siege",
+                "mirror-shade": "hollow-ground"
+            },
+            "levels_cleared": 5,
+            "stuck_at": null,
+            "levels": [
+                {
+                    "level_id": "empty-cup",
+                    "sequence": 1,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 8,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 10001,
+                            "scenario": "w0h+l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "empty-cup-quiz"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "noon-fold",
+                    "sequence": 2,
+                    "deck": "starter",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 9,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 10001,
+                            "scenario": "w0h+l0",
+                            "won": true,
+                            "turns": 9,
+                            "core_remaining": 0,
+                            "ended_in_act": "crossed-windows"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "meter-feast",
+                    "sequence": 3,
+                    "deck": "tide-siege",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 11,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 10001,
+                            "scenario": "w0h-l0",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "peak-settlement"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "mirror-shade",
+                    "sequence": 4,
+                    "deck": "tide-siege",
+                    "cleared": true,
+                    "attempts_used": 1,
+                    "clearing_turn": 8,
+                    "max_turns": 9,
+                    "failed_in_acts": [],
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 10001,
+                            "scenario": "w+h+l+",
+                            "won": true,
+                            "turns": 8,
+                            "core_remaining": 0,
+                            "ended_in_act": "counter-exam"
+                        }
+                    ]
+                },
+                {
+                    "level_id": "stored-night",
+                    "sequence": 5,
+                    "deck": "tide-siege+hollow-ground",
+                    "cleared": true,
+                    "attempts_used": 7,
+                    "clearing_turn": 6,
+                    "max_turns": 9,
+                    "failed_in_acts": {
+                        "last-night": 3,
+                        "overhaul-warning": 3
+                    },
+                    "attempts": [
+                        {
+                            "attempt": 1,
+                            "seed": 10001,
+                            "scenario": "w0h0l+",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 57,
+                            "ended_in_act": "last-night"
+                        },
+                        {
+                            "attempt": 2,
+                            "seed": 10002,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 42,
+                            "ended_in_act": "last-night"
+                        },
+                        {
+                            "attempt": 3,
+                            "seed": 10003,
+                            "scenario": "w0h+l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 49,
+                            "ended_in_act": "overhaul-warning"
+                        },
+                        {
+                            "attempt": 4,
+                            "seed": 10004,
+                            "scenario": "w-h0l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 41,
+                            "ended_in_act": "overhaul-warning"
+                        },
+                        {
+                            "attempt": 5,
+                            "seed": 10005,
+                            "scenario": "w0h-l0",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 42,
+                            "ended_in_act": "last-night"
+                        },
+                        {
+                            "attempt": 6,
+                            "seed": 10006,
+                            "scenario": "w-h-l-",
+                            "won": false,
+                            "turns": 9,
+                            "core_remaining": 47,
+                            "ended_in_act": "overhaul-warning"
+                        },
+                        {
+                            "attempt": 7,
+                            "seed": 10007,
+                            "scenario": "w0h+l0",
+                            "won": true,
+                            "turns": 6,
+                            "core_remaining": 0,
+                            "ended_in_act": "overhaul-warning"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
