@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'rules_version' => '4.0.0',
+    'rules_version' => '5.0.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -464,7 +464,7 @@ return [
             'name' => '饗表・園區無底帳',
             'subtitle' => '預告的需求脈衝',
             'apostle' => 'meter-feast',
-            'max_turns' => 10,
+            'max_turns' => 11,
             'requires' => 'noon-fold',
             'mechanic' => '預告的需求脈衝：修復與進攻窗口互相排擠，得為關鍵回合留牌。',
             'lesson' => '為脈衝回合留牌、留惡意，並決定何時交出終招。',
@@ -473,17 +473,24 @@ return [
                 'quote' => '「園區的表從不回頭看。它只問下一筆要多少。」',
                 'quote_note' => '晏沉指著跳動的數字。「這是你的畢業考——主線的最後一關。」',
                 'lessons' => [
-                    '需求脈衝在第 4、8 回合。那兩回合完成跨系連攜會多返還 1 點惡意。',
-                    '城市的修復與護盾輪流出現，回合又只有 10 個。想清楚哪一回合留牌、哪一回合放終招。',
+                    '三幕：帳前準備（第 1～3 回合）、需求脈衝（第 4 回合起）、高峰結算（第 7 回合起）。',
+                    '第一幕的水盾**不能打斷**，只能換系繞過去。需求脈衝在第 4、8 回合，那兩回合完成跨系連攜會多返還 1 點惡意。',
+                    '第三幕四個回合連續出手：熱盾、兩次水系修復、再一次熱系修復。回合只有 11 個，想清楚哪一回合留牌、哪一回合放終招。',
                     '通關即完成主線目標。你可以收下戰果結束計畫，也可以接受進階畢業考。',
                 ],
             ],
             'defenses' => [
-                Element::Water->value => 24,
-                Element::Heat->value => 24,
-                Element::Land->value => 22,
+                Element::Water->value => 37,
+                Element::Heat->value => 37,
+                Element::Land->value => 35,
             ],
             'data_elements' => [Element::Water->value, Element::Heat->value],
+            /*
+             * 主線最後一關同時吃水、熱兩系資料，不夾的話低資料情境會讓 planner 最低格
+             * 掉到 0.50（硬門檻 0.55）。最低格固定是「爆發獎勵牌組 × 全低資料」，
+             * 0.06 把擺幅壓到玩家控制得住的範圍，同時讓防線能拉到 37 去壓 forecast-aware。
+             */
+            'modifier_cap' => 0.06,
             'deck' => [
                 'long-flow' => 3, 'spend-tide' => 1, 'foul-current' => 1,
                 'open-chill' => 3, 'hundred-smoke' => 1, 'idle-fume' => 1,
@@ -494,19 +501,39 @@ return [
             'pulse_turns' => [4, 8],
             'level_phases' => [
                 [
-                    'id' => 'main',
-                    'label' => '全關',
-                    'objective' => '為脈衝回合留牌、留惡意，並決定何時交出終招。',
+                    'id' => 'ledger-prep',
+                    'label' => '第一幕・帳前準備',
+                    'objective' => '這道水盾不能打斷，只能換系繞過去：用前兩關學過的手段先把帳面壓下來。',
                     'starts_when' => ['type' => 'turn_gte', 'value' => 1],
                     'intents' => [
-                        2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
-                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
-                        5 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
-                        6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                        7 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
-                        9 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
+                        2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => false],
                     ],
                     'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 4, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'demand-pulse',
+                    'label' => '第二幕・需求脈衝',
+                    'objective' => '脈衝回合完成跨系連攜可返還惡意：把惡意當成要規劃的資源。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 4],
+                    'intents' => [
+                        4 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
+                        5 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 16, 'interruptible' => true],
+                        6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'peak-settlement',
+                    'label' => '第三幕・高峰結算',
+                    'objective' => '脈衝、修復與護盾密集交錯：為終招和關鍵打斷留下惡意與手牌。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 7],
+                    'intents' => [
+                        7 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 24, 'interruptible' => true],
+                        8 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
+                        9 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 26, 'interruptible' => true],
+                        10 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 24, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 5, 'interruptible' => false],
                 ],
             ],
             'mechanic_states' => [],

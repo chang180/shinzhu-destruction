@@ -55,6 +55,15 @@ class DifficultyReport
     public const SUITES = ['quick', 'full'];
 
     /**
+     * P10 §3.4 硬門檻 3：planner 任一（情境, 牌組）格的勝率下限。
+     *
+     * 取代 P05 時代 StrategyMatrixTest 裡逐情境 70% 的寫法——P10 從第 3 關起把
+     * 逐關目標改成加權區間（第 3 關 80–90%、第 5 關 60–75%），70% 的逐格門檻會
+     * 和那些區間直接矛盾。逐關區間由 `game:difficulty-report` 的 gates 檢查。
+     */
+    public const PLANNER_CELL_FLOOR = 0.55;
+
+    /**
      * 幕次量測（P10-2 起）。報告格式因此從 P10-0 的版本升級；difficulty_index 公式不變。
      */
     public const LEVEL_PHASE_METRICS = 'per cell: reach_rate = games whose run entered the act / games (act 1 = 1.0); avg_entry_turn = mean first turn played in the act among games that reached it';
@@ -650,7 +659,7 @@ class DifficultyReport
 
         $plannerFloor = array_values(array_map(
             static fn (array $cell): array => ['scenario' => $cell['scenario'], 'deck' => $cell['deck'], 'win_rate' => $cell['win_rate']],
-            array_filter($cells, static fn (array $cell): bool => $cell['strategy'] === 'planner' && $cell['win_rate'] < 0.55),
+            array_filter($cells, static fn (array $cell): bool => $cell['strategy'] === 'planner' && $cell['win_rate'] < self::PLANNER_CELL_FLOOR),
         ));
 
         $weakSolutions = $level->sequence < 2 ? [] : array_values(array_map(

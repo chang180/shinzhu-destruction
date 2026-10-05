@@ -79,10 +79,11 @@ class LevelPhaseApiTest extends TestCase
         $response = $this->getJson(route('api.v1.levels.index'))->assertOk();
         $levels = collect($response->json('levels'))->keyBy('level_id');
 
-        // P10-2：第 1、2 關三幕，觸發都只用回合門檻；其餘關卡仍是單一等價幕次。
+        // P10-2／P10-3：第 1～3 關三幕，觸發都只用回合門檻；第 4、5 關仍是單一等價幕次。
         $acts = [
             'empty-cup' => [['trial-cup', '第一幕・試杯', 1], ['cut-supply', '第二幕・斷補', 3], ['empty-cup-quiz', '第三幕・空杯小考', 5]],
             'noon-fold' => [['single-shield', '第一幕・單盾示範', 1], ['shift-guard', '第二幕・輪班防線', 3], ['crossed-windows', '第三幕・交錯窗口', 5]],
+            'meter-feast' => [['ledger-prep', '第一幕・帳前準備', 1], ['demand-pulse', '第二幕・需求脈衝', 4], ['peak-settlement', '第三幕・高峰結算', 7]],
         ];
 
         foreach ($acts as $levelId => $expected) {
@@ -91,11 +92,15 @@ class LevelPhaseApiTest extends TestCase
             $this->assertSame(array_column($expected, 1), array_column($phases, 'label'), $levelId);
             $this->assertSame([1, 2, 3], array_column($phases, 'order'), $levelId);
             $this->assertSame(array_map(static fn (array $act): array => ['type' => 'turn_gte', 'value' => $act[2]], $expected), array_column($phases, 'starts_when'), $levelId);
-            $this->assertSame(['第 3 回合起', '第 5 回合起', null], array_column($phases, 'next_phase_summary'), $levelId);
+            $this->assertSame(
+                [sprintf('第 %d 回合起', $expected[1][2]), sprintf('第 %d 回合起', $expected[2][2]), null],
+                array_column($phases, 'next_phase_summary'),
+                $levelId
+            );
             $this->assertNotContains('', array_column($phases, 'objective'), $levelId);
         }
 
-        foreach (['meter-feast', 'mirror-shade', 'stored-night'] as $levelId) {
+        foreach (['mirror-shade', 'stored-night'] as $levelId) {
             $this->assertSame([[
                 'id' => 'main',
                 'order' => 1,

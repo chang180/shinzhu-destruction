@@ -34,7 +34,7 @@ class LevelPhaseEquivalenceTest extends TestCase
     /**
      * 4.0.0 改了內容的關卡；它們的 3.1.0 錄製不再是現行規則的期望值。
      */
-    private const CHANGED_IN_4_0_0 = ['empty-cup', 'noon-fold'];
+    private const CHANGED_SINCE_RECORDING = ['empty-cup', 'noon-fold', 'meter-feast'];
 
     private function fixture(): array
     {
@@ -62,7 +62,7 @@ class LevelPhaseEquivalenceTest extends TestCase
         foreach ($fixture['games'] as $key => $expected) {
             [$levelId, $scenario, $strategy, $seed] = explode('|', $key);
 
-            if (in_array($levelId, self::CHANGED_IN_4_0_0, true)) {
+            if (in_array($levelId, self::CHANGED_SINCE_RECORDING, true)) {
                 continue;
             }
             $modifiers = EquivalenceRecorder::modifiers(self::SCENARIOS[$scenario]);
@@ -77,7 +77,7 @@ class LevelPhaseEquivalenceTest extends TestCase
     {
         $fixture = $this->fixture();
 
-        foreach (array_diff_key($fixture['full_events'], array_flip(self::CHANGED_IN_4_0_0)) as $levelId => $expected) {
+        foreach (array_diff_key($fixture['full_events'], array_flip(self::CHANGED_SINCE_RECORDING)) as $levelId => $expected) {
             $modifiers = EquivalenceRecorder::modifiers(0.0);
 
             $actual = $this->recorder()->record(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy('planner', $modifiers), 1, $fixture['meta']['public_keys'], true);
@@ -90,7 +90,7 @@ class LevelPhaseEquivalenceTest extends TestCase
     {
         $fixture = $this->fixture();
 
-        foreach (self::CHANGED_IN_4_0_0 as $levelId) {
+        foreach (self::CHANGED_SINCE_RECORDING as $levelId) {
             $modifiers = EquivalenceRecorder::modifiers(0.0);
 
             $actual = $this->recorder()->record(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy('planner', $modifiers), 1, $fixture['meta']['public_keys'], true);
@@ -140,7 +140,7 @@ class LevelPhaseEquivalenceTest extends TestCase
         foreach ($this->fixture()['counterfactual'] as $key => $expected) {
             [$levelId, $decision] = explode('|', $key);
 
-            if (in_array($levelId, self::CHANGED_IN_4_0_0, true)) {
+            if (in_array($levelId, self::CHANGED_SINCE_RECORDING, true)) {
                 continue;
             }
             $modifiers = EquivalenceRecorder::modifiers(0.0);

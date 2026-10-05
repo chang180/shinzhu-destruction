@@ -17,6 +17,7 @@ use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
 use App\Domain\Game\Simulation\Strategies\RandomStrategy;
 use App\Domain\Game\Simulation\Strategies\SingleElementStrategy;
 use App\Domain\Game\Simulation\Strategy;
+use App\Services\Game\DifficultyReport;
 use Random\Engine\Xoshiro256StarStar;
 use Random\Randomizer;
 use Tests\TestCase;
@@ -27,8 +28,13 @@ use Tests\TestCase;
  * 完整矩陣用 `php artisan game:simulate` 產生；這裡跑的是同一批策略、
  * 同樣的固定 seed，只是斷言驗收門檻。
  *
- * 只對 `available` 的關卡斷言：內容未交付的關卡沒有平衡可言，對它斷言 70% 勝率
+ * 只對 `available` 的關卡斷言：內容未交付的關卡沒有平衡可言，對它斷言勝率門檻
  * 等於把「尚未驗證」寫成「已通過」。P05 之後五關都在掃描範圍內。
+ *
+ * 逐格下限用 `DifficultyReport::PLANNER_CELL_FLOOR`（P10 §3.4 硬門檻 3，0.55），
+ * 不再用 P05 時代寫死的 0.70：P10 從第 3 關起把逐關目標改成加權區間
+ * （第 3 關 80–90%、第 4 關 70–82%、第 5 關 60–75%），0.70 的逐格門檻會和那些
+ * 區間矛盾。逐關區間由 `game:difficulty-report` 的 gates 檢查，見 docs/BALANCE.md。
  */
 class StrategyMatrixTest extends TestCase
 {
@@ -88,7 +94,7 @@ class StrategyMatrixTest extends TestCase
                 $rate = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $label);
 
                 $this->assertGreaterThanOrEqual(
-                    0.70,
+                    DifficultyReport::PLANNER_CELL_FLOOR,
                     $rate,
                     "規劃策略在 {$levelId}／{$label} 只有 ".round($rate * 100).'% 勝率',
                 );
@@ -159,8 +165,8 @@ class StrategyMatrixTest extends TestCase
                 $greedy = $this->winRate($levelId, $modifiers, new GreedyStrategy($modifiers), $label);
                 $planner = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $label);
 
-                $this->assertGreaterThanOrEqual(0.70, $greedy, "{$levelId}／{$label} 只剩一種可行策略");
-                $this->assertGreaterThanOrEqual(0.70, $planner, "{$levelId}／{$label} 只剩一種可行策略");
+                $this->assertGreaterThanOrEqual(DifficultyReport::PLANNER_CELL_FLOOR, $greedy, "{$levelId}／{$label} 只剩一種可行策略");
+                $this->assertGreaterThanOrEqual(DifficultyReport::PLANNER_CELL_FLOOR, $planner, "{$levelId}／{$label} 只剩一種可行策略");
             }
         }
     }
