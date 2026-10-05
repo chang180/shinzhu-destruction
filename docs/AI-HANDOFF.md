@@ -1,5 +1,13 @@
 # AI 派工與階段交接規範
 
+## 2026-10-05 Hostinger 正式站更新
+
+依使用者要求在正式站工作目錄執行 `git pull --ff-only`，由 `f8b8de2` 快轉至 `a6cd2f8`。使用鎖檔執行 `composer install --no-dev --optimize-autoloader`、`npm ci --ignore-scripts` 及 `RAYON_NUM_THREADS=1 npm run build`；`php artisan migrate --force` 回報沒有待遷移，`php artisan optimize` 的設定、事件、路由及 view 快取均成功。
+
+線上驗證：首頁 HTTP 200；`GET /api/v1/levels` HTTP 200，回傳 `rules_version 5.0.1`、5 關與 15 張卡；HTML 引用的 CSS／JS 資產均 HTTP 200；`.env` 回 403、`vendor/autoload.php` 回 404。Laravel 環境為 production、Debug 關閉、維護模式關閉；本次未執行測試套件。
+
+P09 仍進行中：需補正式資料來源抓取、cron 不重疊與快照暖機、SQLite 備份還原、程式／資料回退及戰役結局驗收；不可把本次首頁與 API 冒煙檢查當作完整正式部署驗收。
+
 ## 2026-10-05 P10-3 補修交接
 
 基準 `7a056a3`；本輪單一修補提交 `fix(game): close P10-3 balance gap and complete resource metrics` 推送 main，未部署。規則升 **5.0.1**，只改第 3 關第 4 回合為可打斷水修復 14；原 5.0.0／70.30% 未達歷史保留於 [P10-3 報告](phase-reports/P10-3.md) §1～§7，新結果見 §8。
