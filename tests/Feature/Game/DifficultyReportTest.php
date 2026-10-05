@@ -151,6 +151,8 @@ class DifficultyReportTest extends TestCase
             'zero seeds' => [['--seeds' => 0]],
             'negative seeds' => [['--seeds' => -1]],
             'non-numeric seeds' => [['--seeds' => 'many']],
+            'non-numeric start seed' => [['--start-seed' => 'abc']],
+            'fractional start seed' => [['--start-seed' => '1.5']],
             'unknown suite' => [['--suite' => 'huge']],
         ];
     }
@@ -166,6 +168,25 @@ class DifficultyReportTest extends TestCase
         $this->artisan('game:difficulty-report', $options + ['--json' => $json])->assertExitCode(2);
 
         $this->assertFileDoesNotExist($json);
+    }
+
+    public function test_repeated_level_and_strategy_options_run_each_cell_once(): void
+    {
+        $json = $this->scratchPath('dedupe.json');
+
+        $this->artisan('game:difficulty-report', [
+            '--seeds' => 1,
+            '--level' => ['noon-fold', 'noon-fold'],
+            '--strategy' => ['random', 'random', 'greedy'],
+            '--json' => $json,
+        ])->assertSuccessful();
+
+        $report = json_decode((string) file_get_contents($json), true);
+        $this->assertSame(['noon-fold'], array_column($report['levels'], 'level'));
+        $this->assertCount(9 * 2, $report['cells']);
+        $this->assertSame(['random', 'greedy'], array_values(array_unique(array_column($report['cells'], 'strategy'))));
+
+        unlink($json);
     }
 
     public function test_difficulty_index_uses_the_p10_weights(): void

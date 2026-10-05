@@ -28,11 +28,14 @@ class DifficultyReportCommand extends Command
     public function handle(DifficultyReport $report): int
     {
         $seeds = (string) $this->option('seeds');
+        $startSeed = (string) $this->option('start-seed');
 
-        if (preg_match('/^-?\d+$/', $seeds) !== 1) {
-            $this->components->error('seeds 必須是整數');
+        foreach (['seeds' => $seeds, 'start-seed' => $startSeed] as $name => $value) {
+            if (preg_match('/^-?\d+$/', $value) !== 1) {
+                $this->components->error("{$name} 必須是整數");
 
-            return self::INVALID;
+                return self::INVALID;
+            }
         }
 
         $mistakes = null;
@@ -42,9 +45,10 @@ class DifficultyReportCommand extends Command
             $result = $report->build(
                 suite: (string) $this->option('suite'),
                 seeds: (int) $seeds,
-                startSeed: (int) $this->option('start-seed'),
-                levelIds: $this->option('level'),
-                strategyNames: $this->option('strategy'),
+                startSeed: (int) $startSeed,
+                // 重複指定同一關或同一策略視為一次，避免同一格被跑兩次、報告重複列出。
+                levelIds: array_values(array_unique($this->option('level'))),
+                strategyNames: array_values(array_unique($this->option('strategy'))),
                 progress: fn (string $levelId) => $this->components->info("{$levelId} 完成"),
                 onMistakeGame: $mistakesPath === null || $mistakesPath === '' ? null : function (array $row) use (&$mistakes, $mistakesPath): void {
                     if ($mistakes === null) {
