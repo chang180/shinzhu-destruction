@@ -2,7 +2,7 @@
 
 ## 2026-10-05 P10-1 三幕引擎交接
 
-P10-1 已完成三幕引擎前置，但**沒有任何關卡變成真正三幕**。關卡幕次存在 `BattleState::$levelPhaseId`（`state.level_phase_id`、事件 `level_phase_change`），和第 5 關重整的機制狀態 `state.phase`（standby／overhaul、事件 `phase_change`）分開；設定改為 `level_phases`（預告表在幕內）與 `mechanic_states`。觸發只有 `turn_gte`／`core_lte`／`flag_true`／`any_of`，載入時驗證。五關目前各一幕 `main`，等價證據見 `tests/Fixtures/p10-1/equivalence.json` 與 `LevelPhaseEquivalenceTest`。新增離線 solver `php artisan game:solve`，只證明存在解，不是玩家策略。P10-0／P10-0.1 報告裡「worktree 逐位元相同」的舊比對方法有誤（`vendor/` 符號連結），已用正確方法重做且結論成立。下一包 P10-2，入口見 [P10-1 報告](phase-reports/P10-1.md)；未部署。
+P10-1 已完成三幕引擎前置，但**沒有任何關卡變成真正三幕**。關卡幕次存在 `BattleState::$levelPhaseId`（`state.level_phase_id`、事件 `level_phase_change`），和第 5 關重整的機制狀態 `state.phase`（standby／overhaul、事件 `phase_change`）分開；設定改為 `level_phases`（預告表在幕內）與 `mechanic_states`。觸發只有 `turn_gte`／`core_lte`／`flag_true`／`any_of`，載入時驗證。五關目前各一幕 `main`，等價證據見 `tests/Fixtures/p10-1/equivalence.json` 與 `LevelPhaseEquivalenceTest`。新增離線 solver `php artisan game:solve`，只證明存在解，不是玩家策略。P10-0／P10-0.1 報告裡「worktree 逐位元相同」的舊比對方法有誤（`vendor/` 符號連結），已用正確方法重做且結論成立。下一包 P10-2，入口見 [P10-1 報告](phase-reports/P10-1.md)；交付 commit `6f3db2b` 已推送 `main`，未部署。
 
 ## 2026-10-05 P10-0 難度量測交接
 
