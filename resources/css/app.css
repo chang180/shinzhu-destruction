@@ -186,3 +186,27 @@ small,.small,.eyebrow,summary,.settings,.settings summary,.mode-picker legend,.m
     .report-stats{gap:14px}.report-stats dd{font-size:1.2rem}.report .small{font-size:.875rem}
     .briefing .lead,.cutscene-copy p{font-size:1rem}.message{font-size:1rem}.eyebrow{letter-spacing:.1em}
 }
+/* P10-6 三幕顯示：進度條、本幕目標、下一幕條件、分幕戰報。 */
+.acts{margin-bottom:20px;border:1px solid var(--line);padding:16px 20px;background:#ede2ca06}
+.acts>ol{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0 0 14px;padding:0;background:var(--line);border:1px solid var(--line)}
+.acts>ol>li{padding:11px 13px;background:#211b2b;font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.acts>ol>li b{font-weight:600}
+.acts>ol>li.done b:before{content:'✓ ';color:var(--copper)}
+.acts>ol>li.current{background:#d3a06e14;color:var(--paper);box-shadow:inset 0 -2px var(--copper)}
+.acts>ol>li.current b{color:var(--copper)}
+.acts>ol>li.upcoming{opacity:.6}
+.acts .conditional{font-size:.6rem;letter-spacing:.08em;border:1px solid var(--line);padding:1px 5px;color:var(--muted)}
+.act-objective,.act-next{font-size:.82rem;margin:0;line-height:1.8}
+.act-objective b{color:var(--copper)}
+.act-next{color:var(--muted);margin-top:6px}
+.act-lines{margin:8px 0 0;padding-left:20px}
+.act-lines li{font-size:.8rem;margin-bottom:6px}
+.report-acts{padding-bottom:30px;border-bottom:1px solid var(--line)}
+.report-acts h2{font-size:1.3rem;margin-bottom:18px}
+.report-acts>ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.report-acts>ol>li{background:#211b2b;padding:16px}
+.report-acts>ol>li.unreached{opacity:.6}
+.report-acts b{display:block;color:var(--copper);font-size:.9rem;margin-bottom:4px}
+.report-acts small{display:block;color:var(--muted);font-size:.7rem;margin-bottom:10px}
+.report-acts p{font-size:.78rem;line-height:1.8;margin:0 0 7px}
+@media(max-width:760px){.acts{padding:14px}.acts>ol,.report-acts>ol{grid-template-columns:1fr}}

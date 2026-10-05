@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, forecastLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, forecastLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText, actSteps, currentAct, nextActText, actBriefingLines, reportActs, isConditionalAct } from './game';
 import type { BattleEvent, Campaign, Card, Choice, CounterfactualComparison, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
 
@@ -115,6 +115,12 @@ function toggleKeep(instanceId: string): void {
 const p06Assets = new Set(['yan-chen-stern', 'yan-chen-pleased', 'student-silhouette', 'apostle-empty-cup', 'apostle-noon-fold', 'apostle-meter-feast', 'apostle-mirror-shade', 'apostle-stored-night', 'scene-noon-fold', 'scene-meter-feast', 'scene-mirror-shade', 'scene-stored-night', 'skill-water-2', 'skill-heat-2', 'skill-land-2', 'skill-ultimate', 'defense-success-1', 'defense-success-2', 'victory-2', 'victory-3', 'advanced-finale-1', 'advanced-finale-2', 'advanced-finale-3']);
 function asset(name: string): string { return `/assets/${p06Assets.has(name) ? 'p06' : 'p04'}/${name}.webp`; }
 function focusHeading(): void { void nextTick(() => document.querySelector<HTMLElement>('main h1, main h2')?.focus()); }
+// P10-6：三幕顯示一律從伺服器公開的 state.level_phase_id 與 level.phases 推導。
+const acts = computed(() => (run.value ? actSteps(level.value, run.value.state) : []));
+const act = computed(() => (run.value ? currentAct(level.value, run.value.state) : undefined));
+const actHint = computed(() => (run.value ? nextActText(level.value, run.value.state) : null));
+const actSections = computed(() => (run.value ? reportActs(run.value, level.value) : []));
+
 function showRun(value: Run, briefing = false): void {
     run.value = value;
     mode.value = value.mode;
@@ -383,6 +389,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         <ol class="lesson">
                             <li><b>每回合五張手牌，點一張立即施放。</b>{{ briefingTimingText(mode) }}</li>
                             <li><b>最多留 2 張到下一手。</b>同一張不能連續再留；先標記留牌，再點另一張施放。每回合只能免費換 1 張。</li>
+                            <li v-if="actBriefingLines(level).length"><b>本關分三幕，壓力逐幕改變。</b><ol class="act-lines"><li v-for="line in actBriefingLines(level)" :key="line">{{ line }}</li></ol></li>
                             <li v-for="(lesson, index) in level?.briefing?.lessons ?? []" :key="index">{{ lesson }}</li>
                             <li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，點擊同樣立即執行。</li>
                         </ol>
@@ -396,6 +403,16 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         </div>
                     </div>
                     <div class="battle-goal"><b>你的目標：在 {{ state.max_turns }} 回合內，把城市核心打到 0。</b><p>牌的系別 → 對應防線減傷 → 城市核心。不必先打破防線，也能傷到核心；直接出牌即可，城市接著按預告回應。</p></div>
+                    <div v-if="acts.length" class="acts" aria-label="關卡幕次進度">
+                        <ol>
+                            <li v-for="step in acts" :key="step.phase.id" :class="step.status" :aria-current="step.status === 'current' ? 'step' : undefined">
+                                <b>{{ step.phase.label }}</b>
+                                <small v-if="step.conditional" class="conditional">條件幕</small>
+                            </li>
+                        </ol>
+                        <p class="act-objective"><b>本幕目標：</b>{{ act?.objective }}</p>
+                        <p v-if="actHint" class="act-next">{{ actHint }}</p>
+                    </div>
                     <div class="city-strip">
                         <div class="city-core"><img :src="asset(sceneAsset(run.level_id))" :alt="`${level?.name}的虛構城市防線`"><img class="apostle-mark" :src="asset(apostleAsset(run.level_id))" :alt="`${level?.name}的禁術使徒`"><div class="core-panel"><span>城市核心 · 打到 0 通關</span><strong>{{ state.core_resilience }}</strong><progress aria-label="城市核心韌性" :value="state.core_resilience" max="100"></progress></div></div>
                         <div class="city-read">
@@ -487,6 +504,17 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     <h2 tabindex="-1">有一張新禁術可以換進牌組。</h2>
                     <p class="lead">{{ reward?.prompt }}</p>
                     <div class="report-actions"><button class="primary" :disabled="locked" @click="openReward">去挑一張 ↗</button></div>
+                </section>
+                <section v-if="page === 'report' && actSections.length" class="content-width report-acts">
+                    <h2 tabindex="-1">分幕複盤</h2>
+                    <ol>
+                        <li v-for="section in actSections" :key="section.id" :class="{ unreached: !section.reached }">
+                            <b>{{ section.label }}</b>
+                            <small v-if="section.reached">第 {{ section.turns.length ? `${section.turns[0]}–${section.turns[section.turns.length - 1]}` : '—' }} 回合</small>
+                            <small v-else>未進入</small>
+                            <p v-for="line in section.lines" :key="line">{{ line }}</p>
+                        </li>
+                    </ol>
                 </section>
                 <section v-if="page === 'report'" class="content-width report-details"><details><summary>展開完整戰報與演出</summary><p>{{ run.outcome === 'player_victory' ? '晏沉抬杯：「你讓城市沒有下一次。」以下依本局的實際紀錄複盤。' : '晏沉收回空杯：「看看是哪一回合。」以下依本局的實際紀錄複盤。' }}</p><button :disabled="locked" @click="replay">重播本局演出</button><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></details></section>
                 <section class="content-width data-panel"><details :open="page === 'briefing'"><summary>本局情境情報 · 開局後不變</summary><p class="small">以下是遊戲情境修正，不是災害預測。正值有利進攻；缺值採中性修正。標示「本關未採用」的系別不會在這一局生效。</p><div class="data-grid"><div v-for="element in elements" :key="element"><b>{{ elementNames[element] }}系 {{ run.data_notes[element]?.applied ? ((run.data_notes[element].modifier ?? 0) * 100).toFixed(1) + '%' : '本關未採用' }}</b><p>{{ run.data_notes[element]?.reason ?? run.scenario.reasons[element]?.message }}</p></div></div><div v-if="!Object.keys(run.snapshots).length" class="message">舊局未保存來源品質。保留原情境數值，不以今日資料冒充。</div><div v-for="(snapshot, source) in run.snapshots" :key="source" class="source-row"><b>{{ sourceNames[source] ?? source }}</b><span>{{ qualityNames[snapshot.quality] ?? snapshot.quality }}</span><small>觀測：{{ snapshot.observed_at ?? (snapshot.period ? Object.values(snapshot.period).join(' / ') : '無觀測日期') }}</small><p v-for="warning in snapshot.warnings" :key="warning" class="small">{{ warning }}</p></div></details></section>

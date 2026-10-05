@@ -3,8 +3,9 @@ export type Outcome = 'in_progress' | 'player_victory' | 'city_held';
 export type ActionType = 'reveal' | 'play' | 'swap' | 'timeout';
 export type RunMode = 'challenge' | 'practice';
 export type TurnPhase = 'awaiting_reveal' | 'decision';
-export interface Intent { type: string; element: Element; magnitude: number; interruptible: boolean; scheduled_turn: number; description: string; level_phase_id?: string }
-export interface LevelPhase { id: string; order: number; label: string; objective: string; starts_when_summary: string; next_phase_summary: string | null }
+export interface Intent { type: string; element: Element; magnitude: number; interruptible: boolean; scheduled_turn: number; description: string; level_phase_id?: string; conditional?: boolean }
+export interface PhaseTriggerShape { type: string; value?: number; flag?: string; of?: PhaseTriggerShape[] }
+export interface LevelPhase { id: string; order: number; label: string; objective: string; starts_when: PhaseTriggerShape; starts_when_summary: string; next_phase_summary: string | null }
 export interface BattleState {
     turn: number; max_turns: number; core_resilience: number; malice: number; malice_cap: number; sigil_cap: number;
     defenses: Record<Element, number>; resistance: Record<Element, number>; sigils: Record<Element, number>;
@@ -14,6 +15,10 @@ export interface BattleState {
     deck: Record<string, string>; hand: string[]; kept_last_turn: string[]; discard_pile: string[]; draw_pile_count: number;
     hand_size: number; max_keep: number; turn_phase: TurnPhase; deadline_at: string | null;
     swap_used: boolean; timeouts: number;
+    // 關卡幕次（P10-1 起）。舊存檔沒有這個欄位時為 null，視為第一幕。
+    level_phase_id: string | null;
+    // 機制狀態（stored-night 的 standby／overhaul，其餘一律 standard）。和幕次是兩回事。
+    phase: string; flags: Record<string, unknown>;
 }
 export interface BattleEvent { sequence: number; turn: number; type: string; actor: string; target: Element | null; reason_code: string; cue_id: string; before: Record<string, unknown>; delta: Record<string, unknown>; after: Record<string, unknown> }
 export interface Choice { type: ActionType; card_id: string | null; fixed: string | null; skill_id: string | null; target: Element | null; reason: string | null }
@@ -121,6 +126,117 @@ export function forecastLines(level: Level | undefined): { turn: number; text: s
         return { turn: intent.scheduled_turn, text: startsAct ? `【${labels[phaseId] ?? phaseId}】${intent.description}` : intent.description };
     });
 }
+/**
+ * P10-6 三幕顯示。這些函式只讀伺服器已經公開的欄位（state.level_phase_id、level.phases），
+ * 不在前端推測幕次何時切換——條件幕要等引擎寫進局面才算進入。
+ */
+
+/** 這一局現在在哪一幕。舊存檔沒有 level_phase_id，依契約視為第一幕。 */
+export function currentAct(level: Level | undefined, state: Pick<BattleState, 'level_phase_id'>): LevelPhase | undefined {
+    const phases = level?.phases ?? [];
+    return phases.find(phase => phase.id === state.level_phase_id) ?? phases[0];
+}
+
+/**
+ * 條件幕：進入條件沒有任何回合門檻，所以開局前無法排程，必須標示出來。
+ * 第 5 關的重整警報與最後一夜是目前唯二的例子（any_of 裡只要有一項帶回合就仍可排程）。
+ */
+export function isConditionalAct(phase: LevelPhase): boolean {
+    const hasTurn = (trigger: PhaseTriggerShape): boolean =>
+        trigger.type === 'turn_gte' || (trigger.of ?? []).some(hasTurn);
+    return !hasTurn(phase.starts_when);
+}
+
+export type ActStatus = 'done' | 'current' | 'upcoming';
+export interface ActStep { phase: LevelPhase; status: ActStatus; conditional: boolean }
+
+/** 三幕進度條。current 之前的都算走過，之後的算未到；不猜條件幕會不會到。 */
+export function actSteps(level: Level | undefined, state: Pick<BattleState, 'level_phase_id'>): ActStep[] {
+    const phases = level?.phases ?? [];
+    if (phases.length < 2) return [];
+    const active = currentAct(level, state);
+    const index = phases.findIndex(phase => phase.id === active?.id);
+    return phases.map((phase, order) => ({
+        phase,
+        status: order < index ? 'done' : order === index ? 'current' : 'upcoming',
+        conditional: isConditionalAct(phase),
+    }));
+}
+
+/** 下一幕的進入條件；最後一幕回 null。條件幕明說它取決於這一局怎麼打。 */
+export function nextActText(level: Level | undefined, state: Pick<BattleState, 'level_phase_id'>): string | null {
+    const phases = level?.phases ?? [];
+    const index = phases.findIndex(phase => phase.id === currentAct(level, state)?.id);
+    const next = index < 0 ? undefined : phases[index + 1];
+    if (!next) return null;
+    const summary = next.starts_when_summary || '條件未公開';
+    return isConditionalAct(next)
+        ? `下一幕「${next.label}」：${summary}——沒有固定回合，取決於這一局的局面。`
+        : `下一幕「${next.label}」：${summary}。`;
+}
+
+/** 簡報用的三行幕次說明：只給幕名與目標，完整預告仍然折疊在下方。 */
+export function actBriefingLines(level: Level | undefined): string[] {
+    const phases = level?.phases ?? [];
+    if (phases.length < 2) return [];
+    return phases.map(phase => {
+        const conditional = isConditionalAct(phase) ? '（條件幕，沒有固定回合）' : '';
+        return `${phase.label}${conditional}：${phase.objective}`;
+    });
+}
+
+export interface ActReportSection { id: string; label: string; turns: number[]; reached: boolean; lines: string[] }
+
+/**
+ * 戰報分幕：用本局實際的 level_phase_change 事件切，沒有到的幕明說沒有到。
+ * 只敘述紀錄到的後果，不推論玩家意圖。
+ */
+export function reportActs(run: Run, level: Level | undefined): ActReportSection[] {
+    const phases = level?.phases ?? [];
+    if (phases.length < 2) return [];
+    const events = run.history.flatMap(entry => entry.events);
+    const starts = new Map<string, number>([[phases[0]!.id, 1]]);
+    for (const event of events) {
+        if (event.type === 'level_phase_change' && typeof event.after.level_phase_id === 'string') {
+            const from = event.after.from_turn;
+            starts.set(event.after.level_phase_id, typeof from === 'number' ? from : event.turn + 1);
+        }
+    }
+    const lastTurn = events.findLast(event => event.type === 'outcome')?.turn ?? run.state.turn;
+    const ordered = phases.filter(phase => starts.has(phase.id));
+    return phases.map(phase => {
+        const from = starts.get(phase.id);
+        if (from === undefined) {
+            return { id: phase.id, label: phase.label, turns: [], reached: false, lines: [`本局沒有進入這一幕（${phase.objective}）。`] };
+        }
+        const position = ordered.findIndex(candidate => candidate.id === phase.id);
+        const nextFrom = starts.get(ordered[position + 1]?.id ?? '') ?? lastTurn + 1;
+        const turns: number[] = [];
+        for (let turn = from; turn < nextFrom && turn <= lastTurn; turn++) turns.push(turn);
+        return { id: phase.id, label: phase.label, turns, reached: true, lines: actLines(events, turns) };
+    });
+}
+
+/** 某一幕裡實際發生的事；沒有可敘述的紀錄就說沒有，不補空話。 */
+function actLines(events: BattleEvent[], turns: number[]): string[] {
+    const within = events.filter(event => turns.includes(event.turn));
+    const lines: string[] = [];
+    const damage = within.filter(event => event.type === 'impact' && Number(event.delta.core_resilience) < 0)
+        .reduce((sum, event) => sum - Number(event.delta.core_resilience), 0);
+    if (damage) lines.push(`這一幕你對核心造成 ${damage} 點損失。`);
+    const repaired = within.filter(event => event.type === 'city_repair' && Number(event.delta.core_resilience) > 0)
+        .reduce((sum, event) => sum + Number(event.delta.core_resilience), 0);
+    if (repaired) lines.push(`城市在這一幕修回 ${repaired} 點核心。`);
+    const interrupts = within.filter(event => event.type === 'interrupt');
+    if (interrupts.length) lines.push(`你在第 ${interrupts.map(event => event.turn).join('、')} 回合打斷城市行動，共 ${interrupts.length} 次。`);
+    const failed = within.filter(event => event.type === 'interrupt_failed');
+    if (failed.length) lines.push(`第 ${failed.map(event => event.turn).join('、')} 回合的擾序沒有取消城市行動：需同系且預告可打斷。`);
+    const missed = within.filter(event => event.type === 'action_missed');
+    if (missed.length) lines.push(`第 ${missed.map(event => event.turn).join('、')} 回合逾時，共 ${missed.length} 次沒有出手。`);
+    if (!lines.length) lines.push('這一幕沒有命中、修復或打斷的紀錄。');
+    return lines;
+}
+
 export function soundStatusText(muted: boolean): string {
     return muted ? '目前靜音' : '目前有聲';
 }
@@ -182,12 +298,14 @@ export function cueImage(event: BattleEvent, levelId = 'empty-cup'): string {
 }
 export function cueDuration(event: BattleEvent): number {
     if (event.type === 'outcome') return event.after.outcome === 'player_victory' ? 8000 : 3000;
+    // 進入下一幕只要一個短提示；它在結算階段播，揭牌與 30 秒倒數都在它之後才開始。
+    if (event.type === 'level_phase_change') return 900;
     if (event.cue_id.includes('ultimate')) return 2600;
     if (['interrupt', 'breach_opened', 'combo'].includes(event.type)) return 1200;
     return 700;
 }
 export function visibleEvents(events: BattleEvent[]): BattleEvent[] {
-    return events.filter(e => ['action_accepted', 'action_missed', 'impact', 'interrupt', 'interrupt_failed', 'breach_opened', 'combo', 'city_repair', 'city_shield', 'city_reinforce', 'outcome'].includes(e.type));
+    return events.filter(e => ['action_accepted', 'action_missed', 'impact', 'interrupt', 'interrupt_failed', 'breach_opened', 'combo', 'city_repair', 'city_shield', 'city_reinforce', 'level_phase_change', 'outcome'].includes(e.type));
 }
 export interface ReportFinding { turn: number | null; text: string }
 export interface ReportSummary { turn: number; initialCore: number | null; condition: string; finalMove: string; findings: ReportFinding[] }

@@ -103,6 +103,20 @@ class LevelPhaseApiTest extends TestCase
 
         $this->assertSame(['county-alert', 'overhaul-warning', 'last-night'], array_column($levels['stored-night']['phases'], 'id'));
         $this->assertSame([1, 2, 3], array_column($levels['stored-night']['phases'], 'order'));
+
+        // P10-6 的前端靠 starts_when 的結構分辨「條件幕」（完全沒有回合門檻），
+        // 所以觸發條件必須原樣公開，不能只送 summary 字串。
+        $this->assertSame([
+            ['type' => 'turn_gte', 'value' => 1],
+            ['type' => 'any_of', 'of' => [
+                ['type' => 'turn_gte', 'value' => 4],
+                ['type' => 'flag_true', 'flag' => 'overhaul_started'],
+            ]],
+            ['type' => 'any_of', 'of' => [
+                ['type' => 'flag_true', 'flag' => 'overhaul_stopped'],
+                ['type' => 'flag_true', 'flag' => 'overhaul_completed'],
+            ]],
+        ], array_column($levels['stored-night']['phases'], 'starts_when'));
         $this->assertTrue($levels['stored-night']['forecast'][0]['conditional']);
         $this->assertStringContainsString('以當前預告為準', $levels['stored-night']['forecast'][0]['description']);
 

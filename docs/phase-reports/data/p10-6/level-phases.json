@@ -1,0 +1,254 @@
+{
+    "rules_version": "7.0.0",
+    "note": "LevelResource::publicPhases() 實際輸出；conditional 由 starts_when 是否含回合門檻判定（前端 isConditionalAct 同一條規則）。",
+    "levels": {
+        "empty-cup": {
+            "sequence": 1,
+            "name": "枯潮・寶山空杯",
+            "max_turns": 8,
+            "phases": [
+                {
+                    "order": 1,
+                    "id": "trial-cup",
+                    "label": "第一幕・試杯",
+                    "objective": "看懂城市預告，用試探與破陣打出第一波核心傷害。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 1
+                    },
+                    "starts_when_summary": "第 1 回合起",
+                    "next_phase_summary": "第 3 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 2,
+                    "id": "cut-supply",
+                    "label": "第二幕・斷補",
+                    "objective": "第 3 回合的修復可以用水系擾序取消，或用輸出把它補回的核心打回來。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 3
+                    },
+                    "starts_when_summary": "第 3 回合起",
+                    "next_phase_summary": "第 5 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 3,
+                    "id": "empty-cup-quiz",
+                    "label": "第三幕・空杯小考",
+                    "objective": "第 6 回合的修復更大：決定要打斷它，還是集中輸出在回合用完前打空核心。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 5
+                    },
+                    "starts_when_summary": "第 5 回合起",
+                    "next_phase_summary": null,
+                    "conditional": false
+                }
+            ]
+        },
+        "noon-fold": {
+            "sequence": 2,
+            "name": "折晝・竹北長晝",
+            "max_turns": 9,
+            "phases": [
+                {
+                    "order": 1,
+                    "id": "single-shield",
+                    "label": "第一幕・單盾示範",
+                    "objective": "熱系護盾只擋熱系攻擊：換水系或土地系打過去。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 1
+                    },
+                    "starts_when_summary": "第 1 回合起",
+                    "next_phase_summary": "第 3 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 2,
+                    "id": "shift-guard",
+                    "label": "第二幕・輪班防線",
+                    "objective": "護盾每回合換一系：看預告決定留牌、改系，或用同系擾序取消。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 3
+                    },
+                    "starts_when_summary": "第 3 回合起",
+                    "next_phase_summary": "第 5 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 3,
+                    "id": "crossed-windows",
+                    "label": "第三幕・交錯窗口",
+                    "objective": "修復與護盾交錯出現：決定先打斷修復、繞過護盾，還是保存高衝擊牌。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 5
+                    },
+                    "starts_when_summary": "第 5 回合起",
+                    "next_phase_summary": null,
+                    "conditional": false
+                }
+            ]
+        },
+        "meter-feast": {
+            "sequence": 3,
+            "name": "饗表・園區無底帳",
+            "max_turns": 11,
+            "phases": [
+                {
+                    "order": 1,
+                    "id": "ledger-prep",
+                    "label": "第一幕・帳前準備",
+                    "objective": "這道水盾不能打斷，只能換系繞過去：用前兩關學過的手段先把帳面壓下來。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 1
+                    },
+                    "starts_when_summary": "第 1 回合起",
+                    "next_phase_summary": "第 4 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 2,
+                    "id": "demand-pulse",
+                    "label": "第二幕・需求脈衝",
+                    "objective": "脈衝回合完成跨系連攜可返還惡意：把惡意當成要規劃的資源。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 4
+                    },
+                    "starts_when_summary": "第 4 回合起",
+                    "next_phase_summary": "第 7 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 3,
+                    "id": "peak-settlement",
+                    "label": "第三幕・高峰結算",
+                    "objective": "脈衝、修復與護盾密集交錯：為終招和關鍵打斷留下惡意與手牌。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 7
+                    },
+                    "starts_when_summary": "第 7 回合起",
+                    "next_phase_summary": null,
+                    "conditional": false
+                }
+            ]
+        },
+        "mirror-shade": {
+            "sequence": 4,
+            "name": "鏡蔭・丘陵借影",
+            "max_turns": 9,
+            "phases": [
+                {
+                    "order": 1,
+                    "id": "reflection",
+                    "label": "第一幕・照影",
+                    "objective": "誘出同系護盾，再換系命中。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 1
+                    },
+                    "starts_when_summary": "第 1 回合起",
+                    "next_phase_summary": "第 4 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 2,
+                    "id": "borrowed-shadow",
+                    "label": "第二幕・借影",
+                    "objective": "在鏡射與排定修復之間，留牌處理窗口。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 4
+                    },
+                    "starts_when_summary": "第 4 回合起",
+                    "next_phase_summary": "第 7 回合起",
+                    "conditional": false
+                },
+                {
+                    "order": 3,
+                    "id": "counter-exam",
+                    "label": "第三幕・反制考核",
+                    "objective": "誘盾後換系高衝擊，抓住修復之間的輸出窗口。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 7
+                    },
+                    "starts_when_summary": "第 7 回合起",
+                    "next_phase_summary": null,
+                    "conditional": false
+                }
+            ]
+        },
+        "stored-night": {
+            "sequence": 5,
+            "name": "蓄夜・全縣最後重整",
+            "max_turns": 9,
+            "phases": [
+                {
+                    "order": 1,
+                    "id": "county-alert",
+                    "label": "第一幕・全縣戒備",
+                    "objective": "換系繞盾、保留擾序，為核心到 35 以下的重整預留資源。",
+                    "starts_when": {
+                        "type": "turn_gte",
+                        "value": 1
+                    },
+                    "starts_when_summary": "第 1 回合起",
+                    "next_phase_summary": "第 4 回合起，或重整啟動之後",
+                    "conditional": false
+                },
+                {
+                    "order": 2,
+                    "id": "overhaul-warning",
+                    "label": "第二幕・重整警報",
+                    "objective": "兩回合倒數內以土地、水兩系擾序中止，或在修復前打完核心。",
+                    "starts_when": {
+                        "type": "any_of",
+                        "of": [
+                            {
+                                "type": "turn_gte",
+                                "value": 4
+                            },
+                            {
+                                "type": "flag_true",
+                                "flag": "overhaul_started"
+                            }
+                        ]
+                    },
+                    "starts_when_summary": "第 4 回合起，或重整啟動之後",
+                    "next_phase_summary": "重整被中止之後，或重整完成之後",
+                    "conditional": false
+                },
+                {
+                    "order": 3,
+                    "id": "last-night",
+                    "label": "第三幕・最後一夜",
+                    "objective": "重整只會發生一次；用剩餘印記與惡意，把握最後的修復窗口。",
+                    "starts_when": {
+                        "type": "any_of",
+                        "of": [
+                            {
+                                "type": "flag_true",
+                                "flag": "overhaul_stopped"
+                            },
+                            {
+                                "type": "flag_true",
+                                "flag": "overhaul_completed"
+                            }
+                        ]
+                    },
+                    "starts_when_summary": "重整被中止之後，或重整完成之後",
+                    "next_phase_summary": null,
+                    "conditional": true
+                }
+            ]
+        }
+    }
+}
