@@ -30,23 +30,34 @@ abstract class LookaheadStrategy implements Strategy
             return null;
         }
 
-        $best = null;
-        $bestScore = -INF;
+        return $this->pick($state, $this->ranked($state, $engine, $level));
+    }
 
-        foreach ($this->evaluate($state, $engine, $level) as [$action, $score]) {
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $best = $action;
-            }
-        }
+    /**
+     * 從已排序的候選裡挑出要出的那一手。
+     *
+     * `choose()` 與需要先看整份排名的子類（`PlannerOneMistakeStrategy`）共用這一份，
+     * 否則兩邊的取捨規則會各自漂移——P10-2.1 就因為子類自己取第一名而漏掉下面的
+     * `-INF` 分支，在「每一種出牌都會輸」的回合打出和 planner 不同的牌。
+     *
+     * 候選為空，或每一種出牌都會輸（分數全是 `-INF`）時回蓄勢：既然都要輸，
+     * 不如把資源留著。
+     *
+     * @param  list<array{0: array<string, mixed>, 1: float}>  $ranked
+     * @return array<string, mixed>
+     */
+    protected function pick(BattleState $state, array $ranked): array
+    {
+        $best = $ranked[0] ?? null;
 
-        if ($best === null) {
+        if ($best === null || $best[1] === -INF) {
             return self::gather();
         }
 
-        $best['keep'] = $this->keep($state, $best);
+        $action = $best[0];
+        $action['keep'] = $this->keep($state, $action);
 
-        return $best;
+        return $action;
     }
 
     /**

@@ -104,10 +104,11 @@ class PlannerOneMistakeStrategy extends PlannerStrategy implements InstrumentedS
         if ($candidate === null) {
             /*
              * 這一回合沒有明確的機制錯誤可以注入；維持 planner 打法，往後面的回合繼續找。
-             * 直接用已經算好的排名，不再呼叫 parent::choose()——那會把整個前瞻重算一次，
-             * 而本策略現在每回合都要排名，重算等於把成本翻倍。
+             * 用父類的 pick() 而不是重新呼叫 parent::choose()：後者會把整個前瞻重算一次，
+             * 而本策略每回合都要排名，重算等於把成本翻倍。pick() 是和 choose() 同一份
+             * 取捨邏輯，所以「沒有可注入失誤時完全照 planner 打」在 -INF 回合也成立。
              */
-            return $this->plannerPick($state, $ranked);
+            return $this->pick($state, $ranked);
         }
 
         [$best, $bestScore] = $ranked[0];
@@ -126,21 +127,6 @@ class PlannerOneMistakeStrategy extends PlannerStrategy implements InstrumentedS
         $action['keep'] = $this->keep($state, $action);
 
         return $action;
-    }
-
-    /**
-     * 和 planner 完全相同的選擇：`ranked()` 的第一名就是 `LookaheadStrategy::choose()`
-     * 會挑的那一個（分數最高，同分取合法清單裡較早的）。
-     *
-     * @param  list<array{0: array<string, mixed>, 1: float}>  $ranked
-     * @return array<string, mixed>
-     */
-    private function plannerPick(BattleState $state, array $ranked): array
-    {
-        $best = $ranked[0][0];
-        $best['keep'] = $this->keep($state, $best);
-
-        return $best;
     }
 
     /**
@@ -211,7 +197,19 @@ class PlannerOneMistakeStrategy extends PlannerStrategy implements InstrumentedS
             return null;
         }
 
+        $intent = $state->intent;
+
         foreach ($alternatives as [$action, $score]) {
+            /*
+             * 撞盾的那一手如果剛好同時打斷了當前預告，它就不是失誤——那是正確處理。
+             * 這條會發生在「預告可打斷、但 planner 最佳不是去打斷」的回合：M1 不啟動，
+             * 落到 M2，而被挑中的攻擊正好是同系擾序。第 3～5 關實測 1200 局有 135 局
+             * 命中；第 1、2 關碰不到，所以 P10-2.1 的抽查沒有發現。
+             */
+            if ($intent !== null && $intent->interruptible && $this->interrupts($state, $action, $intent)) {
+                continue;
+            }
+
             if ($score < $bestScore
                 && $this->absorbed($state, $action, $shielded)
                 && self::signature($action) !== self::signature($best)) {

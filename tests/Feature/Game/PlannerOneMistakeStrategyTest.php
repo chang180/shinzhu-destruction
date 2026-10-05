@@ -21,9 +21,14 @@ class PlannerOneMistakeStrategyTest extends TestCase
 {
     private function neutral(): ScenarioModifiers
     {
+        return $this->uniform(0.0);
+    }
+
+    private function uniform(float $value): ScenarioModifiers
+    {
         $reasons = array_fill_keys(Element::values(), ['code' => 'test', 'message' => '', 'inputs' => []]);
 
-        return new ScenarioModifiers(array_fill_keys(Element::values(), 0.0), $reasons);
+        return new ScenarioModifiers(array_fill_keys(Element::values(), $value), $reasons);
     }
 
     private function strategy(): PlannerOneMistakeStrategy
@@ -43,6 +48,12 @@ class PlannerOneMistakeStrategyTest extends TestCase
     {
         return (new BattleSimulator(app(BattleEngine::class)))
             ->run(app(LevelRepository::class)->get($levelId), $this->neutral(), $strategy, $seed, 'w0h0l0', $deck);
+    }
+
+    private function playIn(string $levelId, ScenarioModifiers $modifiers, PlannerOneMistakeStrategy|PlannerStrategy $strategy, int $seed, string $label): SimulationResult
+    {
+        return (new BattleSimulator(app(BattleEngine::class)))
+            ->run(app(LevelRepository::class)->get($levelId), $modifiers, $strategy, $seed, $label);
     }
 
     public function test_attacking_into_a_same_element_shield_when_a_bypass_exists_is_a_mechanic_mistake(): void
@@ -88,6 +99,50 @@ class PlannerOneMistakeStrategyTest extends TestCase
         $this->assertNotSame('disrupt.water', $report['mistake']['skill_id']);
     }
 
+    public function test_a_shield_collision_that_also_interrupts_the_telegraph_is_not_a_mistake(): void
+    {
+        /*
+         * 自我驗收找到的回歸：預告可打斷、但 planner 最佳不是去打斷時，M1 不啟動、
+         * 落到 M2，而被挑中的撞盾攻擊剛好是同系擾序——那同時是正確打斷，不能算失誤。
+         * meter-feast seed 1 第 3 回合（可打斷的水系修復 18、水盾站著）命中這個邊界。
+         * 第 1、2 關碰不到，所以 P10-2.1 的抽查沒有發現。
+         */
+        $report = $this->play('meter-feast', $this->strategy(), 1)->strategyReport;
+
+        if ($report['status'] !== PlannerOneMistakeStrategy::STATUS_INJECTED) {
+            $this->markTestSkipped('這一局沒有注入失誤');
+        }
+
+        if ($report['mistake_kind'] !== PlannerOneMistakeStrategy::KIND_WALKED_INTO_SHIELD) {
+            $this->markTestSkipped('這一局不是撞盾失誤');
+        }
+
+        $this->assertNotSame('disrupt.water', $report['mistake']['skill_id']);
+    }
+
+    public function test_no_injected_shield_collision_is_ever_a_correct_interrupt(): void
+    {
+        // 掃五關 × 中性情境 × 30 seed：撞盾失誤不得同時是同系擾序打斷。
+        foreach (app(LevelRepository::class)->ids() as $levelId) {
+            for ($seed = 1; $seed <= 30; $seed++) {
+                $result = $this->play($levelId, $this->strategy(), $seed);
+                $report = $result->strategyReport;
+
+                if ($report['mistake_kind'] !== PlannerOneMistakeStrategy::KIND_WALKED_INTO_SHIELD) {
+                    continue;
+                }
+
+                $intent = $report['context']['intent_element'] ?? null;
+                $skill = $report['mistake']['skill_id'];
+
+                $this->assertFalse(
+                    $intent !== null && $skill === 'disrupt.'.$intent,
+                    "{$levelId} seed {$seed}：撞盾失誤同時打斷了預告"
+                );
+            }
+        }
+    }
+
     public function test_ignoring_an_interruptible_repair_the_player_could_stop_is_a_mechanic_mistake(): void
     {
         // empty-cup seed 1 第 3 回合（斷補幕）：可打斷的水系修復 19，planner 最佳就是去打斷。
@@ -129,6 +184,25 @@ class PlannerOneMistakeStrategyTest extends TestCase
         $planner = $this->play('empty-cup', $this->planner(), 1, $deck);
 
         $this->assertSame(PlannerOneMistakeStrategy::STATUS_NO_ELIGIBLE, $mistake->strategyReport['status']);
+        $this->assertSame($planner->actions, $mistake->actions);
+        $this->assertSame($planner->outcome, $mistake->outcome);
+        $this->assertSame($planner->coreRemaining, $mistake->coreRemaining);
+    }
+
+    public function test_a_turn_where_every_play_loses_still_follows_the_planner(): void
+    {
+        /*
+         * 外部驗收（Codex）找到的回歸：第 8 回合每一種出牌都會輸，所有候選都是 -INF。
+         * `LookaheadStrategy::choose()` 在這種回合回蓄勢；P10-2.1 的子類自己取排名
+         * 第一名，於是打出 probe.land，核心從 19 掉到 4。兩邊現在共用 pick()。
+         */
+        $low = $this->uniform(-0.15);
+
+        $mistake = $this->playIn('empty-cup', $low, $this->strategy(), 7, 'w-h-l-');
+        $planner = $this->playIn('empty-cup', $low, $this->planner(), 7, 'w-h-l-');
+
+        $this->assertSame(PlannerOneMistakeStrategy::STATUS_NO_ELIGIBLE, $mistake->strategyReport['status']);
+        $this->assertSame('gather', $planner->actions[7]['skill_id'], '第 8 回合 planner 應該蓄勢');
         $this->assertSame($planner->actions, $mistake->actions);
         $this->assertSame($planner->outcome, $mistake->outcome);
         $this->assertSame($planner->coreRemaining, $mistake->coreRemaining);

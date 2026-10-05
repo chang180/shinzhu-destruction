@@ -176,7 +176,7 @@ P10-1 建立了下列契約；P10-2 起的三幕內容必須沿用，改動需�
 - `GET /api/v1/runs/{run}`：新增 `level_phase`（同上欄位＋`total`），`state` 新增 `level_phase_id`。既有欄位語意不變。
 - 多幕關卡的靜態 `forecast`（P10-2）：每回合取該回合所在幕的預告表並帶 `level_phase_id`；所在幕只依回合門檻推進（`LevelDefinition::scheduledPhaseForTurn()`），核心與旗標條件視為未成立。只用 `turn_gte` 的關卡因此和實際對局一致；用到 `core_lte`／`flag_true` 的關卡要另外標示條件幕。
 
-**模擬量測**：`SimulationResult::$phaseChanges` 只記機制狀態，`$levelPhaseChanges` 只記幕次。P10-2 起難度報告每格有 `avg_level_phase_changes` 與 `level_phases[]`（`reach_rate`、`avg_entry_turn`），CSV 為 `act_1～3_*` 欄位；`difficulty_index` 公式（`p10-di-2`）不變。
+**模擬量測**：`SimulationResult::$phaseChanges` 只記機制狀態，`$levelPhaseChanges` 只記幕次。P10-2 起難度報告每格有 `avg_level_phase_changes` 與 `level_phases[]`（`reach_rate`、`avg_entry_turn`），CSV 為 `act_1～3_*` 欄位。`difficulty_index` 的公式與權重自 `p10-di-1` 以來從未改過；第三項的語意在 P10-2.1 改版並升為 `p10-di-3`，版本差異見 §3.3。
 
 **可解性 solver**：`php artisan game:solve`（`App\Domain\Game\Solver\SolvabilitySolver`）。見 [P10-1 報告](phase-reports/P10-1.md)。
 

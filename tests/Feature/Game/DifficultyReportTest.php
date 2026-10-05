@@ -134,6 +134,14 @@ class DifficultyReportTest extends TestCase
         // 這組 seed 裡 planner 有輸的局：它們注入了失誤，但不進恢復率分母。
         $this->assertGreaterThan($expected['eligible_mistake_games'], $expected['mistakes_injected']);
         $this->assertSame(round($expected['recoveries_after_mistake'] / $expected['eligible_mistake_games'], 4), $cell['recovery_rate']);
+        /*
+         * 覆蓋率必須一起報：恢復率的分母只涵蓋「planner 原本通關且有明確機制錯誤可注入」
+         * 的局，不附覆蓋率的話，未來調關卡時恢復率可能只是因為分母縮小才變好看。
+         */
+        $this->assertSame(
+            round($expected['eligible_mistake_games'] / $expected['planner_baseline_wins'], 4),
+            $cell['eligible_mistake_coverage'],
+        );
         $this->assertCount(20, $cellRows);
         $this->assertSame($expected['eligible_mistake_games'], count(array_filter($cellRows, static fn (array $row): bool => $row['planner_won'] && $row['status'] === 'injected')));
         $this->assertSame(array_sum($cell['mistake_turns']), $expected['mistakes_injected']);

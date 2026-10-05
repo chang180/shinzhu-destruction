@@ -44,6 +44,12 @@ class DifficultyReport
      */
     public const SUPERSEDED_INDEX_VERSIONS = ['p10-di-1', 'p10-di-2'];
 
+    /**
+     * 恢復率的分母只涵蓋「planner 原本通關且當局真的有明確機制錯誤可注入」的局。
+     * 覆蓋率必須一起報，否則未來調關卡時恢復率可能只是因為分母縮小才變好看。
+     */
+    public const ONE_MISTAKE_COVERAGE = 'eligible_mistake_games / planner_baseline_wins; how much of the planner-cleared population the recovery rate actually covers';
+
     public const ONE_MISTAKE_RECOVERY = 'paired by (level, deck, scenario, seed): recoveries_after_mistake / eligible_mistake_games; eligible = planner won and one mechanic mistake was injected (missed_interrupt: planner would interrupt an interruptible repair/shield/overhaul and we did not; walked_into_shield: planner bypassed a standing same-element shield and we attacked into it); pooled over the level';
 
     public const SUITES = ['quick', 'full'];
@@ -275,6 +281,7 @@ class DifficultyReport
                 'index_version' => self::INDEX_VERSION,
                 'index_formula' => self::INDEX_FORMULA,
                 'one_mistake_recovery' => self::ONE_MISTAKE_RECOVERY,
+                'one_mistake_coverage' => self::ONE_MISTAKE_COVERAGE,
                 'superseded_index_versions' => self::SUPERSEDED_INDEX_VERSIONS,
                 'superseded_index_note' => 'p10-di-1 and p10-di-2 used different one-mistake definitions and are not comparable with p10-di-3; their numbers stay in the P10-0 and P10-2 reports. difficulty_index_unconditional_variant substitutes the unconditional planner-one-mistake win rate into the same formula and is only a sanity check, not the index.',
                 'weighting' => 'every (scenario, deck) cell of a level has equal weight',
@@ -396,6 +403,9 @@ class DifficultyReport
             'recovery_rate' => $counts['eligible_mistake_games'] === 0
                 ? null
                 : round($counts['recoveries_after_mistake'] / $counts['eligible_mistake_games'], 4),
+            'eligible_mistake_coverage' => $counts['planner_baseline_wins'] === 0
+                ? null
+                : round($counts['eligible_mistake_games'] / $counts['planner_baseline_wins'], 4),
             'avg_finite_score_delta' => $deltas === [] ? null : round(array_sum($deltas) / count($deltas), 4),
             'min_finite_score_delta' => $deltas === [] ? null : min($deltas),
             'mistakes_skipping_a_winning_move' => $terminalBest,
@@ -582,6 +592,7 @@ class DifficultyReport
 
         $mistakeCells = array_values(array_filter($cells, static fn (array $cell): bool => $cell['strategy'] === 'planner-one-mistake'));
         $eligible = array_sum(array_column($mistakeCells, 'eligible_mistake_games'));
+        $baselineWins = array_sum(array_column($mistakeCells, 'planner_baseline_wins'));
         $recovery = $eligible === 0 ? null : array_sum(array_column($mistakeCells, 'recoveries_after_mistake')) / $eligible;
 
         $plannerCells = array_values(array_filter($cells, static fn (array $cell): bool => $cell['strategy'] === 'planner' && $cell['wins'] > 0));
@@ -601,7 +612,8 @@ class DifficultyReport
             'one_mistake_recovery_rate' => $recovery === null ? null : round($recovery, 4),
             'planner_winning_turn_budget_used' => $budget === null ? null : round($budget, 4),
             'difficulty_index' => $index($recovery === null ? null : round($recovery, 4)),
-            'planner_baseline_wins' => array_sum(array_column($mistakeCells, 'planner_baseline_wins')),
+            'planner_baseline_wins' => $baselineWins,
+            'eligible_mistake_coverage' => $baselineWins === 0 ? null : round($eligible / $baselineWins, 4),
             'mistakes_injected' => array_sum(array_column($mistakeCells, 'mistakes_injected')),
             'eligible_mistake_games' => $eligible,
             'recoveries_after_mistake' => array_sum(array_column($mistakeCells, 'recoveries_after_mistake')),
