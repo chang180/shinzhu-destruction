@@ -35,8 +35,11 @@
       "w+h+l0",
       "w+h+l+"
     ],
-    "index_version": "p10-di-1",
-    "index_formula": "0.35*(1-planner) + 0.25*(1-forecast_aware) + 0.25*(1-one_mistake) + 0.15*planner_winning_turn_budget",
+    "index_version": "p10-di-2",
+    "index_formula": "0.35*(1-planner) + 0.25*(1-forecast_aware) + 0.25*(1-one_mistake_recovery) + 0.15*planner_winning_turn_budget",
+    "one_mistake_recovery": "paired by (level, deck, scenario, seed): recoveries_after_mistake / eligible_mistake_games; eligible = planner won and a semantically different, strictly lower-scored mistake was injected; pooled over the level",
+    "legacy_index_version": "p10-di-1",
+    "legacy_index_note": "difficulty_index_p10_di_1 uses the unconditional planner-one-mistake win rate; kept only for comparison",
     "weighting": "every (scenario, deck) cell of a level has equal weight",
     "solver": "not implemented in P10-0; planner results are not a solvability proof"
   },
@@ -157,9 +160,19 @@
       "difficulty": {
         "planner_win_rate": 0.9956,
         "forecast_aware_win_rate": 0.9867,
-        "one_mistake_recovery_rate": 0.9956,
+        "one_mistake_recovery_rate": 0.9955,
         "planner_winning_turn_budget_used": 0.8378,
-        "difficulty_index": 0.1316
+        "difficulty_index": 0.1317,
+        "planner_baseline_wins": 8064,
+        "mistakes_injected": 8100,
+        "eligible_mistake_games": 8064,
+        "recoveries_after_mistake": 8028,
+        "no_eligible_mistake_games": 0,
+        "window_not_reached_games": 0,
+        "legacy_second_same_semantics": 99,
+        "legacy_second_tied": 1314,
+        "one_mistake_unconditional_win_rate": 0.9956,
+        "difficulty_index_p10_di_1": 0.1316
       },
       "gates": {
         "bands": {
@@ -179,12 +192,12 @@
             "actual": 0.9867,
             "within": false
           },
-          "planner-one-mistake": {
+          "one-mistake-recovery": {
             "target": [
               0.75,
               0.9
             ],
-            "actual": 0.9956,
+            "actual": 0.9955,
             "within": false
           }
         },
@@ -291,14 +304,14 @@
         },
         "planner-one-mistake": {
           "cells": 27,
-          "weighted_win_rate": 0.9311,
+          "weighted_win_rate": 0.9078,
           "min_cell": {
-            "win_rate": 0.87,
+            "win_rate": 0.8667,
             "scenario": "w-h-l-",
             "deck": "starter"
           },
           "max_cell": {
-            "win_rate": 0.9767,
+            "win_rate": 0.96,
             "scenario": "w-h+l-",
             "deck": "starter"
           },
@@ -308,9 +321,19 @@
       "difficulty": {
         "planner_win_rate": 0.9378,
         "forecast_aware_win_rate": 0.7744,
-        "one_mistake_recovery_rate": 0.9311,
+        "one_mistake_recovery_rate": 0.9313,
         "planner_winning_turn_budget_used": 0.836,
-        "difficulty_index": 0.2208
+        "difficulty_index": 0.2207,
+        "planner_baseline_wins": 7596,
+        "mistakes_injected": 8100,
+        "eligible_mistake_games": 7596,
+        "recoveries_after_mistake": 7074,
+        "no_eligible_mistake_games": 0,
+        "window_not_reached_games": 0,
+        "legacy_second_same_semantics": 1917,
+        "legacy_second_tied": 3510,
+        "one_mistake_unconditional_win_rate": 0.9078,
+        "difficulty_index_p10_di_1": 0.2266
       },
       "gates": {
         "bands": {
@@ -330,12 +353,12 @@
             "actual": 0.7744,
             "within": true
           },
-          "planner-one-mistake": {
+          "one-mistake-recovery": {
             "target": [
               0.6,
               0.75
             ],
-            "actual": 0.9311,
+            "actual": 0.9313,
             "within": false
           }
         },
@@ -443,9 +466,9 @@
         },
         "planner-one-mistake": {
           "cells": 54,
-          "weighted_win_rate": 0.9789,
+          "weighted_win_rate": 0.9722,
           "min_cell": {
-            "win_rate": 0.8933,
+            "win_rate": 0.8567,
             "scenario": "w-h-l-",
             "deck": "tide-siege"
           },
@@ -460,9 +483,19 @@
       "difficulty": {
         "planner_win_rate": 0.9843,
         "forecast_aware_win_rate": 0.902,
-        "one_mistake_recovery_rate": 0.9789,
+        "one_mistake_recovery_rate": 0.9761,
         "planner_winning_turn_budget_used": 0.713,
-        "difficulty_index": 0.1422
+        "difficulty_index": 0.1429,
+        "planner_baseline_wins": 15945,
+        "mistakes_injected": 16200,
+        "eligible_mistake_games": 15945,
+        "recoveries_after_mistake": 15564,
+        "no_eligible_mistake_games": 0,
+        "window_not_reached_games": 0,
+        "legacy_second_same_semantics": 3663,
+        "legacy_second_tied": 3981,
+        "one_mistake_unconditional_win_rate": 0.9722,
+        "difficulty_index_p10_di_1": 0.1439
       },
       "gates": {
         "bands": {
@@ -482,12 +515,12 @@
             "actual": 0.902,
             "within": false
           },
-          "planner-one-mistake": {
+          "one-mistake-recovery": {
             "target": [
               0.42,
               0.6
             ],
-            "actual": 0.9789,
+            "actual": 0.9761,
             "within": false
           }
         },
@@ -595,9 +628,9 @@
         },
         "planner-one-mistake": {
           "cells": 54,
-          "weighted_win_rate": 0.947,
+          "weighted_win_rate": 0.9306,
           "min_cell": {
-            "win_rate": 0.7567,
+            "win_rate": 0.73,
             "scenario": "w-h-l-",
             "deck": "tide-siege"
           },
@@ -612,9 +645,19 @@
       "difficulty": {
         "planner_win_rate": 0.9668,
         "forecast_aware_win_rate": 0.7418,
-        "one_mistake_recovery_rate": 0.947,
+        "one_mistake_recovery_rate": 0.9429,
         "planner_winning_turn_budget_used": 0.8253,
-        "difficulty_index": 0.2132
+        "difficulty_index": 0.2142,
+        "planner_baseline_wins": 15663,
+        "mistakes_injected": 16200,
+        "eligible_mistake_games": 15663,
+        "recoveries_after_mistake": 14769,
+        "no_eligible_mistake_games": 0,
+        "window_not_reached_games": 0,
+        "legacy_second_same_semantics": 4239,
+        "legacy_second_tied": 5688,
+        "one_mistake_unconditional_win_rate": 0.9306,
+        "difficulty_index_p10_di_1": 0.2173
       },
       "gates": {
         "bands": {
@@ -634,12 +677,12 @@
             "actual": 0.7418,
             "within": false
           },
-          "planner-one-mistake": {
+          "one-mistake-recovery": {
             "target": [
               0.25,
               0.45
             ],
-            "actual": 0.947,
+            "actual": 0.9429,
             "within": false
           }
         },
@@ -749,16 +792,16 @@
         },
         "planner-one-mistake": {
           "cells": 108,
-          "weighted_win_rate": 0.9319,
+          "weighted_win_rate": 0.9068,
           "min_cell": {
-            "win_rate": 0.6533,
+            "win_rate": 0.5433,
             "scenario": "w-h-l-",
-            "deck": "tide-siege+hollow-ground"
+            "deck": "smoke-screen+hollow-ground"
           },
           "max_cell": {
-            "win_rate": 1.0,
-            "scenario": "w+h+l+",
-            "deck": "smoke-screen+sluice-jam"
+            "win_rate": 0.9933,
+            "scenario": "w0h+l+",
+            "deck": "tide-siege+hollow-ground"
           },
           "illegal_choices": 0
         }
@@ -766,9 +809,19 @@
       "difficulty": {
         "planner_win_rate": 0.9511,
         "forecast_aware_win_rate": 0.804,
-        "one_mistake_recovery_rate": 0.9319,
+        "one_mistake_recovery_rate": 0.9222,
         "planner_winning_turn_budget_used": 0.7251,
-        "difficulty_index": 0.1919
+        "difficulty_index": 0.1943,
+        "planner_baseline_wins": 30815,
+        "mistakes_injected": 32400,
+        "eligible_mistake_games": 30815,
+        "recoveries_after_mistake": 28417,
+        "no_eligible_mistake_games": 0,
+        "window_not_reached_games": 0,
+        "legacy_second_same_semantics": 5924,
+        "legacy_second_tied": 10920,
+        "one_mistake_unconditional_win_rate": 0.9068,
+        "difficulty_index_p10_di_1": 0.1982
       },
       "gates": {
         "bands": {
@@ -788,12 +841,12 @@
             "actual": 0.804,
             "within": false
           },
-          "planner-one-mistake": {
+          "one-mistake-recovery": {
             "target": [
               0.1,
               0.3
             ],
-            "actual": 0.9319,
+            "actual": 0.9222,
             "within": false
           }
         },
@@ -808,25 +861,25 @@
       {
         "from": "empty-cup",
         "to": "noon-fold",
-        "delta": 0.0892,
+        "delta": 0.089,
         "passes": true
       },
       {
         "from": "noon-fold",
         "to": "meter-feast",
-        "delta": -0.0786,
+        "delta": -0.0778,
         "passes": false
       },
       {
         "from": "meter-feast",
         "to": "mirror-shade",
-        "delta": 0.071,
+        "delta": 0.0713,
         "passes": true
       },
       {
         "from": "mirror-shade",
         "to": "stored-night",
-        "delta": -0.0213,
+        "delta": -0.0199,
         "passes": false
       }
     ],

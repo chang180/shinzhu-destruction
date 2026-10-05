@@ -31,23 +31,41 @@ use InvalidArgumentException;
  */
 class DifficultyReport
 {
-    public const INDEX_VERSION = 'p10-di-1';
+    public const INDEX_VERSION = 'p10-di-2';
 
-    public const INDEX_FORMULA = '0.35*(1-planner) + 0.25*(1-forecast_aware) + 0.25*(1-one_mistake) + 0.15*planner_winning_turn_budget';
+    public const INDEX_FORMULA = '0.35*(1-planner) + 0.25*(1-forecast_aware) + 0.25*(1-one_mistake_recovery) + 0.15*planner_winning_turn_budget';
+
+    /**
+     * p10-di-1（P10-0）用 planner-one-mistake 的無條件勝率當第三項，而且失誤可能只是
+     * 同招的另一張實體牌。只為新舊對照保留，不作排序依據。
+     */
+    public const LEGACY_INDEX_VERSION = 'p10-di-1';
+
+    public const ONE_MISTAKE_RECOVERY = 'paired by (level, deck, scenario, seed): recoveries_after_mistake / eligible_mistake_games; eligible = planner won and a semantically different, strictly lower-scored mistake was injected; pooled over the level';
 
     public const SUITES = ['quick', 'full'];
 
     /**
      * P10 §3.4 初始發布門檻（勝率區間，0～1）。P10-0 只對照、不調整關卡。
      *
-     * @var array<int, array{planner: array{float, float}, forecast-aware: array{float, float}, planner-one-mistake: array{float, float}}>
+     * @var array<int, array{planner: array{float, float}, forecast-aware: array{float, float}, one-mistake-recovery: array{float, float}}>
      */
     public const TARGETS = [
-        1 => ['planner' => [0.95, 1.00], 'forecast-aware' => [0.80, 0.95], 'planner-one-mistake' => [0.75, 0.90]],
-        2 => ['planner' => [0.88, 0.95], 'forecast-aware' => [0.65, 0.82], 'planner-one-mistake' => [0.60, 0.75]],
-        3 => ['planner' => [0.80, 0.90], 'forecast-aware' => [0.45, 0.68], 'planner-one-mistake' => [0.42, 0.60]],
-        4 => ['planner' => [0.70, 0.82], 'forecast-aware' => [0.25, 0.52], 'planner-one-mistake' => [0.25, 0.45]],
-        5 => ['planner' => [0.60, 0.75], 'forecast-aware' => [0.10, 0.38], 'planner-one-mistake' => [0.10, 0.30]],
+        1 => ['planner' => [0.95, 1.00], 'forecast-aware' => [0.80, 0.95], 'one-mistake-recovery' => [0.75, 0.90]],
+        2 => ['planner' => [0.88, 0.95], 'forecast-aware' => [0.65, 0.82], 'one-mistake-recovery' => [0.60, 0.75]],
+        3 => ['planner' => [0.80, 0.90], 'forecast-aware' => [0.45, 0.68], 'one-mistake-recovery' => [0.42, 0.60]],
+        4 => ['planner' => [0.70, 0.82], 'forecast-aware' => [0.25, 0.52], 'one-mistake-recovery' => [0.25, 0.45]],
+        5 => ['planner' => [0.60, 0.75], 'forecast-aware' => [0.10, 0.38], 'one-mistake-recovery' => [0.10, 0.30]],
+    ];
+
+    /**
+     * 逐局失誤紀錄的欄位，順序即 --mistakes-csv 的欄位順序。
+     */
+    public const MISTAKE_COLUMNS = [
+        'level', 'deck', 'scenario', 'seed', 'planner_won', 'won_after_mistake', 'status', 'turn',
+        'best_signature', 'best_card', 'best_score', 'mistake_signature', 'mistake_card', 'mistake_score',
+        'score_delta', 'legacy_second_signature', 'legacy_second_card', 'legacy_second_same_semantics',
+        'legacy_second_tied',
     ];
 
     private const WEAK_STRATEGIES = ['random', 'single-water', 'legacy-cycle'];
@@ -165,6 +183,8 @@ class DifficultyReport
      * @param  list<string>  $levelIds  空陣列代表全部關卡
      * @param  list<string>  $strategyNames  空陣列代表全部策略
      * @param  (callable(string): void)|null  $progress
+     * @param  (callable(array<string, mixed>): void)|null  $onMistakeGame  逐局失誤紀錄（欄位見 MISTAKE_COLUMNS）；
+     *                                                                      用串流交出，避免完整矩陣把每一局都留在記憶體
      * @return array<string, mixed>
      */
     public function build(
@@ -174,7 +194,10 @@ class DifficultyReport
         array $levelIds = [],
         array $strategyNames = [],
         ?callable $progress = null,
+        ?callable $onMistakeGame = null,
     ): array {
+        $this->validate($suite, $seeds, $levelIds, $strategyNames);
+
         $simulator = new BattleSimulator($this->engine);
         $scenarios = $this->scenarios($suite);
         $levelIds = $levelIds === [] ? $this->levels->ids() : $levelIds;
@@ -186,19 +209,37 @@ class DifficultyReport
             foreach ($this->deckVariants($level) as $deckLabel => $composition) {
                 foreach ($scenarios as $scenarioLabel => $values) {
                     $modifiers = $this->modifiers($values);
-
-                    foreach ($this->strategies($modifiers) as $strategy) {
-                        if ($strategyNames !== [] && ! in_array($strategy->name(), $strategyNames, true)) {
-                            continue;
-                        }
-
+                    $run = function (Strategy $strategy) use ($simulator, $level, $modifiers, $scenarioLabel, $composition, $deckLabel, $seeds, $startSeed): array {
                         $results = [];
 
                         for ($seed = $startSeed; $seed < $startSeed + $seeds; $seed++) {
                             $results[] = $simulator->run($level, $modifiers, $strategy, $seed, $scenarioLabel, $composition, $deckLabel);
                         }
 
-                        $cells[] = $this->cell($level, $deckLabel, $scenarioLabel, $strategy->name(), $results);
+                        return $results;
+                    };
+                    $plannerResults = null;
+
+                    foreach ($this->strategies($modifiers) as $strategy) {
+                        $selected = $strategyNames === [] || in_array($strategy->name(), $strategyNames, true);
+
+                        // 失誤恢復率要和同 seed 的 planner 配對；只跑 one-mistake 時仍要算 planner 基準。
+                        if ($strategy->name() === 'planner' && ($selected || in_array('planner-one-mistake', $strategyNames, true))) {
+                            $plannerResults = $run($strategy);
+                        }
+
+                        if (! $selected) {
+                            continue;
+                        }
+
+                        $results = $strategy->name() === 'planner' ? $plannerResults : $run($strategy);
+                        $cell = $this->cell($level, $deckLabel, $scenarioLabel, $strategy->name(), $results);
+
+                        if ($strategy->name() === 'planner-one-mistake') {
+                            $cell += $this->recovery($results, $plannerResults ?? [], $onMistakeGame);
+                        }
+
+                        $cells[] = $cell;
                     }
                 }
             }
@@ -221,12 +262,164 @@ class DifficultyReport
                 'scenarios' => array_keys($scenarios),
                 'index_version' => self::INDEX_VERSION,
                 'index_formula' => self::INDEX_FORMULA,
+                'one_mistake_recovery' => self::ONE_MISTAKE_RECOVERY,
+                'legacy_index_version' => self::LEGACY_INDEX_VERSION,
+                'legacy_index_note' => 'difficulty_index_p10_di_1 uses the unconditional planner-one-mistake win rate; kept only for comparison',
                 'weighting' => 'every (scenario, deck) cell of a level has equal weight',
                 'solver' => 'not implemented in P10-0; planner results are not a solvability proof',
             ],
             'levels' => $levels,
             'progression' => $this->progression($levels),
             'cells' => $cells,
+        ];
+    }
+
+    /**
+     * 所有可用的策略名稱，供命令列驗證。
+     *
+     * @return list<string>
+     */
+    public function strategyNames(): array
+    {
+        return array_map(static fn (Strategy $strategy): string => $strategy->name(), $this->strategies($this->modifiers([
+            Element::Water->value => 0.0,
+            Element::Heat->value => 0.0,
+            Element::Land->value => 0.0,
+        ])));
+    }
+
+    /**
+     * 拼錯的關卡或策略不能默默產生一份空報告。
+     *
+     * @param  list<string>  $levelIds
+     * @param  list<string>  $strategyNames
+     */
+    private function validate(string $suite, int $seeds, array $levelIds, array $strategyNames): void
+    {
+        if (! in_array($suite, self::SUITES, true)) {
+            throw new InvalidArgumentException("Unknown suite [{$suite}].");
+        }
+
+        if ($seeds < 1) {
+            throw new InvalidArgumentException('Seeds must be at least 1.');
+        }
+
+        $unknownLevels = array_values(array_filter($levelIds, fn (string $id): bool => ! $this->levels->has($id)));
+
+        if ($unknownLevels !== []) {
+            throw new InvalidArgumentException('Unknown level ['.implode(', ', $unknownLevels).']. Available: '.implode(', ', $this->levels->ids()).'.');
+        }
+
+        $unknownStrategies = array_values(array_diff($strategyNames, $this->strategyNames()));
+
+        if ($unknownStrategies !== []) {
+            throw new InvalidArgumentException('Unknown strategy ['.implode(', ', $unknownStrategies).']. Available: '.implode(', ', $this->strategyNames()).'.');
+        }
+    }
+
+    /**
+     * 同 seed 配對的失誤恢復：planner 原本通關、而且這一局真的注入了失誤，才進分母。
+     *
+     * @param  list<SimulationResult>  $mistakeResults
+     * @param  list<SimulationResult>  $plannerResults
+     * @return array<string, mixed>
+     */
+    private function recovery(array $mistakeResults, array $plannerResults, ?callable $onMistakeGame): array
+    {
+        $plannerBySeed = [];
+
+        foreach ($plannerResults as $result) {
+            $plannerBySeed[$result->seed] = $result;
+        }
+
+        $counts = [
+            'planner_baseline_wins' => 0,
+            'mistakes_injected' => 0,
+            'eligible_mistake_games' => 0,
+            'recoveries_after_mistake' => 0,
+            'no_eligible_mistake_games' => 0,
+            'window_not_reached_games' => 0,
+            'legacy_second_same_semantics' => 0,
+            'legacy_second_tied' => 0,
+        ];
+        $deltas = [];
+        $terminalBest = 0;
+        $turns = [];
+
+        foreach ($mistakeResults as $result) {
+            $report = $result->strategyReport;
+            $status = $report['status'] ?? null;
+            $baselineWon = ($plannerBySeed[$result->seed] ?? null)?->won() ?? false;
+            $injected = $status === PlannerOneMistakeStrategy::STATUS_INJECTED;
+
+            $counts['planner_baseline_wins'] += $baselineWon ? 1 : 0;
+            $counts['mistakes_injected'] += $injected ? 1 : 0;
+            $counts['no_eligible_mistake_games'] += $status === PlannerOneMistakeStrategy::STATUS_NO_ELIGIBLE ? 1 : 0;
+            $counts['window_not_reached_games'] += $status === PlannerOneMistakeStrategy::STATUS_WINDOW_NOT_REACHED ? 1 : 0;
+            $counts['legacy_second_same_semantics'] += ($report['legacy_second_same_semantics'] ?? false) ? 1 : 0;
+            $counts['legacy_second_tied'] += ($report['legacy_second_tied'] ?? false) ? 1 : 0;
+
+            if ($baselineWon && $injected) {
+                $counts['eligible_mistake_games']++;
+                $counts['recoveries_after_mistake'] += $result->won() ? 1 : 0;
+            }
+
+            if ($injected) {
+                $turns[$report['turn']] = ($turns[$report['turn']] ?? 0) + 1;
+
+                if (is_string($report['score_delta'])) {
+                    $terminalBest++;
+                } else {
+                    $deltas[] = $report['score_delta'];
+                }
+            }
+
+            if ($onMistakeGame !== null) {
+                $onMistakeGame($this->mistakeRow($result, $baselineWon));
+            }
+        }
+
+        ksort($turns);
+
+        return $counts + [
+            'recovery_rate' => $counts['eligible_mistake_games'] === 0
+                ? null
+                : round($counts['recoveries_after_mistake'] / $counts['eligible_mistake_games'], 4),
+            'avg_finite_score_delta' => $deltas === [] ? null : round(array_sum($deltas) / count($deltas), 4),
+            'min_finite_score_delta' => $deltas === [] ? null : min($deltas),
+            'mistakes_skipping_a_winning_move' => $terminalBest,
+            'mistake_turns' => array_map('intval', $turns),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mistakeRow(SimulationResult $result, bool $baselineWon): array
+    {
+        $report = $result->strategyReport;
+        $signature = static fn (?array $action): ?string => $action === null ? null : PlannerOneMistakeStrategy::signature($action);
+
+        return [
+            'level' => $result->levelId,
+            'deck' => $result->deck,
+            'scenario' => $result->scenario,
+            'seed' => $result->seed,
+            'planner_won' => $baselineWon,
+            'won_after_mistake' => $result->won(),
+            'status' => $report['status'] ?? null,
+            'turn' => $report['turn'] ?? null,
+            'best_signature' => $signature($report['best'] ?? null),
+            'best_card' => $report['best']['card_id'] ?? null,
+            'best_score' => $report['best']['score'] ?? null,
+            'mistake_signature' => $signature($report['mistake'] ?? null),
+            'mistake_card' => $report['mistake']['card_id'] ?? null,
+            'mistake_score' => $report['mistake']['score'] ?? null,
+            'score_delta' => $report['score_delta'] ?? null,
+            'legacy_second_signature' => $signature($report['legacy_second'] ?? null),
+            'legacy_second_card' => $report['legacy_second']['card_id'] ?? null,
+            'legacy_second_same_semantics' => $report['legacy_second_same_semantics'] ?? null,
+            'legacy_second_tied' => $report['legacy_second_tied'] ?? null,
         ];
     }
 
@@ -321,13 +514,17 @@ class DifficultyReport
      *
      * @param  list<array<string, mixed>>  $cells
      * @param  array<string, array<string, mixed>>  $strategies
-     * @return array<string, float|null>
+     * @return array<string, float|int|null>
      */
     private function difficulty(array $cells, array $strategies): array
     {
         $planner = $strategies['planner']['weighted_win_rate'] ?? null;
         $forecast = $strategies['forecast-aware']['weighted_win_rate'] ?? null;
-        $mistake = $strategies['planner-one-mistake']['weighted_win_rate'] ?? null;
+        $legacyMistake = $strategies['planner-one-mistake']['weighted_win_rate'] ?? null;
+
+        $mistakeCells = array_values(array_filter($cells, static fn (array $cell): bool => $cell['strategy'] === 'planner-one-mistake'));
+        $eligible = array_sum(array_column($mistakeCells, 'eligible_mistake_games'));
+        $recovery = $eligible === 0 ? null : array_sum(array_column($mistakeCells, 'recoveries_after_mistake')) / $eligible;
 
         $plannerCells = array_values(array_filter($cells, static fn (array $cell): bool => $cell['strategy'] === 'planner' && $cell['wins'] > 0));
         $winningWeight = array_sum(array_column($plannerCells, 'wins'));
@@ -336,16 +533,26 @@ class DifficultyReport
             $plannerCells,
         )) / $winningWeight;
 
-        $index = ($planner === null || $forecast === null || $mistake === null || $budget === null)
+        $index = static fn (?float $third): ?float => ($planner === null || $forecast === null || $third === null || $budget === null)
             ? null
-            : round(0.35 * (1 - $planner) + 0.25 * (1 - $forecast) + 0.25 * (1 - $mistake) + 0.15 * $budget, 4);
+            : round(0.35 * (1 - $planner) + 0.25 * (1 - $forecast) + 0.25 * (1 - $third) + 0.15 * $budget, 4);
 
         return [
             'planner_win_rate' => $planner,
             'forecast_aware_win_rate' => $forecast,
-            'one_mistake_recovery_rate' => $mistake,
+            'one_mistake_recovery_rate' => $recovery === null ? null : round($recovery, 4),
             'planner_winning_turn_budget_used' => $budget === null ? null : round($budget, 4),
-            'difficulty_index' => $index,
+            'difficulty_index' => $index($recovery === null ? null : round($recovery, 4)),
+            'planner_baseline_wins' => array_sum(array_column($mistakeCells, 'planner_baseline_wins')),
+            'mistakes_injected' => array_sum(array_column($mistakeCells, 'mistakes_injected')),
+            'eligible_mistake_games' => $eligible,
+            'recoveries_after_mistake' => array_sum(array_column($mistakeCells, 'recoveries_after_mistake')),
+            'no_eligible_mistake_games' => array_sum(array_column($mistakeCells, 'no_eligible_mistake_games')),
+            'window_not_reached_games' => array_sum(array_column($mistakeCells, 'window_not_reached_games')),
+            'legacy_second_same_semantics' => array_sum(array_column($mistakeCells, 'legacy_second_same_semantics')),
+            'legacy_second_tied' => array_sum(array_column($mistakeCells, 'legacy_second_tied')),
+            'one_mistake_unconditional_win_rate' => $legacyMistake,
+            'difficulty_index_p10_di_1' => $index($legacyMistake),
         ];
     }
 
@@ -360,8 +567,10 @@ class DifficultyReport
     {
         $bands = [];
 
+        $recovery = $this->difficulty($cells, $strategies)['one_mistake_recovery_rate'];
+
         foreach (self::TARGETS[$level->sequence] ?? [] as $name => [$low, $high]) {
-            $rate = $strategies[$name]['weighted_win_rate'] ?? null;
+            $rate = $name === 'one-mistake-recovery' ? $recovery : ($strategies[$name]['weighted_win_rate'] ?? null);
             $bands[$name] = [
                 'target' => [$low, $high],
                 'actual' => $rate,

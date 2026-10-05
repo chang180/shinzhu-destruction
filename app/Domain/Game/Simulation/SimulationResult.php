@@ -10,6 +10,7 @@ final readonly class SimulationResult
      * @param  list<array{turn: int, skill_id: string, target: string|null}>  $actions
      * @param  array<string, int>  $metrics  由結算事件統計的量測欄位，見 BattleSimulator::emptyMetrics()
      * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges
+     * @param  array<string, mixed>  $strategyReport  InstrumentedStrategy 的逐局紀錄（例如失誤注入）
      */
     public function __construct(
         public string $levelId,
@@ -25,6 +26,7 @@ final readonly class SimulationResult
         public int $maxTurns = 0,
         public array $metrics = [],
         public array $phaseChanges = [],
+        public array $strategyReport = [],
     ) {}
 
     public function won(): bool

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\Game\DifficultyReport;
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 
 /**
  * P10 難度報告。和 game:simulate 不同，這裡量的是難度曲線：
@@ -19,30 +20,56 @@ class DifficultyReportCommand extends Command
                             {--level=* : 只跑指定關卡，預設全部}
                             {--strategy=* : 只跑指定策略，預設全部（缺策略時不算 difficulty_index）}
                             {--json= : 把完整報告寫成 JSON 檔}
-                            {--csv= : 把逐格結果寫成 CSV 檔}';
+                            {--csv= : 把逐格結果寫成 CSV 檔}
+                            {--mistakes-csv= : 把 planner-one-mistake 的逐局失誤紀錄寫成 CSV 檔}';
 
     protected $description = '以固定 seed 產生 P10 難度報告：關卡 × 情境 × 合法牌組 × 策略';
 
     public function handle(DifficultyReport $report): int
     {
-        $suite = (string) $this->option('suite');
+        $seeds = (string) $this->option('seeds');
 
-        if (! in_array($suite, DifficultyReport::SUITES, true)) {
-            $this->components->error('suite 只能是 quick 或 full');
+        if (preg_match('/^-?\d+$/', $seeds) !== 1) {
+            $this->components->error('seeds 必須是整數');
 
             return self::INVALID;
         }
 
-        $seeds = max(1, (int) $this->option('seeds'));
+        $mistakes = null;
+        $mistakesPath = $this->option('mistakes-csv');
 
-        $result = $report->build(
-            suite: $suite,
-            seeds: $seeds,
-            startSeed: (int) $this->option('start-seed'),
-            levelIds: $this->option('level'),
-            strategyNames: $this->option('strategy'),
-            progress: fn (string $levelId) => $this->components->info("{$levelId} 完成"),
-        );
+        try {
+            $result = $report->build(
+                suite: (string) $this->option('suite'),
+                seeds: (int) $seeds,
+                startSeed: (int) $this->option('start-seed'),
+                levelIds: $this->option('level'),
+                strategyNames: $this->option('strategy'),
+                progress: fn (string $levelId) => $this->components->info("{$levelId} 完成"),
+                onMistakeGame: $mistakesPath === null || $mistakesPath === '' ? null : function (array $row) use (&$mistakes, $mistakesPath): void {
+                    if ($mistakes === null) {
+                        $this->ensureDirectory($mistakesPath);
+                        $mistakes = fopen($mistakesPath, 'w');
+                        fputcsv($mistakes, DifficultyReport::MISTAKE_COLUMNS, escape: '');
+                    }
+
+                    fputcsv($mistakes, array_map(static fn (mixed $value): string => match (true) {
+                        $value === null => '',
+                        is_bool($value) => $value ? 'true' : 'false',
+                        default => (string) $value,
+                    }, $row), escape: '');
+                },
+            );
+        } catch (InvalidArgumentException $exception) {
+            $this->components->error($exception->getMessage());
+
+            return self::INVALID;
+        }
+
+        if ($mistakes !== null) {
+            fclose($mistakes);
+            $this->components->info("逐局失誤紀錄已寫入 {$mistakesPath}");
+        }
 
         $this->renderLevels($result['levels']);
         $this->renderProgression($result['progression']);
@@ -78,12 +105,18 @@ class DifficultyReportCommand extends Command
                 );
             }
 
-            $index = $level['difficulty']['difficulty_index'];
-            $row[] = $index === null ? '—' : sprintf('%.4f', $index);
+            $difficulty = $level['difficulty'];
+            $row[] = $difficulty['one_mistake_recovery_rate'] === null ? '—' : sprintf(
+                '%5.1f%% (%d/%d)',
+                100 * $difficulty['one_mistake_recovery_rate'],
+                $difficulty['recoveries_after_mistake'],
+                $difficulty['eligible_mistake_games'],
+            );
+            $row[] = $difficulty['difficulty_index'] === null ? '—' : sprintf('%.4f', $difficulty['difficulty_index']);
             $rows[] = $row;
         }
 
-        $this->table(['關卡', '牌組', ...array_map(static fn (string $name): string => $name.' 加權（最低–最高）', $names), 'difficulty_index'], $rows);
+        $this->table(['關卡', '牌組', ...array_map(static fn (string $name): string => $name.' 加權（最低–最高）', $names), '失誤恢復（配對）', 'difficulty_index'], $rows);
     }
 
     /**
@@ -121,9 +154,10 @@ class DifficultyReportCommand extends Command
             foreach ($level['gates']['bands'] as $name => $band) {
                 if ($band['within'] === false) {
                     $this->line(sprintf(
-                        '  %s %s 加權 %.1f%% 不在目標 %d–%d%%',
+                        '  %s %s %s %.1f%% 不在目標 %d–%d%%',
                         $level['level'],
                         $name,
+                        $name === 'one-mistake-recovery' ? '配對' : '加權',
                         100 * $band['actual'],
                         (int) round(100 * $band['target'][0]),
                         (int) round(100 * $band['target'][1]),
@@ -160,11 +194,17 @@ class DifficultyReportCommand extends Command
             $this->ensureDirectory($csv);
             $handle = fopen($csv, 'w');
             $metricKeys = array_keys($result['cells'][0]['avg_metrics'] ?? []);
+            $recoveryKeys = [
+                'planner_baseline_wins', 'mistakes_injected', 'eligible_mistake_games', 'recoveries_after_mistake',
+                'no_eligible_mistake_games', 'window_not_reached_games', 'legacy_second_same_semantics',
+                'legacy_second_tied', 'recovery_rate', 'avg_finite_score_delta', 'min_finite_score_delta',
+                'mistakes_skipping_a_winning_move',
+            ];
 
             fputcsv($handle, [
                 'level', 'sequence', 'deck', 'scenario', 'strategy', 'games', 'wins', 'win_rate',
                 'avg_end_turn', 'avg_winning_turn_budget_used', 'avg_core_remaining_on_loss', 'illegal_choices',
-                'avg_phase_changes', ...$metricKeys,
+                'avg_phase_changes', ...$metricKeys, ...$recoveryKeys,
             ], escape: '');
 
             foreach ($result['cells'] as $cell) {
@@ -174,6 +214,7 @@ class DifficultyReportCommand extends Command
                     $cell['avg_winning_turn_budget_used'] ?? '', $cell['avg_core_remaining_on_loss'] ?? '',
                     $cell['illegal_choices'], $cell['avg_phase_changes'],
                     ...array_map(static fn (string $key): float => $cell['avg_metrics'][$key], $metricKeys),
+                    ...array_map(static fn (string $key): string => (string) ($cell[$key] ?? ''), $recoveryKeys),
                 ], escape: '');
             }
 

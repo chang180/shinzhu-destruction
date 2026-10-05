@@ -83,6 +83,10 @@ class BattleSimulator
         $metrics = self::emptyMetrics();
         $phaseChanges = [];
 
+        if ($strategy instanceof InstrumentedStrategy) {
+            $strategy->beginGame();
+        }
+
         while (! $state->outcome->isFinished()) {
             if ($state->turnPhase === BattleState::PHASE_AWAITING_REVEAL) {
                 $result = $this->engine->apply(
@@ -154,6 +158,7 @@ class BattleSimulator
             maxTurns: $level->maxTurns,
             metrics: $metrics,
             phaseChanges: $phaseChanges,
+            strategyReport: $strategy instanceof InstrumentedStrategy ? $strategy->gameReport() : [],
         );
     }
 
