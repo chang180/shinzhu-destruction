@@ -59,7 +59,7 @@ class DifficultyReport
      *
      * 取代 P05 時代 StrategyMatrixTest 裡逐情境 70% 的寫法——P10 從第 3 關起把
      * 逐關目標改成加權區間（第 3 關 80–90%、第 5 關 60–75%），70% 的逐格門檻會
-     * 和那些區間直接矛盾。逐關區間由 `game:difficulty-report` 的 gates 檢查。
+     * 排除 P10 明確允許的 55–70% 格。逐關區間由 `game:difficulty-report` 的 gates 檢查。
      */
     public const PLANNER_CELL_FLOOR = 0.55;
 

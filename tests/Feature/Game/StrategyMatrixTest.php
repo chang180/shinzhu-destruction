@@ -33,8 +33,8 @@ use Tests\TestCase;
  *
  * 逐格下限用 `DifficultyReport::PLANNER_CELL_FLOOR`（P10 §3.4 硬門檻 3，0.55），
  * 不再用 P05 時代寫死的 0.70：P10 從第 3 關起把逐關目標改成加權區間
- * （第 3 關 80–90%、第 4 關 70–82%、第 5 關 60–75%），0.70 的逐格門檻會和那些
- * 區間矛盾。逐關區間由 `game:difficulty-report` 的 gates 檢查，見 docs/BALANCE.md。
+ * （第 3 關 80–90%、第 4 關 70–82%、第 5 關 60–75%），0.70 的逐格門檻會
+ * 額外排除允許的 55–70% 格。逐關區間由 `game:difficulty-report` 的 gates 檢查，見 docs/BALANCE.md。
  */
 class StrategyMatrixTest extends TestCase
 {

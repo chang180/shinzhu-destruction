@@ -1,5 +1,15 @@
 # AI 派工與階段交接規範
 
+## 2026-10-05 P10-3 收尾交接
+
+實作 commit `b69d67d` 已交付第 3 關三幕（`ledger-prep`／`demand-pulse`／`peak-settlement`，回合門檻 1／4／7），11 回合、防線 37／37／35、modifier_cap 0.06，規則升 **5.0.0**。Codex 接手後補完 27 情境 × 兩種第 2 關獎勵 × 300 seeds 的完整矩陣、120 局 solver、兩牌組各一勝一敗事件樣本與第 3 關實際預告／幕切換回歸。根 README、BALANCE、進度與 P10 計畫已同步，完整資料見 [P10-3 報告](phase-reports/P10-3.md)。交付已推送 `main`，未部署。
+
+**不能沿用「全部 gate 通過」的接手摘要：**quick 第 3 關通過，但 full forecast-aware **70.30% 高於 68% 上限**；planner 83.85%（最低格 68%）、配對恢復率 47.97%（覆蓋率 100%）、L2→L3 +0.0672 均通過。主線 full 指標 0.1854→0.3081→0.3753 單調；五關曲線尚未完成。這輪保留數值並明列未達，不再掃值、不放寬區間。第 1 關 full 恢復率 91.2% 的既有缺口仍保留。
+
+共用逐格下限採 P10 §3.4 既定的 **55%**，取代 P05 三情境測試的 70%；同時影響 planner 與第二種可行策略檢查。已透過 Boost `record-rule` 記入 `.ai/rules/game.md`。下限不能取代加權目標與難度曲線，也不能把 full greedy 53.33% 誤報成 planner 下限失敗。量尺維持 `p10-di-3`，失誤語意未改。
+
+後端 **260 passed**、三幕窄測試 4 passed、Pint、TypeScript、build、50 項前端／靜態原型測試均實跑通過。本輪沒有瀏覽器、真人、手機實機或 Hostinger 部署證據。solver 120／120 是代表樣本，全量仍留 P10-7。P10-3 狀態為待驗收；先處理或審查 full forecast-aware 缺口，後續 P10-4 需另外指派，不能把本報告當作正式發布核准。
+
 ## 2026-10-05 P10-2.1 失誤量測語意修正交接
 
 `planner-one-mistake` 原本的「關鍵窗口裡第一個語義不同且分數嚴格較低的合法行動」不能代表犯錯：第 1、2 關實測有近七成注入的「失誤」只是比較弱的合法打法，第 2 關 seed 1 甚至把 `disrupt.water`（正確打斷可打斷水盾）標成失誤。現在只承認兩種核心機制錯誤——`missed_interrupt`（預告可打斷、手上有同系擾序、planner 最佳就是打斷，卻改成不處理）與 `walked_into_shield`（有同系護盾、planner 最佳繞開了它，卻改成撞上去）——**兩者都要求 planner 最佳打法本身就是正確處理**，否則另一條合理策略會被誤標。逐回合檢查，第一個能構成明確錯誤的回合注入，每局最多一次，找不到記 `no_eligible_mistake`。`INDEX_VERSION` 升 **`p10-di-3`**；公式權重不變，但 `p10-di-1`／`p10-di-2`／`p10-di-3` 的第三項語意不同，**不可互相比較**。報告移除 `window_not_reached_games` 與 `legacy_second_*`，新增 `missed_interrupt_mistakes`、`walked_into_shield_mistakes` 與逐局 `mistake_kind`／`intent_*`／`shielded_elements`。結果：第 2 關恢復率 89.2%→**65.4%** 落進目標 60–75%，第 1 關 94.3%→**91.2%** 仍超出上限 1.2 點（**門檻沒有放寬**），第 1→2 關 Δ difficulty_index 由 +0.071 擴大為 **+0.123**（full）。六個未改策略的加權勝率與逐格分布逐欄相同，`rules_version 4.0.0` 與第 1、2 關數值一個字沒改。外部驗收（Codex）後再修兩項量測缺陷：子類在「每一種出牌都會輸」的回合沒走 `LookaheadStrategy::choose()` 的蓄勢分支（取捨邏輯已抽成共用的 `pick()`）；以及 `walked_into_shield` 的候選有可能同時正確打斷當前預告（五關 1200 局命中 135 局，**第 3～5 關恢復率因此下修 0.3～5.0 點，第 1、2 關不變**）。報告新增 `eligible_mistake_coverage`：第 1 關只有 46.4%，其餘四關 98–100%，所以第 1 關的恢復率只能解讀為「在能犯錯的那半數局裡」。撞盾判準仍是 planner 條件化，而且撞盾不等於整招白丟（89% 傷害被吸收、62% 核心零傷害，但防線與印記仍生效）；要不要把判準改嚴是量測契約變更，留給計畫擁有者。下一包 P10-3，入口見 [P10-2.1 報告](phase-reports/P10-2.1.md)；**不要再改量測語意**。交付 commit `1e337d2`、修正 commit 見報告，皆已推送 `main`，未部署。

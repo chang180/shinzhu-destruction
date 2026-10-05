@@ -45,7 +45,7 @@ rules_version 目前是 3.0.0（P05 五關戰役）。三條和 2.0.0 不同的�
 2. 第 4 關（mirror-shade）的 adaptive_shield：沒有排定行程且回合 >= from_turn 的回合，城市架起玩家上一次進攻系別的同系護盾。它讀的是局面裡的 lastAttackElement，沒有亂數；回合表寫死的預告優先。關卡列表的靜態 forecast 在還沒有人出手時只說明規則，不假裝城市已經選好系別。
 3. 關卡可以設 modifier_cap，把每一系的情境修正再夾一次（第 5 關 0.08）。三系同時採用資料時不夾，low/high 的資料情境會直接決定勝負，而玩家選不了資料。
 
-關卡的 available 只能在該關通過 tests/Feature/Game/StrategyMatrixTest.php 的門檻後才打開：planner/greedy >= 70%、planner - random >= 25 點、legacy-cycle < 80%（第 1 關 < 95%）、單系連按 < 80%、非法選擇 0。數值與矩陣以 docs/BALANCE.md 為準。
+P05 的 available 驗收歷史門檻為 planner/greedy >= 70%、planner - random >= 25 點、legacy-cycle < 80%（第 1 關 < 95%）、單系連按 < 80%、非法選擇 0。P10-3 起逐格下限由下方 P10 規則取代，且必須另查新 quick/full 難度契約；數值與矩陣以 docs/BALANCE.md 為準。
 
 ## Consecutive keep limit from P08
 Since rules_version 3.1.0, a physical card kept into the next hand cannot be kept again on the immediately following turn. Keep up to 2 cards per turn and one free swap per turn remain. Persist kept_last_turn in BattleState, reject invalid keep before mutation, and keep strategies/UI aligned with the public state.
@@ -59,3 +59,6 @@ Acts are configured as `level_phases` (id, label, objective, starts_when, intent
 
 ## rules_version 4.0.0: L1/L2 three acts, turn-only triggers, old runs read-only
 Since P10-2 rules_version is 4.0.0: empty-cup and noon-fold have three level_phases triggered only by turn_gte, so the static forecast (LevelDefinition::scheduledPhaseForTurn, forecast[].level_phase_id) matches live runs exactly. A level that adds core_lte/flag_true acts must decide how the forecast labels conditional acts. noon-fold act-1 heat shield is deliberately NOT interruptible (act 1 teaches switching element). Older-version runs are read/replay only: actions, retry AND counterfactual return 409 rules_version_mismatch. LevelPhaseEquivalenceTest::CHANGED_IN_4_0_0 lists levels whose 3.1.0 recordings no longer apply; add a level there when you change it.
+
+## P10 strategy acceptance replaces the historical P05 floor
+Since P10-3, the P05 per-scenario 70% floor is superseded by DifficultyReport::PLANNER_CELL_FLOOR = 0.55 (P10 plan §3.4). StrategyMatrixTest applies it to planner and the second clearing strategy; weighted planner/forecast-aware/recovery bands, weak-strategy checks and adjacent difficulty deltas still require quick/full difficulty reports. Do not treat the cell floor alone as balance acceptance. rules_version 5.0.0 adds meter-feast turn-only acts at turns 1/4/7; versions through 4.0.0 remain read/replay only.

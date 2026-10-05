@@ -11,7 +11,7 @@ use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
 use Tests\TestCase;
 
 /**
- * P10-2：第 1、2 關的三幕。幕次只用回合門檻，所以靜態預告表必須和實際對局逐回合一致。
+ * P10-2／P10-3：主線三關的幕次只用回合門檻，靜態預告必須和實際對局逐回合一致。
  */
 class ThreeActLevelsTest extends TestCase
 {
@@ -20,6 +20,7 @@ class ThreeActLevelsTest extends TestCase
     private const ACTS = [
         'empty-cup' => ['trial-cup', 'cut-supply', 'empty-cup-quiz'],
         'noon-fold' => ['single-shield', 'shift-guard', 'crossed-windows'],
+        'meter-feast' => ['ledger-prep', 'demand-pulse', 'peak-settlement'],
     ];
 
     private function neutral(): ScenarioModifiers
@@ -29,7 +30,7 @@ class ThreeActLevelsTest extends TestCase
         return new ScenarioModifiers(array_fill_keys(Element::values(), 0.0), $reasons);
     }
 
-    public function test_a_planner_run_reaches_all_three_acts_at_turns_three_and_five(): void
+    public function test_a_planner_run_reaches_all_three_acts_at_the_scheduled_boundaries(): void
     {
         foreach (self::ACTS as $levelId => $acts) {
             $result = (new BattleSimulator(app(BattleEngine::class)))->run(
@@ -41,8 +42,8 @@ class ThreeActLevelsTest extends TestCase
             );
 
             $this->assertSame([
-                ['turn' => 2, 'from' => $acts[0], 'to' => $acts[1], 'reason_code' => 'level_phase_turn_gte'],
-                ['turn' => 4, 'from' => $acts[1], 'to' => $acts[2], 'reason_code' => 'level_phase_turn_gte'],
+                ['turn' => $levelId === 'meter-feast' ? 3 : 2, 'from' => $acts[0], 'to' => $acts[1], 'reason_code' => 'level_phase_turn_gte'],
+                ['turn' => $levelId === 'meter-feast' ? 6 : 4, 'from' => $acts[1], 'to' => $acts[2], 'reason_code' => 'level_phase_turn_gte'],
             ], $result->levelPhaseChanges, $levelId);
         }
     }

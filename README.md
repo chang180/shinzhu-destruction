@@ -8,7 +8,7 @@
 
 - [分階段開發計畫](docs/DEVELOPMENT-PLAN.md)：P00～P09 依賴、交付與驗收，可逐階段派給其他 AI。
 - [P08 試玩回饋改版計畫](docs/P08-USABILITY-REVISION-PLAN.md)：字級、卡牌用途／目標說明與結算首屏已實作；同張牌不能連續留的規則已推送。自動與本機畫面檢查見 [P08 QA 紀錄](docs/QA-REPORT.md)，真人回測待補。
-- [P10 難度曲線計畫](docs/P10-DIFFICULTY-PROGRESSION-PLAN.md)：P10-0 已建立 `game:difficulty-report` 與 3.1.0 難度基線（曲線不單調、規則未改），見 [P10-0 報告](docs/phase-reports/P10-0.md)；P10-1 已建立幕次引擎與離線可解性 solver（`game:solve`），見 [P10-1 報告](docs/phase-reports/P10-1.md)；P10-2 已把第 1、2 關改成三幕並升 `rules_version 4.0.0`（第 2 關比第 1 關高 ≥ 0.05，失誤恢復率仍未達目標），見 [P10-2 報告](docs/phase-reports/P10-2.md)；第 3～5 關待 P10-3 起。
+- [P10 難度曲線計畫](docs/P10-DIFFICULTY-PROGRESSION-PLAN.md)：P10-0 已建立 `game:difficulty-report` 與 3.1.0 難度基線（曲線不單調、規則未改），見 [P10-0 報告](docs/phase-reports/P10-0.md)；P10-1 已建立幕次引擎與離線可解性 solver（`game:solve`），見 [P10-1 報告](docs/phase-reports/P10-1.md)；P10-2 已把第 1、2 關改成三幕並升 `rules_version 4.0.0`（第 2 關比第 1 關高 ≥ 0.05，失誤恢復率仍未達目標），見 [P10-2 報告](docs/phase-reports/P10-2.md)；P10-3 已把第 3 關改成三幕並升至 `5.0.0`，主線 full 難度依序上升；完整矩陣 forecast-aware 70.3% 超出 68% 上限，仍待平衡驗收，見 [P10-3 報告](docs/phase-reports/P10-3.md)。第 4、5 關待後續工作包。
 - [技術規格](docs/TECHNICAL-SPEC.md)：版本、Boost 非互動全選、SQLite、資料來源及 Hostinger 部署。
 - [資料契約](docs/DATA-CONTRACT.md)：三個部會來源的正規化快照欄位、單位、品質門檻、失敗分類與備援。
 - [平衡鎖版](docs/BALANCE.md)：`rules_version`、技能表、傷害公式、情境修正換算與策略矩陣驗收。
@@ -37,7 +37,7 @@
 
 ## Phase 3 已完成的戰鬥引擎
 
-- 規則只有一份，位於 `app/Domain/Game/`；`rules_version` 現為 `4.0.0`（P10-2：第 1、2 關三幕化），數值與公式以[平衡鎖版](docs/BALANCE.md)為準。1.0.0、2.0.0、3.0.0 與 3.1.0 的舊局只能讀取與重播。
+- 規則只有一份，位於 `app/Domain/Game/`；`rules_version` 現為 `5.0.0`（P10-3：第 3 關三幕化），數值與公式以[平衡鎖版](docs/BALANCE.md)為準。1.0.0、2.0.0、3.0.0、3.1.0 與 4.0.0 的舊局只能讀取與重播。
 - **完全沒有亂數**：城市行為由關卡預告表決定，相同輸入必得相同事件與結局，重播不需保存亂數狀態。
 - 六個 `/api/v1` JSON 介面掛在 `web` middleware group，仍受工作階段與 CSRF 保護；匿名存檔綁 HttpOnly session。
 - 同一個 `action_id` 重送回放原結果不重新結算；版本過期回 409，規則不合法回 422 且不消耗回合或惡意。
