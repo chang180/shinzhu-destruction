@@ -16,6 +16,48 @@ use Tests\TestCase;
 
 class DifficultyReportTest extends TestCase
 {
+    public function test_missing_ultimate_timing_stays_null_in_json_and_blank_in_csv(): void
+    {
+        $json = $this->scratchPath('diagnostics.json');
+        $csv = $this->scratchPath('diagnostics.csv');
+
+        $this->artisan('game:difficulty-report', [
+            '--seeds' => 1, '--level' => ['empty-cup'], '--strategy' => ['random'],
+            '--json' => $json, '--csv' => $csv,
+        ])->assertSuccessful();
+        $report = json_decode((string) file_get_contents($json), true);
+        $diagnostics = $report['levels'][0]['strategies']['random']['mechanic_diagnostics'];
+        $handle = fopen($csv, 'r');
+        $headers = fgetcsv($handle, escape: '');
+        $row = array_combine($headers, fgetcsv($handle, escape: ''));
+        fclose($handle);
+
+        $this->assertSame(9, $diagnostics['games']);
+        $this->assertSame(0, $diagnostics['ultimate_games']);
+        $this->assertNull($diagnostics['avg_first_ultimate_turn']);
+        $this->assertNull($diagnostics['avg_winning_first_ultimate_turn']);
+        $this->assertSame(9, $diagnostics['terminal_games']);
+        $this->assertSame('', $row['diagnostic_avg_first_ultimate_turn']);
+        $this->assertSame('0', $row['diagnostic_ultimate_games']);
+        unlink($json);
+        unlink($csv);
+    }
+
+    public function test_diagnostics_pool_counts_and_sums_instead_of_averaging_empty_ultimate_cells(): void
+    {
+        $report = app(DifficultyReport::class)->build('quick', 20, 1, ['meter-feast'], ['planner']);
+        $cells = $report['cells'];
+        $diagnostics = $report['levels'][0]['strategies']['planner']['mechanic_diagnostics'];
+
+        $this->assertGreaterThan(0, $diagnostics['ultimate_games']);
+        foreach (DifficultyReport::DIAGNOSTIC_TOTALS as $key) {
+            $this->assertSame(array_sum(array_map(static fn (array $cell): int => $cell['mechanic_diagnostics'][$key], $cells)), $diagnostics[$key], $key);
+        }
+        $this->assertSame(round($diagnostics['first_ultimate_turn_sum'] / $diagnostics['ultimate_games'], 4), $diagnostics['avg_first_ultimate_turn']);
+        $this->assertSame(round($diagnostics['terminal_malice_wins_sum'] / $diagnostics['terminal_wins'], 4), $diagnostics['avg_terminal_malice_wins']);
+        $this->assertSame(round($diagnostics['terminal_malice_losses_sum'] / $diagnostics['terminal_losses'], 4), $diagnostics['avg_terminal_malice_losses']);
+    }
+
     private function scratchPath(string $name): string
     {
         return sys_get_temp_dir().'/p10-'.getmypid().'-'.$name;

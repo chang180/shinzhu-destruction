@@ -218,6 +218,7 @@ class DifficultyReportCommand extends Command
             $this->ensureDirectory($csv);
             $handle = fopen($csv, 'w');
             $metricKeys = array_keys($result['cells'][0]['avg_metrics'] ?? []);
+            $diagnosticKeys = array_keys($result['cells'][0]['mechanic_diagnostics'] ?? []);
             $recoveryKeys = [
                 'planner_baseline_wins', 'mistakes_injected', 'eligible_mistake_games', 'recoveries_after_mistake',
                 'no_eligible_mistake_games', 'missed_interrupt_mistakes', 'walked_into_shield_mistakes',
@@ -235,6 +236,7 @@ class DifficultyReportCommand extends Command
                 'level', 'sequence', 'deck', 'scenario', 'strategy', 'games', 'wins', 'win_rate',
                 'avg_end_turn', 'avg_winning_turn_budget_used', 'avg_core_remaining_on_loss', 'illegal_choices',
                 'avg_phase_changes', ...$metricKeys, ...$recoveryKeys, 'avg_level_phase_changes', ...$phaseKeys,
+                ...array_map(static fn (string $key): string => 'diagnostic_'.$key, $diagnosticKeys),
             ], escape: '');
 
             foreach ($result['cells'] as $cell) {
@@ -251,6 +253,7 @@ class DifficultyReportCommand extends Command
 
                         return $phase === null ? ['', '', ''] : [$phase['id'], (string) $phase['reach_rate'], (string) ($phase['avg_entry_turn'] ?? '')];
                     }, range(0, DifficultyReport::CSV_LEVEL_PHASES - 1))),
+                    ...array_map(static fn (string $key): string => (string) ($cell['mechanic_diagnostics'][$key] ?? ''), $diagnosticKeys),
                 ], escape: '');
             }
 

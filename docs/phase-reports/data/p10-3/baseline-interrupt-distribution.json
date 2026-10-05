@@ -1,0 +1,314 @@
+{
+    "rules_version": "5.0.0",
+    "suite": "full",
+    "seeds_per_cell": 300,
+    "strategy": "forecast-aware",
+    "decks": {
+        "tide-siege": {
+            "1": {
+                "opportunities": 8100,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.land": 1971,
+                    "breach.water": 2565,
+                    "breach.land": 1809,
+                    "breach.heat": 1755
+                }
+            },
+            "2": {
+                "opportunities": 8100,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "breach.water": 1350,
+                    "probe.heat": 3321,
+                    "probe.water": 999,
+                    "probe.land": 1728,
+                    "breach.heat": 567,
+                    "gather": 135
+                }
+            },
+            "3": {
+                "opportunities": 8100,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "breach.land": 3888,
+                    "breach.heat": 1512,
+                    "probe.land": 1242,
+                    "probe.heat": 1431,
+                    "gather": 27
+                }
+            },
+            "4": {
+                "opportunities": 8100,
+                "interrupts": 2538,
+                "heat_interrupts": 2538,
+                "actions": {
+                    "probe.land": 1998,
+                    "disrupt.heat": 2538,
+                    "probe.heat": 2565,
+                    "breach.heat": 324,
+                    "breach.land": 432,
+                    "gather": 243
+                }
+            },
+            "5": {
+                "opportunities": 8100,
+                "interrupts": 2430,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.heat": 1134,
+                    "probe.water": 1350,
+                    "disrupt.land": 2430,
+                    "probe.land": 1539,
+                    "breach.water": 918,
+                    "breach.heat": 270,
+                    "breach.land": 459
+                }
+            },
+            "6": {
+                "opportunities": 8100,
+                "interrupts": 2295,
+                "heat_interrupts": 0,
+                "actions": {
+                    "disrupt.land": 2295,
+                    "probe.heat": 1701,
+                    "probe.water": 1053,
+                    "breach.heat": 1134,
+                    "breach.water": 1836,
+                    "probe.land": 81
+                }
+            },
+            "7": {
+                "opportunities": 8052,
+                "interrupts": 1566,
+                "heat_interrupts": 1566,
+                "actions": {
+                    "disrupt.heat": 1566,
+                    "probe.water": 1209,
+                    "breach.heat": 1026,
+                    "probe.heat": 1908,
+                    "breach.water": 1350,
+                    "probe.land": 432,
+                    "breach.land": 378,
+                    "gather": 183
+                }
+            },
+            "8": {
+                "opportunities": 7983,
+                "interrupts": 2436,
+                "heat_interrupts": 0,
+                "actions": {
+                    "breach.land": 918,
+                    "probe.land": 2340,
+                    "breach.water": 864,
+                    "probe.water": 1161,
+                    "disrupt.water": 2436,
+                    "gather": 237,
+                    "ultimate": 27
+                }
+            },
+            "9": {
+                "opportunities": 6186,
+                "interrupts": 1893,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.land": 1941,
+                    "disrupt.water": 1893,
+                    "breach.water": 450,
+                    "probe.heat": 474,
+                    "probe.water": 789,
+                    "breach.land": 345,
+                    "gather": 159,
+                    "breach.heat": 108,
+                    "ultimate": 27
+                }
+            },
+            "10": {
+                "opportunities": 4812,
+                "interrupts": 870,
+                "heat_interrupts": 870,
+                "actions": {
+                    "probe.water": 294,
+                    "ultimate": 996,
+                    "probe.land": 831,
+                    "breach.land": 240,
+                    "breach.heat": 480,
+                    "probe.heat": 690,
+                    "disrupt.heat": 870,
+                    "breach.water": 411
+                }
+            },
+            "11": {
+                "opportunities": 3471,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "breach.heat": 264,
+                    "probe.heat": 450,
+                    "probe.land": 615,
+                    "probe.water": 537,
+                    "ultimate": 264,
+                    "breach.water": 801,
+                    "breach.land": 540
+                }
+            }
+        },
+        "smoke-screen": {
+            "1": {
+                "opportunities": 8100,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "breach.water": 1323,
+                    "probe.land": 3186,
+                    "breach.land": 1782,
+                    "breach.heat": 1809
+                }
+            },
+            "2": {
+                "opportunities": 8100,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.land": 1458,
+                    "breach.heat": 1566,
+                    "breach.water": 1188,
+                    "probe.water": 2592,
+                    "probe.heat": 1134,
+                    "breach.land": 27,
+                    "gather": 135
+                }
+            },
+            "3": {
+                "opportunities": 8100,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.heat": 675,
+                    "breach.land": 4833,
+                    "breach.heat": 1863,
+                    "probe.land": 594,
+                    "gather": 135
+                }
+            },
+            "4": {
+                "opportunities": 8100,
+                "interrupts": 4455,
+                "heat_interrupts": 4455,
+                "actions": {
+                    "probe.heat": 1620,
+                    "probe.land": 1539,
+                    "disrupt.heat": 4455,
+                    "breach.heat": 297,
+                    "breach.land": 108,
+                    "gather": 81
+                }
+            },
+            "5": {
+                "opportunities": 8100,
+                "interrupts": 2700,
+                "heat_interrupts": 0,
+                "actions": {
+                    "breach.water": 594,
+                    "probe.water": 1215,
+                    "probe.land": 2430,
+                    "disrupt.land": 2700,
+                    "probe.heat": 810,
+                    "breach.land": 297,
+                    "breach.heat": 54
+                }
+            },
+            "6": {
+                "opportunities": 8100,
+                "interrupts": 2160,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.heat": 1971,
+                    "breach.water": 837,
+                    "disrupt.land": 2160,
+                    "probe.water": 2133,
+                    "breach.heat": 810,
+                    "probe.land": 54,
+                    "gather": 135
+                }
+            },
+            "7": {
+                "opportunities": 8019,
+                "interrupts": 1836,
+                "heat_interrupts": 1836,
+                "actions": {
+                    "disrupt.heat": 1836,
+                    "breach.water": 675,
+                    "probe.heat": 1587,
+                    "probe.water": 1524,
+                    "gather": 156,
+                    "breach.heat": 1026,
+                    "probe.land": 729,
+                    "breach.land": 486
+                }
+            },
+            "8": {
+                "opportunities": 7977,
+                "interrupts": 2157,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.water": 1365,
+                    "disrupt.water": 2157,
+                    "breach.land": 1107,
+                    "gather": 54,
+                    "breach.water": 1155,
+                    "probe.land": 2004,
+                    "ultimate": 135
+                }
+            },
+            "9": {
+                "opportunities": 5409,
+                "interrupts": 1389,
+                "heat_interrupts": 0,
+                "actions": {
+                    "breach.heat": 216,
+                    "probe.land": 1575,
+                    "disrupt.water": 1389,
+                    "probe.water": 426,
+                    "ultimate": 54,
+                    "breach.land": 672,
+                    "breach.water": 705,
+                    "probe.heat": 372
+                }
+            },
+            "10": {
+                "opportunities": 4182,
+                "interrupts": 1083,
+                "heat_interrupts": 1083,
+                "actions": {
+                    "breach.land": 252,
+                    "disrupt.heat": 1083,
+                    "breach.water": 387,
+                    "probe.land": 636,
+                    "ultimate": 693,
+                    "probe.heat": 339,
+                    "breach.heat": 555,
+                    "probe.water": 219,
+                    "gather": 18
+                }
+            },
+            "11": {
+                "opportunities": 3057,
+                "interrupts": 0,
+                "heat_interrupts": 0,
+                "actions": {
+                    "probe.land": 834,
+                    "breach.water": 405,
+                    "breach.land": 417,
+                    "probe.heat": 354,
+                    "probe.water": 558,
+                    "breach.heat": 357,
+                    "ultimate": 132
+                }
+            }
+        }
+    }
+}

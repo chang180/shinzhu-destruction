@@ -73,6 +73,15 @@ class DifficultyReport
      */
     public const CSV_LEVEL_PHASES = 3;
 
+    /** @var list<string> 可加總的實際局數／事件與回合總和；平均值一律由這些分母重算。 */
+    public const DIAGNOSTIC_TOTALS = [
+        'games', 'ultimate_uses', 'ultimate_games', 'first_ultimate_turn_sum',
+        'winning_ultimate_games', 'winning_first_ultimate_turn_sum',
+        'terminal_games', 'terminal_malice_sum', 'terminal_wins', 'terminal_malice_wins_sum',
+        'terminal_losses', 'terminal_malice_losses_sum', 'pulse_windows', 'pulse_refunds',
+        'repair_windows', 'repairs_interrupted',
+    ];
+
     /**
      * P10 §3.4 初始發布門檻（勝率區間，0～1）。P10-0 只對照、不調整關卡。
      *
@@ -296,6 +305,7 @@ class DifficultyReport
                 'weighting' => 'every (scenario, deck) cell of a level has equal weight',
                 'solver' => 'separate offline command game:solve (P10-1); planner results are not a solvability proof',
                 'level_phase_metrics' => self::LEVEL_PHASE_METRICS,
+                'mechanic_diagnostics' => 'P10-3 diagnostics only; excluded from difficulty_index. Counts/sums are pooled over games. Ultimate turns come from ultimate_consumed_all events; first-turn means include only games with an ultimate (winning mean only wins with one), never zero-filled. Terminal malice comes from finished engine states; unfinished games are excluded. Pulse/repair windows count accepted plays or timeouts facing that window, including lethal plays; refunds/interrupts are actual events.',
             ],
             'levels' => $levels,
             'progression' => $this->progression($levels),
@@ -506,6 +516,66 @@ class DifficultyReport
             'avg_level_phase_changes' => round(array_sum(array_map(static fn (SimulationResult $result): int => count($result->levelPhaseChanges), $results)) / max(1, $games), 3),
             'level_phases' => $this->levelPhaseReach($level, $results),
             'avg_metrics' => $metrics,
+            'mechanic_diagnostics' => $this->diagnostics($results),
+        ];
+    }
+
+    /**
+     * @param  list<SimulationResult>  $results
+     * @return array<string, int|float|null>
+     */
+    private function diagnostics(array $results): array
+    {
+        $totals = array_fill_keys(self::DIAGNOSTIC_TOTALS, 0);
+        $totals['games'] = count($results);
+
+        foreach ($results as $result) {
+            $totals['ultimate_uses'] += count($result->ultimateTurns);
+            $first = $result->ultimateTurns[0] ?? null;
+
+            if ($first !== null) {
+                $totals['ultimate_games']++;
+                $totals['first_ultimate_turn_sum'] += $first;
+                if ($result->won()) {
+                    $totals['winning_ultimate_games']++;
+                    $totals['winning_first_ultimate_turn_sum'] += $first;
+                }
+            }
+
+            if ($result->terminalMalice !== null) {
+                $totals['terminal_games']++;
+                $totals['terminal_malice_sum'] += $result->terminalMalice;
+                $group = $result->won() ? 'wins' : 'losses';
+                $totals['terminal_'.$group]++;
+                $totals['terminal_malice_'.$group.'_sum'] += $result->terminalMalice;
+            }
+
+            foreach (['pulse_windows', 'pulse_refunds', 'repair_windows', 'repairs_interrupted'] as $key) {
+                $totals[$key] += $result->metrics[$key] ?? 0;
+            }
+        }
+
+        return $this->diagnosticAverages($totals);
+    }
+
+    /**
+     * @param  array<string, int>  $totals
+     * @return array<string, int|float|null>
+     */
+    private function diagnosticAverages(array $totals): array
+    {
+        $average = static fn (string $sum, string $count): ?float => $totals[$count] === 0
+            ? null : round($totals[$sum] / $totals[$count], 4);
+
+        return $totals + [
+            'ultimate_use_rate' => $average('ultimate_games', 'games'),
+            'avg_first_ultimate_turn' => $average('first_ultimate_turn_sum', 'ultimate_games'),
+            'avg_winning_first_ultimate_turn' => $average('winning_first_ultimate_turn_sum', 'winning_ultimate_games'),
+            'avg_terminal_malice' => $average('terminal_malice_sum', 'terminal_games'),
+            'avg_terminal_malice_wins' => $average('terminal_malice_wins_sum', 'terminal_wins'),
+            'avg_terminal_malice_losses' => $average('terminal_malice_losses_sum', 'terminal_losses'),
+            'pulse_combo_use_rate' => $average('pulse_refunds', 'pulse_windows'),
+            'repair_interrupt_rate' => $average('repairs_interrupted', 'repair_windows'),
         ];
     }
 
@@ -565,6 +635,12 @@ class DifficultyReport
                 'min_cell' => ['win_rate' => $rates[$minIndex], 'scenario' => $mine[$minIndex]['scenario'], 'deck' => $mine[$minIndex]['deck']],
                 'max_cell' => ['win_rate' => $rates[$maxIndex], 'scenario' => $mine[$maxIndex]['scenario'], 'deck' => $mine[$maxIndex]['deck']],
                 'illegal_choices' => array_sum(array_column($mine, 'illegal_choices')),
+                'mechanic_diagnostics' => $this->diagnosticAverages(array_combine(
+                    self::DIAGNOSTIC_TOTALS,
+                    array_map(static fn (string $key): int => array_sum(array_map(
+                        static fn (array $cell): int => $cell['mechanic_diagnostics'][$key], $mine,
+                    )), self::DIAGNOSTIC_TOTALS),
+                )),
                 // 每格等權平均的幕次到達率，順序同設定。
                 'level_phase_reach' => array_map(
                     static fn (int $index): array => [

@@ -10,6 +10,25 @@ class LegacyRunCompatibilityTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_a_5_0_0_in_progress_save_remains_readable_but_rejects_all_new_calculations(): void
+    {
+        $id = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->assertCreated()->json('data.run_id');
+        $run = Run::query()->where('public_id', $id)->firstOrFail();
+        $run->forceFill(['rules_version' => '5.0.0'])->save();
+        $stored = $run->state;
+
+        $this->getJson("/api/v1/runs/{$id}")->assertOk()->assertJsonPath('data.compatible', false)->assertJsonPath('data.available_actions', []);
+        $this->postJson("/api/v1/runs/{$id}/actions", ['action_id' => 'old-5-action', 'expected_version' => $run->version, 'type' => 'reveal'])
+            ->assertConflict()->assertJsonPath('reason_code', 'rules_version_mismatch');
+        $this->postJson("/api/v1/runs/{$id}/retry")->assertConflict()->assertJsonPath('reason_code', 'rules_version_mismatch');
+        $this->postJson("/api/v1/runs/{$id}/counterfactual", ['sequence' => 1, 'type' => 'play', 'fixed' => 'gather'])
+            ->assertConflict()->assertJsonPath('reason_code', 'run_in_progress');
+
+        $this->assertSame($stored, $run->fresh()->state);
+        $this->assertDatabaseCount('runs', 1);
+        $this->assertDatabaseCount('run_actions', 0);
+    }
+
     public function test_a_v1_save_remains_readable_without_rewriting_its_state(): void
     {
         $run = $this->legacyRun();

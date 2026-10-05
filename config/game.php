@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'rules_version' => '5.0.0',
+    'rules_version' => '5.0.1',
 
     /*
     |--------------------------------------------------------------------------
@@ -516,7 +516,7 @@ return [
                     'objective' => '脈衝回合完成跨系連攜可返還惡意：把惡意當成要規劃的資源。',
                     'starts_when' => ['type' => 'turn_gte', 'value' => 4],
                     'intents' => [
-                        4 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
+                        4 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 14, 'interruptible' => true],
                         5 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 16, 'interruptible' => true],
                         6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
                     ],

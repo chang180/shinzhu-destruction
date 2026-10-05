@@ -83,6 +83,7 @@ class BattleSimulator
         $metrics = self::emptyMetrics();
         $phaseChanges = [];
         $levelPhaseChanges = [];
+        $ultimateTurns = [];
 
         if ($strategy instanceof InstrumentedStrategy) {
             $strategy->beginGame();
@@ -96,7 +97,7 @@ class BattleSimulator
                     $level,
                     $modifiers,
                 );
-                $this->measure($state, $result, $metrics, $phaseChanges, $levelPhaseChanges);
+                $this->measure($state, $result, $level, $metrics, $phaseChanges, $levelPhaseChanges, $ultimateTurns);
                 $state = $result->state;
 
                 continue;
@@ -137,7 +138,7 @@ class BattleSimulator
                 'skill_id' => $choice['skill_id'] ?? null,
                 'target' => $choice['target'] ?? null,
             ];
-            $this->measure($state, $result, $metrics, $phaseChanges, $levelPhaseChanges);
+            $this->measure($state, $result, $level, $metrics, $phaseChanges, $levelPhaseChanges, $ultimateTurns);
             $state = $result->state;
         }
 
@@ -161,6 +162,8 @@ class BattleSimulator
             phaseChanges: $phaseChanges,
             levelPhaseChanges: $levelPhaseChanges,
             strategyReport: $strategy instanceof InstrumentedStrategy ? $strategy->gameReport() : [],
+            ultimateTurns: $ultimateTurns,
+            terminalMalice: $state->outcome->isFinished() ? $state->malice : null,
         );
     }
 
@@ -189,6 +192,9 @@ class BattleSimulator
             'overhaul_stopped' => 0,
             'overhaul_completed' => 0,
             'missed_actions' => 0,
+            'ultimate_uses' => 0,
+            'pulse_windows' => 0,
+            'repair_windows' => 0,
         ];
     }
 
@@ -203,10 +209,18 @@ class BattleSimulator
      *                                       重整啟動不會被算成進入下一幕。
      * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges
      * @param  list<array{turn: int, from: string|null, to: string, reason_code: string}>  $levelPhaseChanges
+     * @param  list<int>  $ultimateTurns
      */
-    private function measure(BattleState $before, TurnResult $result, array &$metrics, array &$phaseChanges, array &$levelPhaseChanges): void
+    private function measure(BattleState $before, TurnResult $result, LevelDefinition $level, array &$metrics, array &$phaseChanges, array &$levelPhaseChanges, array &$ultimateTurns): void
     {
         foreach ($result->events as $event) {
+            if ($event->type === 'sigil_spent' && $event->reasonCode === 'ultimate_consumed_all') {
+                $ultimateTurns[] = $before->turn;
+            }
+            if ($event->type === 'action_accepted' || $event->type === 'action_missed') {
+                $metrics['repair_windows'] += $before->intent?->type === 'repair' ? 1 : 0;
+                $metrics['pulse_windows'] += $level->apostlePower === 'pulse_combo_refund' && $level->isPulseTurn($before->turn) ? 1 : 0;
+            }
             if ($event->type === 'level_phase_change') {
                 $levelPhaseChanges[] = [
                     'turn' => $before->turn,
@@ -247,6 +261,9 @@ class BattleSimulator
     private function count(BattleEvent $event, array &$metrics, bool &$pendingBreach): void
     {
         switch ($event->type) {
+            case 'sigil_spent':
+                $metrics['ultimate_uses'] += $event->reasonCode === 'ultimate_consumed_all' ? 1 : 0;
+                break;
             case 'city_repair':
                 $metrics['city_repairs']++;
                 $metrics['city_repair_amount'] += (int) ($event->delta['core_resilience'] ?? 0);

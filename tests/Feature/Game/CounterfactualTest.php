@@ -12,6 +12,7 @@ use App\Models\Run;
 use App\Models\RunAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Random\Randomizer;
 use Tests\TestCase;
 
@@ -226,11 +227,17 @@ class CounterfactualTest extends TestCase
         $this->assertSame('player_victory', $run->outcome->value);
     }
 
-    public function test_a_run_finished_under_older_rules_replays_unchanged_but_cannot_be_compared_or_retried(): void
+    public static function olderRules(): array
+    {
+        return [['3.1.0'], ['5.0.0']];
+    }
+
+    #[DataProvider('olderRules')]
+    public function test_a_run_finished_under_older_rules_replays_unchanged_but_cannot_be_compared_or_retried(string $version): void
     {
         $runId = $this->winRun();
         $replay = $this->getJson(route('api.v1.runs.replay', ['run' => $runId]))->assertOk()->json();
-        Run::query()->where('public_id', $runId)->firstOrFail()->forceFill(['rules_version' => '3.1.0'])->save();
+        Run::query()->where('public_id', $runId)->firstOrFail()->forceFill(['rules_version' => $version])->save();
 
         // 續局只能用現行規則，替 3.1.0 的局算「如果」會得到錯的答案，所以直接拒絕。
         $this->counterfactual($runId, ['sequence' => $this->firstPlaySequence($runId), 'type' => 'play', 'fixed' => 'gather'])
@@ -242,7 +249,7 @@ class CounterfactualTest extends TestCase
 
         $old = $this->getJson(route('api.v1.runs.replay', ['run' => $runId]))
             ->assertOk()
-            ->assertJsonPath('rules_version', '3.1.0')
+            ->assertJsonPath('rules_version', $version)
             ->json();
         $this->assertSame(array_diff_key($replay, ['rules_version' => 1]), array_diff_key($old, ['rules_version' => 1]));
         $this->getJson(route('api.v1.runs.show', ['run' => $runId]))->assertJsonPath('data.compatible', false);

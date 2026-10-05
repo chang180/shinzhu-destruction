@@ -62,3 +62,9 @@ Since P10-2 rules_version is 4.0.0: empty-cup and noon-fold have three level_pha
 
 ## P10 strategy acceptance replaces the historical P05 floor
 Since P10-3, the P05 per-scenario 70% floor is superseded by DifficultyReport::PLANNER_CELL_FLOOR = 0.55 (P10 plan §3.4). StrategyMatrixTest applies it to planner and the second clearing strategy; weighted planner/forecast-aware/recovery bands, weak-strategy checks and adjacent difficulty deltas still require quick/full difficulty reports. Do not treat the cell floor alone as balance acceptance. rules_version 5.0.0 adds meter-feast turn-only acts at turns 1/4/7; versions through 4.0.0 remain read/replay only.
+
+## P10-3 repair 5.0.1: resource diagnostics and unchanged gates
+
+rules_version 5.0.1 changes only meter-feast turn 4 to interruptible water repair 14 (was heat repair 18). Versions through 5.0.0 are read/replay only; action, retry and finished-run counterfactual must reject version mismatch. An in-progress counterfactual still rejects run_in_progress first.
+
+Simulation ultimate timing comes only from real sigil_spent events with reason ultimate_consumed_all, using the pre-action turn. No ultimate means an empty turn list and null average, never turn zero. Terminal malice comes only from finished engine state. JSON/CSV pool raw counts/sums before averaging: ultimate use rate divides by all games; first timing by ultimate games; winning timing by winning ultimate games; terminal malice by terminal games (and separately terminal wins/losses). Pulse windows count settled player actions on advertised pulse turns; repair windows count settled actions facing a repair intent, including lethal actions/timeouts. Pulse refunds and repair interruptions use actual events. Empty denominators remain null. Diagnostics do not change p10-di-3 weights, gates, strategies or mistake semantics. See docs/phase-reports/P10-3.md §8 for full evidence, scan history and deck disparity limitation.

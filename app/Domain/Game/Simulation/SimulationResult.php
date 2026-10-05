@@ -12,6 +12,7 @@ final readonly class SimulationResult
      * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges  機制狀態變化（第 5 關重整 standby／overhaul），不是幕次
      * @param  list<array{turn: int, from: string|null, to: string, reason_code: string}>  $levelPhaseChanges  關卡幕次變化（P10-1）
      * @param  array<string, mixed>  $strategyReport  InstrumentedStrategy 的逐局紀錄（例如失誤注入）
+     * @param  list<int>  $ultimateTurns  實際終招結算事件所在回合；未使用為空陣列
      */
     public function __construct(
         public string $levelId,
@@ -29,6 +30,8 @@ final readonly class SimulationResult
         public array $phaseChanges = [],
         public array $strategyReport = [],
         public array $levelPhaseChanges = [],
+        public array $ultimateTurns = [],
+        public ?int $terminalMalice = null,
     ) {}
 
     public function won(): bool

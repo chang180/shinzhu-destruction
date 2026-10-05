@@ -1,6 +1,16 @@
 # AI 派工與階段交接規範
 
-## 2026-10-05 P10-3 收尾交接
+## 2026-10-05 P10-3 補修交接
+
+基準 `7a056a3`；本輪單一修補提交 `fix(game): close P10-3 balance gap and complete resource metrics` 推送 main，未部署。規則升 **5.0.1**，只改第 3 關第 4 回合為可打斷水修復 14；原 5.0.0／70.30% 未達歷史保留於 [P10-3 報告](phase-reports/P10-3.md) §1～§7，新結果見 §8。
+
+full 27 情境 × 兩種實際獎勵牌組 × 300 seeds：planner **84.85%**（最低格 **65%**）、forecast-aware **64.65%**、配對失誤恢復 **44.53%**（覆蓋率 **99.83%**）、difficulty_index **0.3967**、L2→L3 **+0.0886**，全部原定 gate 通過。quick 同樣通過；**P10-3 待驗收（本補修包自動驗收條件已具備）**。兩牌組 forecast-aware 為潮汐 68.59%、煙囪 60.70%，煙囪優勢反轉，絕對差距沒有縮小；目標是既定逐關合併加權。恢復率分母 13,722，原 planner 勝局 13,746，24 局沒有合資格失誤；不能寫覆蓋率 100%。
+
+新增真實引擎事件／終局狀態診斷：終招使用率、首次／勝局首次終招回合、全部／勝敗終局惡意，以及脈衝使用／修復打斷率。JSON／CSV 保留計數、總和及分母，無終招回合為 null；DI 仍 p10-di-3，策略、失誤語意與 gate 不變。5.0.0 舊局可讀、事件可重播，不能續打、重試或反事實；未結束反事實優先回 run_in_progress。
+
+後端 **266 passed**、代表 solver **120／120 可解且重播**；ThreeActLevelsTest、DifficultyReportTest、LegacyRunCompatibilityTest、CounterfactualTest、Pint、typecheck、50 項 probe 測試、build 與 diff 檢查皆實跑通過。README、BALANCE、計畫、進度、規則與階段報告已同步；Boost MCP search-docs／record-rule 回 Transport closed，依本包明示要求直接更新 .ai/rules/game.md，未改 vendor。其他四關、Vue、路由與 Pages 四檔未改。第 1 關既有缺口、P10-7 全量 solver、真人／手機／本輪瀏覽器與部署仍未做。**本包結束即停止，不開始 P10-4、不部署。**
+
+## 2026-10-05 P10-3 原收尾交接（5.0.0 歷史）
 
 實作 commit `b69d67d` 已交付第 3 關三幕（`ledger-prep`／`demand-pulse`／`peak-settlement`，回合門檻 1／4／7），11 回合、防線 37／37／35、modifier_cap 0.06，規則升 **5.0.0**。Codex 接手後補完 27 情境 × 兩種第 2 關獎勵 × 300 seeds 的完整矩陣、120 局 solver、兩牌組各一勝一敗事件樣本與第 3 關實際預告／幕切換回歸。根 README、BALANCE、進度與 P10 計畫已同步，完整資料見 [P10-3 報告](phase-reports/P10-3.md)。交付已推送 `main`，未部署。
 
