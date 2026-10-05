@@ -1,0 +1,836 @@
+{
+  "meta": {
+    "rules_version": "3.1.0",
+    "suite": "full",
+    "seeds_per_cell": 300,
+    "start_seed": 1,
+    "scenario_legend": "w/h/l = water/heat/land; - = -modifier_limit, 0 = neutral, + = +modifier_limit",
+    "modifier_limit": 0.15,
+    "scenarios": [
+      "w-h-l-",
+      "w-h-l0",
+      "w-h-l+",
+      "w-h0l-",
+      "w-h0l0",
+      "w-h0l+",
+      "w-h+l-",
+      "w-h+l0",
+      "w-h+l+",
+      "w0h-l-",
+      "w0h-l0",
+      "w0h-l+",
+      "w0h0l-",
+      "w0h0l0",
+      "w0h0l+",
+      "w0h+l-",
+      "w0h+l0",
+      "w0h+l+",
+      "w+h-l-",
+      "w+h-l0",
+      "w+h-l+",
+      "w+h0l-",
+      "w+h0l0",
+      "w+h0l+",
+      "w+h+l-",
+      "w+h+l0",
+      "w+h+l+"
+    ],
+    "index_version": "p10-di-1",
+    "index_formula": "0.35*(1-planner) + 0.25*(1-forecast_aware) + 0.25*(1-one_mistake) + 0.15*planner_winning_turn_budget",
+    "weighting": "every (scenario, deck) cell of a level has equal weight",
+    "solver": "not implemented in P10-0; planner results are not a solvability proof"
+  },
+  "levels": [
+    {
+      "level": "empty-cup",
+      "sequence": 1,
+      "decks": [
+        "starter"
+      ],
+      "strategies": {
+        "random": {
+          "cells": 27,
+          "weighted_win_rate": 0.0267,
+          "min_cell": {
+            "win_rate": 0.0067,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.05,
+            "scenario": "w+h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "single-water": {
+          "cells": 27,
+          "weighted_win_rate": 0.0,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "legacy-cycle": {
+          "cells": 27,
+          "weighted_win_rate": 0.6133,
+          "min_cell": {
+            "win_rate": 0.15,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.8933,
+            "scenario": "w+h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "greedy": {
+          "cells": 27,
+          "weighted_win_rate": 0.9933,
+          "min_cell": {
+            "win_rate": 0.98,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w0h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "planner": {
+          "cells": 27,
+          "weighted_win_rate": 0.9956,
+          "min_cell": {
+            "win_rate": 0.9867,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w0h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "forecast-aware": {
+          "cells": 27,
+          "weighted_win_rate": 0.9867,
+          "min_cell": {
+            "win_rate": 0.9633,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w+h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "planner-one-mistake": {
+          "cells": 27,
+          "weighted_win_rate": 0.9956,
+          "min_cell": {
+            "win_rate": 0.99,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w+h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        }
+      },
+      "difficulty": {
+        "planner_win_rate": 0.9956,
+        "forecast_aware_win_rate": 0.9867,
+        "one_mistake_recovery_rate": 0.9956,
+        "planner_winning_turn_budget_used": 0.8378,
+        "difficulty_index": 0.1316
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.95,
+              1.0
+            ],
+            "actual": 0.9956,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.8,
+              0.95
+            ],
+            "actual": 0.9867,
+            "within": false
+          },
+          "planner-one-mistake": {
+            "target": [
+              0.75,
+              0.9
+            ],
+            "actual": 0.9956,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      }
+    },
+    {
+      "level": "noon-fold",
+      "sequence": 2,
+      "decks": [
+        "starter"
+      ],
+      "strategies": {
+        "random": {
+          "cells": 27,
+          "weighted_win_rate": 0.0022,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.0067,
+            "scenario": "w-h+l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "single-water": {
+          "cells": 27,
+          "weighted_win_rate": 0.0,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "legacy-cycle": {
+          "cells": 27,
+          "weighted_win_rate": 0.0,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "greedy": {
+          "cells": 27,
+          "weighted_win_rate": 0.9233,
+          "min_cell": {
+            "win_rate": 0.83,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.9867,
+            "scenario": "w-h+l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "planner": {
+          "cells": 27,
+          "weighted_win_rate": 0.9378,
+          "min_cell": {
+            "win_rate": 0.9067,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.9633,
+            "scenario": "w-h+l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "forecast-aware": {
+          "cells": 27,
+          "weighted_win_rate": 0.7744,
+          "min_cell": {
+            "win_rate": 0.6733,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.8567,
+            "scenario": "w-h+l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        },
+        "planner-one-mistake": {
+          "cells": 27,
+          "weighted_win_rate": 0.9311,
+          "min_cell": {
+            "win_rate": 0.87,
+            "scenario": "w-h-l-",
+            "deck": "starter"
+          },
+          "max_cell": {
+            "win_rate": 0.9767,
+            "scenario": "w-h+l-",
+            "deck": "starter"
+          },
+          "illegal_choices": 0
+        }
+      },
+      "difficulty": {
+        "planner_win_rate": 0.9378,
+        "forecast_aware_win_rate": 0.7744,
+        "one_mistake_recovery_rate": 0.9311,
+        "planner_winning_turn_budget_used": 0.836,
+        "difficulty_index": 0.2208
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.88,
+              0.95
+            ],
+            "actual": 0.9378,
+            "within": true
+          },
+          "forecast-aware": {
+            "target": [
+              0.65,
+              0.82
+            ],
+            "actual": 0.7744,
+            "within": true
+          },
+          "planner-one-mistake": {
+            "target": [
+              0.6,
+              0.75
+            ],
+            "actual": 0.9311,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      }
+    },
+    {
+      "level": "meter-feast",
+      "sequence": 3,
+      "decks": [
+        "tide-siege",
+        "smoke-screen"
+      ],
+      "strategies": {
+        "random": {
+          "cells": 54,
+          "weighted_win_rate": 0.0393,
+          "min_cell": {
+            "win_rate": 0.0033,
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen"
+          },
+          "max_cell": {
+            "win_rate": 0.1133,
+            "scenario": "w+h+l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "single-water": {
+          "cells": 54,
+          "weighted_win_rate": 0.0,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "legacy-cycle": {
+          "cells": 54,
+          "weighted_win_rate": 0.1045,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 0.43,
+            "scenario": "w+h+l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "greedy": {
+          "cells": 54,
+          "weighted_win_rate": 0.9733,
+          "min_cell": {
+            "win_rate": 0.8433,
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w-h+l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "planner": {
+          "cells": 54,
+          "weighted_win_rate": 0.9843,
+          "min_cell": {
+            "win_rate": 0.9133,
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w0h+l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "forecast-aware": {
+          "cells": 54,
+          "weighted_win_rate": 0.902,
+          "min_cell": {
+            "win_rate": 0.57,
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w0h+l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "planner-one-mistake": {
+          "cells": 54,
+          "weighted_win_rate": 0.9789,
+          "min_cell": {
+            "win_rate": 0.8933,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w+h0l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        }
+      },
+      "difficulty": {
+        "planner_win_rate": 0.9843,
+        "forecast_aware_win_rate": 0.902,
+        "one_mistake_recovery_rate": 0.9789,
+        "planner_winning_turn_budget_used": 0.713,
+        "difficulty_index": 0.1422
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.8,
+              0.9
+            ],
+            "actual": 0.9843,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.45,
+              0.68
+            ],
+            "actual": 0.902,
+            "within": false
+          },
+          "planner-one-mistake": {
+            "target": [
+              0.42,
+              0.6
+            ],
+            "actual": 0.9789,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      }
+    },
+    {
+      "level": "mirror-shade",
+      "sequence": 4,
+      "decks": [
+        "tide-siege",
+        "smoke-screen"
+      ],
+      "strategies": {
+        "random": {
+          "cells": 54,
+          "weighted_win_rate": 0.008,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 0.03,
+            "scenario": "w-h+l+",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "single-water": {
+          "cells": 54,
+          "weighted_win_rate": 0.0,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "legacy-cycle": {
+          "cells": 54,
+          "weighted_win_rate": 0.0,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "greedy": {
+          "cells": 54,
+          "weighted_win_rate": 0.9411,
+          "min_cell": {
+            "win_rate": 0.7567,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w-h+l+",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "planner": {
+          "cells": 54,
+          "weighted_win_rate": 0.9668,
+          "min_cell": {
+            "win_rate": 0.83,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w-h0l+",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "forecast-aware": {
+          "cells": 54,
+          "weighted_win_rate": 0.7418,
+          "min_cell": {
+            "win_rate": 0.45,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 0.9767,
+            "scenario": "w-h+l+",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        },
+        "planner-one-mistake": {
+          "cells": 54,
+          "weighted_win_rate": 0.947,
+          "min_cell": {
+            "win_rate": 0.7567,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w-h+l+",
+            "deck": "tide-siege"
+          },
+          "illegal_choices": 0
+        }
+      },
+      "difficulty": {
+        "planner_win_rate": 0.9668,
+        "forecast_aware_win_rate": 0.7418,
+        "one_mistake_recovery_rate": 0.947,
+        "planner_winning_turn_budget_used": 0.8253,
+        "difficulty_index": 0.2132
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.7,
+              0.82
+            ],
+            "actual": 0.9668,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.25,
+              0.52
+            ],
+            "actual": 0.7418,
+            "within": false
+          },
+          "planner-one-mistake": {
+            "target": [
+              0.25,
+              0.45
+            ],
+            "actual": 0.947,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      }
+    },
+    {
+      "level": "stored-night",
+      "sequence": 5,
+      "decks": [
+        "tide-siege+hollow-ground",
+        "tide-siege+sluice-jam",
+        "smoke-screen+hollow-ground",
+        "smoke-screen+sluice-jam"
+      ],
+      "strategies": {
+        "random": {
+          "cells": 108,
+          "weighted_win_rate": 0.0581,
+          "min_cell": {
+            "win_rate": 0.0133,
+            "scenario": "w-h0l-",
+            "deck": "smoke-screen+sluice-jam"
+          },
+          "max_cell": {
+            "win_rate": 0.16,
+            "scenario": "w+h+l+",
+            "deck": "tide-siege+hollow-ground"
+          },
+          "illegal_choices": 0
+        },
+        "single-water": {
+          "cells": 108,
+          "weighted_win_rate": 0.0,
+          "min_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege+hollow-ground"
+          },
+          "max_cell": {
+            "win_rate": 0.0,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege+hollow-ground"
+          },
+          "illegal_choices": 0
+        },
+        "legacy-cycle": {
+          "cells": 108,
+          "weighted_win_rate": 0.1028,
+          "min_cell": {
+            "win_rate": 0.0067,
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen+sluice-jam"
+          },
+          "max_cell": {
+            "win_rate": 0.4367,
+            "scenario": "w+h+l+",
+            "deck": "tide-siege+sluice-jam"
+          },
+          "illegal_choices": 0
+        },
+        "greedy": {
+          "cells": 108,
+          "weighted_win_rate": 0.9288,
+          "min_cell": {
+            "win_rate": 0.6233,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege+hollow-ground"
+          },
+          "max_cell": {
+            "win_rate": 0.9967,
+            "scenario": "w+h+l+",
+            "deck": "tide-siege+sluice-jam"
+          },
+          "illegal_choices": 0
+        },
+        "planner": {
+          "cells": 108,
+          "weighted_win_rate": 0.9511,
+          "min_cell": {
+            "win_rate": 0.7233,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege+hollow-ground"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w+h-l+",
+            "deck": "smoke-screen+sluice-jam"
+          },
+          "illegal_choices": 0
+        },
+        "forecast-aware": {
+          "cells": 108,
+          "weighted_win_rate": 0.804,
+          "min_cell": {
+            "win_rate": 0.52,
+            "scenario": "w-h-l-",
+            "deck": "smoke-screen+hollow-ground"
+          },
+          "max_cell": {
+            "win_rate": 0.9667,
+            "scenario": "w+h+l+",
+            "deck": "tide-siege+hollow-ground"
+          },
+          "illegal_choices": 0
+        },
+        "planner-one-mistake": {
+          "cells": 108,
+          "weighted_win_rate": 0.9319,
+          "min_cell": {
+            "win_rate": 0.6533,
+            "scenario": "w-h-l-",
+            "deck": "tide-siege+hollow-ground"
+          },
+          "max_cell": {
+            "win_rate": 1.0,
+            "scenario": "w+h+l+",
+            "deck": "smoke-screen+sluice-jam"
+          },
+          "illegal_choices": 0
+        }
+      },
+      "difficulty": {
+        "planner_win_rate": 0.9511,
+        "forecast_aware_win_rate": 0.804,
+        "one_mistake_recovery_rate": 0.9319,
+        "planner_winning_turn_budget_used": 0.7251,
+        "difficulty_index": 0.1919
+      },
+      "gates": {
+        "bands": {
+          "planner": {
+            "target": [
+              0.6,
+              0.75
+            ],
+            "actual": 0.9511,
+            "within": false
+          },
+          "forecast-aware": {
+            "target": [
+              0.1,
+              0.38
+            ],
+            "actual": 0.804,
+            "within": false
+          },
+          "planner-one-mistake": {
+            "target": [
+              0.1,
+              0.3
+            ],
+            "actual": 0.9319,
+            "within": false
+          }
+        },
+        "planner_cells_below_55": [],
+        "weak_strategy_cells_at_or_above_50": []
+      }
+    }
+  ],
+  "progression": {
+    "required_step": 0.05,
+    "steps": [
+      {
+        "from": "empty-cup",
+        "to": "noon-fold",
+        "delta": 0.0892,
+        "passes": true
+      },
+      {
+        "from": "noon-fold",
+        "to": "meter-feast",
+        "delta": -0.0786,
+        "passes": false
+      },
+      {
+        "from": "meter-feast",
+        "to": "mirror-shade",
+        "delta": 0.071,
+        "passes": true
+      },
+      {
+        "from": "mirror-shade",
+        "to": "stored-night",
+        "delta": -0.0213,
+        "passes": false
+      }
+    ],
+    "monotonic_increasing": false,
+    "passes": false
+  }
+}

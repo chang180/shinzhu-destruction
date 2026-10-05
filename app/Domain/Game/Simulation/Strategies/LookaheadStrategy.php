@@ -26,16 +26,54 @@ abstract class LookaheadStrategy implements Strategy
 
     public function choose(BattleState $state, BattleEngine $engine, LevelDefinition $level, Randomizer $rng): ?array
     {
-        $legal = $engine->legalActions($state);
-
-        if ($legal === []) {
+        if ($engine->legalActions($state) === []) {
             return null;
         }
 
         $best = null;
         $bestScore = -INF;
 
-        foreach ($legal as $action) {
+        foreach ($this->evaluate($state, $engine, $level) as [$action, $score]) {
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = $action;
+            }
+        }
+
+        if ($best === null) {
+            return self::gather();
+        }
+
+        $best['keep'] = $this->keep($state, $best);
+
+        return $best;
+    }
+
+    /**
+     * 依分數由高到低排序的出牌；同分保留合法清單的原順序，和 choose() 的取捨一致。
+     *
+     * @return list<array{0: array<string, mixed>, 1: float}>
+     */
+    protected function ranked(BattleState $state, BattleEngine $engine, LevelDefinition $level): array
+    {
+        $scored = $this->evaluate($state, $engine, $level);
+        $order = array_keys($scored);
+
+        usort($order, static fn (int $a, int $b): int => [$scored[$b][1], $a] <=> [$scored[$a][1], $b]);
+
+        return array_map(static fn (int $index): array => $scored[$index], $order);
+    }
+
+    /**
+     * 用真正的引擎試算每個合法出牌並計分。
+     *
+     * @return list<array{0: array<string, mixed>, 1: float}>
+     */
+    private function evaluate(BattleState $state, BattleEngine $engine, LevelDefinition $level): array
+    {
+        $scored = [];
+
+        foreach ($engine->legalActions($state) as $action) {
             // 換牌不結束回合，一步預測看不出它的價值；先只評估真正的出牌。
             if ($action['type'] !== 'play') {
                 continue;
@@ -58,21 +96,10 @@ abstract class LookaheadStrategy implements Strategy
                 continue;
             }
 
-            $score = $this->score($state, $result, $action);
-
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $best = $action;
-            }
+            $scored[] = [$action, $this->score($state, $result, $action)];
         }
 
-        if ($best === null) {
-            return self::gather();
-        }
-
-        $best['keep'] = $this->keep($state, $best);
-
-        return $best;
+        return $scored;
     }
 
     /**

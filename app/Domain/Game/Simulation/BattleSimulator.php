@@ -5,10 +5,12 @@ namespace App\Domain\Game\Simulation;
 use App\Domain\Game\ActionRequest;
 use App\Domain\Game\ActionType;
 use App\Domain\Game\BattleEngine;
+use App\Domain\Game\BattleEvent;
 use App\Domain\Game\BattleState;
 use App\Domain\Game\Exceptions\InvalidActionException;
 use App\Domain\Game\LevelDefinition;
 use App\Domain\Game\Scenario\ScenarioModifiers;
+use App\Domain\Game\TurnResult;
 use Random\Engine\Xoshiro256StarStar;
 use Random\Randomizer;
 
@@ -25,14 +27,28 @@ class BattleSimulator
 {
     public function __construct(private readonly BattleEngine $engine) {}
 
+    /**
+     * @param  array<string, int>|null  $composition  牌組組成（牌型 => 張數）；null 用關卡起始牌組
+     * @param  string  $deckLabel  牌組版本標籤，只寫進結果供報告聚合
+     */
     public function run(
         LevelDefinition $level,
         ScenarioModifiers $modifiers,
         Strategy $strategy,
         int $seed,
         string $scenarioLabel,
+        ?array $composition = null,
+        string $deckLabel = 'starter',
     ): SimulationResult {
-        return $this->play($this->engine->start($level, $seed), $level, $modifiers, $strategy, $seed, $scenarioLabel);
+        return $this->play(
+            $this->engine->start($level, $seed, $composition),
+            $level,
+            $modifiers,
+            $strategy,
+            $seed,
+            $scenarioLabel,
+            $deckLabel,
+        );
     }
 
     /**
@@ -58,20 +74,25 @@ class BattleSimulator
         Strategy $strategy,
         int $seed,
         string $scenarioLabel,
+        string $deckLabel = 'starter',
     ): SimulationResult {
         $rng = new Randomizer(new Xoshiro256StarStar($this->seedString($seed)));
         $actions = [];
         $rejected = 0;
         $counter = 0;
+        $metrics = self::emptyMetrics();
+        $phaseChanges = [];
 
         while (! $state->outcome->isFinished()) {
             if ($state->turnPhase === BattleState::PHASE_AWAITING_REVEAL) {
-                $state = $this->engine->apply(
+                $result = $this->engine->apply(
                     $state,
                     new ActionRequest('sim-reveal-'.(++$counter), $state->version, ActionType::Reveal),
                     $level,
                     $modifiers,
-                )->state;
+                );
+                $this->measure($state, $result, $metrics, $phaseChanges);
+                $state = $result->state;
 
                 continue;
             }
@@ -111,7 +132,12 @@ class BattleSimulator
                 'skill_id' => $choice['skill_id'] ?? null,
                 'target' => $choice['target'] ?? null,
             ];
+            $this->measure($state, $result, $metrics, $phaseChanges);
             $state = $result->state;
+        }
+
+        if ($state->breachAvailable) {
+            $metrics['breaches_wasted']++;
         }
 
         return new SimulationResult(
@@ -124,7 +150,144 @@ class BattleSimulator
             coreRemaining: $state->coreResilience,
             rejectedActions: $rejected,
             actions: $actions,
+            deck: $deckLabel,
+            maxTurns: $level->maxTurns,
+            metrics: $metrics,
+            phaseChanges: $phaseChanges,
         );
+    }
+
+    /**
+     * 量測欄位的初始值。全部由引擎事件統計，不重算任何規則。
+     *
+     * @return array<string, int>
+     */
+    public static function emptyMetrics(): array
+    {
+        return [
+            'city_repairs' => 0,
+            'city_repair_amount' => 0,
+            'shields_raised' => 0,
+            'shield_absorbed' => 0,
+            'interrupts' => 0,
+            'interrupts_failed' => 0,
+            'repairs_interrupted' => 0,
+            'shields_interrupted' => 0,
+            'breaches_opened' => 0,
+            'breaches_used' => 0,
+            'breaches_wasted' => 0,
+            'combos' => 0,
+            'pulse_refunds' => 0,
+            'overhaul_started' => 0,
+            'overhaul_stopped' => 0,
+            'overhaul_completed' => 0,
+            'missed_actions' => 0,
+        ];
+    }
+
+    /**
+     * 從一次結算的事件累計量測欄位。
+     *
+     * 破綻浪費：被逾時吃掉、用在完全被護盾吸收的攻擊上，或到結束仍未使用
+     * （最後一項在對局結束時另計）。
+     *
+     * @param  array<string, int>  $metrics
+     * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges
+     */
+    private function measure(BattleState $before, TurnResult $result, array &$metrics, array &$phaseChanges): void
+    {
+        $pendingBreach = false;
+
+        foreach ($result->events as $event) {
+            $this->count($event, $metrics, $pendingBreach);
+        }
+
+        if ($result->state->phase !== $before->phase) {
+            $reason = 'phase_changed';
+
+            foreach ($result->events as $event) {
+                if ($event->type === 'phase_change') {
+                    $reason = $event->reasonCode;
+                }
+            }
+
+            $phaseChanges[] = [
+                'turn' => $before->turn,
+                'from' => $before->phase,
+                'to' => $result->state->phase,
+                'reason_code' => $reason,
+            ];
+        }
+    }
+
+    /**
+     * @param  array<string, int>  $metrics
+     */
+    private function count(BattleEvent $event, array &$metrics, bool &$pendingBreach): void
+    {
+        switch ($event->type) {
+            case 'city_repair':
+                $metrics['city_repairs']++;
+                $metrics['city_repair_amount'] += (int) ($event->delta['core_resilience'] ?? 0);
+                break;
+            case 'city_shield':
+                $metrics['shields_raised']++;
+                break;
+            case 'shield_absorbed':
+                $metrics['shield_absorbed'] += (int) ($event->delta['absorbed'] ?? 0);
+                break;
+            case 'interrupt':
+                $metrics['interrupts']++;
+                $intentType = $event->before['intent']['type'] ?? null;
+
+                if ($intentType === 'repair') {
+                    $metrics['repairs_interrupted']++;
+                } elseif ($intentType === 'shield') {
+                    $metrics['shields_interrupted']++;
+                }
+                break;
+            case 'interrupt_failed':
+                $metrics['interrupts_failed']++;
+                break;
+            case 'breach_opened':
+                $metrics['breaches_opened']++;
+                break;
+            case 'breach_consumed':
+                if ($event->reasonCode === 'breach_window_used') {
+                    $metrics['breaches_used']++;
+                    $pendingBreach = true;
+                } else {
+                    $metrics['breaches_wasted']++;
+                }
+                break;
+            case 'impact':
+                if ($pendingBreach && (int) ($event->delta['core_resilience'] ?? 0) === 0) {
+                    $metrics['breaches_wasted']++;
+                }
+                $pendingBreach = false;
+                break;
+            case 'combo':
+                $metrics['combos']++;
+                break;
+            case 'malice_refund':
+                if ($event->reasonCode === 'apostle_pulse_combo') {
+                    $metrics['pulse_refunds']++;
+                }
+                break;
+            case 'phase_change':
+                $key = match ($event->reasonCode) {
+                    'overhaul_started', 'overhaul_stopped', 'overhaul_completed' => $event->reasonCode,
+                    default => null,
+                };
+
+                if ($key !== null) {
+                    $metrics[$key]++;
+                }
+                break;
+            case 'action_missed':
+                $metrics['missed_actions']++;
+                break;
+        }
     }
 
     /**
