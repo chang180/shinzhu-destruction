@@ -229,7 +229,7 @@ class CounterfactualTest extends TestCase
 
     public static function olderRules(): array
     {
-        return [['3.1.0'], ['5.0.0'], ['5.0.1']];
+        return [['3.1.0'], ['5.0.0'], ['5.0.1'], ['6.0.0']];
     }
 
     #[DataProvider('olderRules')]

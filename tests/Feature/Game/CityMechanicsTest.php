@@ -94,10 +94,10 @@ class CityMechanicsTest extends TestCase
     {
         $level = $this->level('stored-night');
 
-        $this->assertSame(0.08, $level->modifierCap);
-        $this->assertSame(0.08, $level->cappedModifier(0.15));
-        $this->assertSame(-0.08, $level->cappedModifier(-0.15));
-        $this->assertSame(0.04, $level->cappedModifier(0.04));
+        $this->assertSame(0.005, $level->modifierCap);
+        $this->assertSame(0.005, $level->cappedModifier(0.15));
+        $this->assertSame(-0.005, $level->cappedModifier(-0.15));
+        $this->assertSame(0.002, $level->cappedModifier(0.002));
 
         // 沒有設上限的關卡照原值，不會被這條規則悄悄改掉。
         $this->assertSame(0.15, $this->level('empty-cup')->cappedModifier(0.15));
@@ -112,7 +112,7 @@ class CityMechanicsTest extends TestCase
             $this->reveal($this->stack($state, 'probe.water'), $level),
             $this->playRequest($this->reveal($this->stack($state, 'probe.water'), $level), 'probe.water'),
             $level,
-            $this->uniformModifiers(0.08),
+            $this->uniformModifiers(0.005),
         )->state;
 
         $beyondCap = $this->engine()->apply(

@@ -32,6 +32,7 @@ final readonly class PhaseTrigger
         'first_interrupt_done' => '首次成功打斷之後',
         'overhaul_started' => '重整啟動之後',
         'overhaul_stopped' => '重整被中止之後',
+        'overhaul_completed' => '重整完成之後',
     ];
 
     /**

@@ -1,5 +1,19 @@
 # AI 派工與階段交接規範
 
+## 2026-10-06 P10-5 第 5 關三幕化交接
+
+第 5 關 `stored-night` 改成全縣戒備（T1 不可打斷的水盾 40、T2 熱盾 40、T3 土地修復 18）／重整警報（第 4 回合**或**核心降到 35 以下啟動，倒數 2 回合，完成回復 48）／最後一夜（重整被中止**或**完成之後）。9 回合、防線 26／28／30、`modifier_cap 0.005`、四種獎勵牌組。`rules_version` 升 **7.0.0**；6.0.0 舊局唯讀，行動、重試與反事實都回 409 `rules_version_mismatch`。
+
+**第 5 關是第一個用 `flag_true` 觸發幕次的關卡**，前四關都只用 `turn_gte`。後果是靜態 `forecast` 和實際對局不再一致：開局前沒有局面可讀，`scheduledPhaseForTurn()` 把旗標一律視為尚未成立，所以第二幕被標成第 4 回合才開始（實際可能更早），第三幕完全不顯示。**P10-6 必須先決定條件幕怎麼標示**，不能沿用前四關逐回合列預告的做法。
+
+引擎配套：`maybeStartOverhaul()` 移出 `resolveCityResponse()`，改在逾時與出牌兩條結算路徑明確呼叫；打斷處理新增 `TYPE_OVERHAUL` 分支以跨回合累計干擾系別（湊滿才算中止，否則記 `overhaul_interrupt_recorded`）；重整完成設新旗標 `overhaul_completed`。只有 `stored-night` 有 `overhaul` 設定，所以這些路徑第 1～4 關都走不到——全五關矩陣的前四關數字與 P10-4 相同即為實測證據。`game:solve` 新增 `--reuse-paths`：只在同（關卡, 牌組, seed）內快取已驗證路徑，換情境時**必須先重播到勝利才採用**，否則退回完整搜尋；重用的是真的重播過的見證，不是推論情境等價。
+
+**全五關階梯首次完全單調**（quick 100，7.0.0）：0.1638 → 0.3231 → 0.4114 → 0.5578 → 0.6189，每步 +0.1593／+0.0883／+0.1464／+0.0611，全部 ≥ +0.05，P10 §3.4 硬門檻 1 成立。第 5 關 full 27×300：planner 64.86%（最低格 56.67%）、forecast-aware 28.19%、失誤恢復 29.00%、DI 0.6107，比第 4 關高 +0.0742，四項全在區間。solver 240／240 可解且全數重播驗證（4 牌組 × 3 情境 × 20 seed）。五關合計只剩第 1 關失誤恢復 93.4% 未達，是 P10-2.1 的既有缺口，門檻未放寬。
+
+**待決缺口：第 5 關的招牌機制幾乎沒有發生。** planner 平均 `overhaul_started` 0.812／局，但 `overhaul_stopped` 只有 **0.004**、`overhaul_completed` 0.150，第三幕到達率 **13.8%**（第 3 關 98.8%、第 4 關 97.7%）。「用兩種不同系擾序中止重整」一千局只成立四次，`overhaul_stop_breach` 使徒能力實質是死規則，第三幕內容絕大多數對局玩不到。四項門檻都通過，所以本包沒有改；要處理建議在 P10-6 前走一個小包（降 `required_interrupts`、延長 `countdown_turns` 或提高 `trigger_core`），由計畫擁有者決定。
+
+Codex 完成實作與量測後在整理文件階段用盡額度；本輪由 Claude Code 驗證、補全五關階梯與 solver 證據、寫報告與交接文件，**沒有改任何平衡數值**。Codex 回報的「全量 solver 32,400 局全部可解」在工作樹裡沒有證據檔，已改為如實記錄，27×300 全量仍屬 P10-7。下一包 P10-6，入口見 [P10-5 報告](phase-reports/P10-5.md)。
+
 ## 2026-10-05 Hostinger 正式站更新
 
 依使用者要求在正式站工作目錄執行 `git pull --ff-only`，由 `f8b8de2` 快轉至 `a6cd2f8`。使用鎖檔執行 `composer install --no-dev --optimize-autoloader`、`npm ci --ignore-scripts` 及 `RAYON_NUM_THREADS=1 npm run build`；`php artisan migrate --force` 回報沒有待遷移，`php artisan optimize` 的設定、事件、路由及 view 快取均成功。

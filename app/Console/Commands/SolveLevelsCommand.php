@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Domain\Game\BattleEngine;
+use App\Domain\Game\Exceptions\InvalidActionException;
 use App\Domain\Game\LevelRepository;
 use App\Domain\Game\Outcome;
 use App\Domain\Game\Scenario\ScenarioModifiers;
 use App\Domain\Game\Solver\SolvabilitySolver;
+use App\Domain\Game\Solver\SolverResult;
 use App\Domain\Game\Solver\SolverStatus;
 use App\Services\Game\DifficultyReport;
 use Illuminate\Console\Command;
@@ -24,6 +26,7 @@ class SolveLevelsCommand extends Command
                             {--seeds=10 : 每格 seed 數}
                             {--start-seed=1 : 起始 seed}
                             {--budget=20000 : 每個 seed 最多展開的決策節點數}
+                            {--reuse-paths : 先重播同牌組同 seed 已找到的路徑，失敗再搜尋}
                             {--json= : 把逐 seed 結果與通關路徑寫成 JSON 檔}';
 
     protected $description = '離線搜尋通關路徑，證明關卡在指定 seed 下有解（預算用完只回報未知，不寫成無解）';
@@ -89,16 +92,36 @@ class SolveLevelsCommand extends Command
                     continue;
                 }
 
+                $verifiedPaths = [];
+
                 foreach ($scenarioLabels as $scenarioLabel) {
                     $modifiers = $this->modifiers($allScenarios[$scenarioLabel]);
                     $counts = array_fill_keys(array_column(SolverStatus::cases(), 'value'), 0);
                     $nodes = 0;
 
                     for ($seed = $startSeed; $seed < $startSeed + $seeds; $seed++) {
-                        $result = $solver->solve($level, $modifiers, $seed, $composition, $budget);
+                        $result = null;
+                        $source = 'search';
+
+                        if ($this->option('reuse-paths') && isset($verifiedPaths[$seed])) {
+                            try {
+                                if ($solver->replay($level, $modifiers, $seed, $composition, $verifiedPaths[$seed])->outcome === Outcome::PlayerVictory) {
+                                    $result = new SolverResult(SolverStatus::Solved, $verifiedPaths[$seed], 0, $budget, 0, 0);
+                                    $source = 'verified_cached_path';
+                                }
+                            } catch (InvalidActionException) {
+                                // 情境改變可能讓原路徑提早結束或不再合法，必須重新搜尋。
+                            }
+                        }
+
+                        $result ??= $solver->solve($level, $modifiers, $seed, $composition, $budget);
                         $replayed = $result->status === SolverStatus::Solved
                             ? $solver->replay($level, $modifiers, $seed, $composition, $result->path)->outcome === Outcome::PlayerVictory
                             : null;
+
+                        if ($replayed === true) {
+                            $verifiedPaths[$seed] = $result->path;
+                        }
 
                         $counts[$result->status->value]++;
                         $nodes += $result->nodesExpanded;
@@ -108,6 +131,7 @@ class SolveLevelsCommand extends Command
                             'scenario' => $scenarioLabel,
                             'seed' => $seed,
                             'replay_verified' => $replayed,
+                            'solution_source' => $source,
                         ] + $result->toArray();
                     }
 
@@ -137,6 +161,8 @@ class SolveLevelsCommand extends Command
                     'budget' => $budget,
                     'seeds_per_cell' => $seeds,
                     'start_seed' => $startSeed,
+                    'reuse_paths' => (bool) $this->option('reuse-paths'),
+                    'reuse_contract' => 'Only same level/deck/seed paths are candidates. Every candidate is replayed under the new scenario; invalid or losing paths fall back to search. No solvability is inferred from another scenario.',
                     'action_model' => 'reveal; every legal play (cards and fixed actions) x every legal keep subset; one swap per turn; timeout',
                     'note' => 'exhausted_unknown means the node budget ran out; it is not a proof of no solution. Not a player strategy and not part of difficulty_index.',
                 ],

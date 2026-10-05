@@ -8,7 +8,8 @@ use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\LevelDefinition;
 use App\Domain\Game\LevelRepository;
 use App\Domain\Game\Simulation\BattleSimulator;
-use App\Domain\Game\Simulation\Strategies\ForecastAwareStrategy;
+use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
+use App\Services\Game\DifficultyReport;
 use Tests\TestCase;
 
 /**
@@ -204,13 +205,15 @@ class LevelPhaseTransitionTest extends TestCase
 
     public function test_the_simulator_counts_overhaul_state_changes_separately_from_level_phase_changes(): void
     {
-        // tests/Fixtures/p10-1 的 stored-night 樣本：forecast-aware、low、seed 27 中止重整。
+        // 7.0.0 實際獎勵牌組的中止重整通關樣本；兩種事件不能互相冒充。
         $level = app(LevelRepository::class)->get('stored-night');
-        $modifiers = EquivalenceRecorder::modifiers(-0.15);
+        $modifiers = EquivalenceRecorder::modifiers(0.0);
+        $deck = app(DifficultyReport::class)->deckVariants($level)['tide-siege+hollow-ground'];
 
-        $result = (new BattleSimulator($this->engine()))->run($level, $modifiers, new ForecastAwareStrategy(app(CardCatalog::class)), 27, 'w-h-l-');
+        $result = (new BattleSimulator($this->engine()))->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 134, 'w0h0l0', $deck);
 
         $this->assertSame(['overhaul_started', 'overhaul_stopped'], array_column($result->phaseChanges, 'reason_code'));
-        $this->assertSame([], $result->levelPhaseChanges);
+        $this->assertSame(['overhaul-warning', 'last-night'], array_column($result->levelPhaseChanges, 'to'));
+        $this->assertTrue($result->won());
     }
 }

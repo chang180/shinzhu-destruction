@@ -79,7 +79,7 @@ class LevelPhaseApiTest extends TestCase
         $response = $this->getJson(route('api.v1.levels.index'))->assertOk();
         $levels = collect($response->json('levels'))->keyBy('level_id');
 
-        // P10-4：第 1～4 關三幕，觸發都只用回合門檻；第 5 關仍是單一等價幕次。
+        // P10-5：第 1～4 關仍是回合三幕，第 5 關以重整事件切入第三幕。
         $acts = [
             'empty-cup' => [['trial-cup', '第一幕・試杯', 1], ['cut-supply', '第二幕・斷補', 3], ['empty-cup-quiz', '第三幕・空杯小考', 5]],
             'noon-fold' => [['single-shield', '第一幕・單盾示範', 1], ['shift-guard', '第二幕・輪班防線', 3], ['crossed-windows', '第三幕・交錯窗口', 5]],
@@ -101,17 +101,10 @@ class LevelPhaseApiTest extends TestCase
             $this->assertNotContains('', array_column($phases, 'objective'), $levelId);
         }
 
-        foreach (['stored-night'] as $levelId) {
-            $this->assertSame([[
-                'id' => 'main',
-                'order' => 1,
-                'label' => '全關',
-                'objective' => $levels[$levelId]['lesson'],
-                'starts_when' => ['type' => 'turn_gte', 'value' => 1],
-                'starts_when_summary' => '第 1 回合起',
-                'next_phase_summary' => null,
-            ]], $levels[$levelId]['phases'], $levelId);
-        }
+        $this->assertSame(['county-alert', 'overhaul-warning', 'last-night'], array_column($levels['stored-night']['phases'], 'id'));
+        $this->assertSame([1, 2, 3], array_column($levels['stored-night']['phases'], 'order'));
+        $this->assertTrue($levels['stored-night']['forecast'][0]['conditional']);
+        $this->assertStringContainsString('以當前預告為準', $levels['stored-night']['forecast'][0]['description']);
 
         foreach ($levels as $levelId => $level) {
             $this->assertCount($level['max_turns'], $level['forecast'], $levelId);
@@ -127,12 +120,12 @@ class LevelPhaseApiTest extends TestCase
         $this->getJson(route('api.v1.runs.show', ['run' => $storedNight]))
             ->assertOk()
             ->assertJsonPath('data.state.phase', 'standby')
-            ->assertJsonPath('data.state.level_phase_id', 'main')
-            ->assertJsonPath('data.level_phase.id', 'main')
+            ->assertJsonPath('data.state.level_phase_id', 'county-alert')
+            ->assertJsonPath('data.level_phase.id', 'county-alert')
             ->assertJsonPath('data.level_phase.order', 1)
-            ->assertJsonPath('data.level_phase.total', 1)
-            ->assertJsonPath('data.level_phase.objective', app(LevelRepository::class)->get('stored-night')->lesson)
-            ->assertJsonPath('data.level_phase.next_phase_summary', null);
+            ->assertJsonPath('data.level_phase.total', 3)
+            ->assertJsonPath('data.level_phase.objective', app(LevelRepository::class)->get('stored-night')->firstPhase()->objective)
+            ->assertJsonPath('data.level_phase.next_phase_summary', '第 4 回合起，或重整啟動之後');
 
         $this->getJson(route('api.v1.runs.show', ['run' => $runId]))
             ->assertJsonPath('data.state.phase', 'standard')

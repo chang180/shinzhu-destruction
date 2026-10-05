@@ -46,12 +46,12 @@ class SolvabilitySolverTest extends TestCase
         $deck = app(DifficultyReport::class)->deckVariants($level)['smoke-screen+hollow-ground'];
         $modifiers = EquivalenceRecorder::modifiers(-0.15);
 
-        $planner = (new BattleSimulator(app(BattleEngine::class)))->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 6, 'w-h-l-', $deck);
-        $solved = $this->solver()->solve($level, $modifiers, 6, $deck, 2000);
+        $planner = (new BattleSimulator(app(BattleEngine::class)))->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 3, 'w-h-l-', $deck);
+        $solved = $this->solver()->solve($level, $modifiers, 3, $deck, 2000);
 
         $this->assertFalse($planner->won());
         $this->assertSame(SolverStatus::Solved, $solved->status);
-        $this->assertSame(Outcome::PlayerVictory, $this->solver()->replay($level, $modifiers, 6, $deck, $solved->path)->outcome);
+        $this->assertSame(Outcome::PlayerVictory, $this->solver()->replay($level, $modifiers, 3, $deck, $solved->path)->outcome);
     }
 
     public function test_running_out_of_budget_is_reported_as_unknown_not_as_unsolvable(): void
@@ -112,6 +112,57 @@ class SolvabilitySolverTest extends TestCase
 
         unlink($first);
         unlink($second);
+    }
+
+    public function test_path_reuse_is_opt_in_and_verifies_every_scenario_without_sharing_between_decks_or_seeds(): void
+    {
+        config(['game.levels.stored-night.modifier_cap' => 0.0]);
+        $json = $this->scratchPath('reuse.json');
+
+        $this->artisan('game:solve', [
+            '--level' => ['stored-night'], '--seeds' => 2, '--budget' => 2000,
+            '--deck' => ['tide-siege+hollow-ground', 'smoke-screen+hollow-ground'],
+            '--scenario' => ['w0h0l0', 'w+h+l+'], '--reuse-paths' => true, '--json' => $json,
+        ])->assertSuccessful();
+
+        $report = json_decode((string) file_get_contents($json), true);
+        $this->assertTrue($report['meta']['reuse_paths']);
+        $this->assertCount(8, $report['results']);
+        foreach ($report['results'] as $result) {
+            $this->assertSame('solved', $result['status']);
+            $this->assertTrue($result['replay_verified']);
+            $this->assertSame($result['scenario'] === 'w0h0l0' ? 'search' : 'verified_cached_path', $result['solution_source']);
+        }
+        unlink($json);
+    }
+
+    /** @return array<string, array{list<string>}> */
+    public static function changedScenarioOrders(): array
+    {
+        return [
+            'higher damage can finish before the cached path ends' => [['w-h-l-', 'w+h+l+']],
+            'lower damage can leave the core standing' => [['w+h+l+', 'w-h-l-']],
+        ];
+    }
+
+    #[DataProvider('changedScenarioOrders')]
+    public function test_a_cached_path_that_becomes_illegal_or_loses_falls_back_to_search(array $scenarios): void
+    {
+        $json = $this->scratchPath('fallback.json');
+
+        $this->artisan('game:solve', [
+            '--level' => ['empty-cup'], '--seeds' => 10, '--budget' => 2000,
+            '--scenario' => $scenarios, '--reuse-paths' => true, '--json' => $json,
+        ])->assertSuccessful();
+
+        $results = json_decode((string) file_get_contents($json), true)['results'];
+        $fallbacks = array_filter($results, static fn (array $result): bool => $result['scenario'] === $scenarios[1] && $result['solution_source'] === 'search');
+        $this->assertNotEmpty($fallbacks);
+        foreach ($results as $result) {
+            $this->assertSame('solved', $result['status']);
+            $this->assertTrue($result['replay_verified']);
+        }
+        unlink($json);
     }
 
     /**

@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'rules_version' => '6.0.0',
+    'rules_version' => '7.0.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -627,7 +627,7 @@ return [
             'name' => '蓄夜・全縣最後重整',
             'subtitle' => '兩回合重整',
             'apostle' => 'stored-night',
-            'max_turns' => 12,
+            'max_turns' => 9,
             'requires' => 'mirror-shade',
             'mechanic' => '核心到門檻就啟動兩回合重整：兩次不同系干擾中止，或搶先結束。',
             'lesson' => '以兩次不同系干擾中止重整，或集中輸出搶先結束。',
@@ -636,19 +636,19 @@ return [
                 'quote' => '「全縣會把最後的力氣留到夜裡，一次修回來。」',
                 'quote_note' => '晏沉熄掉最後一盞燈。「你只有兩個選擇：打斷它，或比它快。」',
                 'lessons' => [
-                    '核心降到 50 以下，城市啟動兩回合重整；完成就一次回復 34 點核心韌性。',
+                    '核心降到 35 以下，城市啟動兩回合重整；完成就一次回復 48 點核心韌性。',
                     '用兩種不同系的擾序打斷重整倒數即可中止，並換來全系破綻；或者在倒數結束前把核心打完。',
                     '通關取得「首席反派」與進階終幕。失敗不會撤銷主線通關。',
                 ],
             ],
             'defenses' => [
-                Element::Water->value => 32,
-                Element::Heat->value => 30,
-                Element::Land->value => 32,
+                Element::Water->value => 26,
+                Element::Heat->value => 28,
+                Element::Land->value => 30,
             ],
             'data_elements' => [Element::Water->value, Element::Heat->value, Element::Land->value],
             // 三系同時採用：每系的情境修正再夾一次，避免「資料好壞」本身決定勝負。
-            'modifier_cap' => 0.08,
+            'modifier_cap' => 0.005,
             'deck' => [
                 'long-flow' => 3, 'spend-tide' => 1, 'foul-current' => 1,
                 'open-chill' => 3, 'hundred-smoke' => 1, 'idle-fume' => 1,
@@ -657,27 +657,54 @@ return [
             'apostle_power' => 'overhaul_stop_breach',
             'apostle_power_value' => 1,
             'overhaul' => [
-                'trigger_core' => 50,
+                'trigger_core' => 35,
                 'countdown_turns' => 2,
                 'repair_magnitude' => 48,
                 'required_interrupts' => 2,
             ],
             'level_phases' => [
                 [
-                    'id' => 'main',
-                    'label' => '全關',
-                    'objective' => '以兩次不同系干擾中止重整，或集中輸出搶先結束。',
+                    'id' => 'county-alert',
+                    'label' => '第一幕・全縣戒備',
+                    'objective' => '換系繞盾、保留擾序，為核心到 35 以下的重整預留資源。',
                     'starts_when' => ['type' => 'turn_gte', 'value' => 1],
                     'intents' => [
-                        2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
-                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
-                        5 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                        6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 20, 'interruptible' => true],
-                        8 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 22, 'interruptible' => true],
-                        10 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
-                        11 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 24, 'interruptible' => true],
+                        1 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 40, 'interruptible' => false],
+                        2 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 40, 'interruptible' => true],
+                        3 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
                     ],
-                    'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 5, 'interruptible' => false],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 6, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'overhaul-warning',
+                    'label' => '第二幕・重整警報',
+                    'objective' => '兩回合倒數內以土地、水兩系擾序中止，或在修復前打完核心。',
+                    'starts_when' => ['type' => 'any_of', 'of' => [
+                        ['type' => 'turn_gte', 'value' => 4],
+                        ['type' => 'flag_true', 'flag' => 'overhaul_started'],
+                    ]],
+                    'intents' => [
+                        4 => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
+                        5 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 20, 'interruptible' => true],
+                        6 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 24, 'interruptible' => true],
+                        7 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 28, 'interruptible' => true],
+                        8 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 32, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 6, 'interruptible' => false],
+                ],
+                [
+                    'id' => 'last-night',
+                    'label' => '第三幕・最後一夜',
+                    'objective' => '重整只會發生一次；用剩餘印記與惡意，把握最後的修復窗口。',
+                    'starts_when' => ['type' => 'any_of', 'of' => [
+                        ['type' => 'flag_true', 'flag' => 'overhaul_stopped'],
+                        ['type' => 'flag_true', 'flag' => 'overhaul_completed'],
+                    ]],
+                    'intents' => [
+                        8 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 32, 'interruptible' => true],
+                        9 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 24, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'repair', 'element' => 'water', 'magnitude' => 12, 'interruptible' => true],
                 ],
             ],
             'mechanic_states' => ['standby', 'overhaul'],

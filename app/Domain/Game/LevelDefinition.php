@@ -112,6 +112,7 @@ final readonly class LevelDefinition
         if (($definition['overhaul'] ?? null) !== null) {
             $flags[] = 'overhaul_started';
             $flags[] = 'overhaul_stopped';
+            $flags[] = 'overhaul_completed';
         }
 
         return array_values(array_intersect($flags, array_keys(PhaseTrigger::FLAGS)));

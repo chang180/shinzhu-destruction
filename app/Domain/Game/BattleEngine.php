@@ -230,6 +230,7 @@ class BattleEngine
         $this->discardHand($next);
 
         $this->resolveCityResponse($next, $level, false);
+        $this->maybeStartOverhaul($next, $level);
         $this->expireEffects($next);
 
         if ($next->turn >= $next->maxTurns) {
@@ -278,6 +279,7 @@ class BattleEngine
         }
 
         $this->resolveCityResponse($next, $level, $interrupted);
+        $this->maybeStartOverhaul($next, $level);
 
         if ($next->coreResilience <= 0) {
             $this->finish($next, Outcome::PlayerVictory, 'core_depleted');
@@ -954,6 +956,20 @@ class BattleEngine
             return false;
         }
 
+        if ($state->intent->type === CityIntent::TYPE_OVERHAUL) {
+            $this->applyInterruptRewards($state, $level);
+            $stopped = (bool) ($state->flags['overhaul_stopped'] ?? false);
+
+            $this->record($state, 'interrupt', BattleEvent::PLAYER, $skill->element->value, $stopped ? 'intent_cancelled' : 'overhaul_interrupt_recorded',
+                ['intent' => $state->intent->toArray()],
+                ['interrupts' => $state->flags['overhaul_interrupt_elements']],
+                ['intent' => $stopped ? null : $state->intent->toArray()],
+                'cue.interrupt.success',
+            );
+
+            return $stopped;
+        }
+
         $this->record($state, 'interrupt', BattleEvent::PLAYER, $skill->element->value, 'intent_cancelled',
             ['intent' => $state->intent->toArray()],
             [],
@@ -1037,6 +1053,7 @@ class BattleEngine
 
         if ($intent->type === CityIntent::TYPE_OVERHAUL) {
             $state->phase = 'standby';
+            $state->flags['overhaul_completed'] = true;
             $state->flags['overhaul_interrupt_elements'] = [];
 
             $this->record($state, 'phase_change', BattleEvent::CITY, null, 'overhaul_completed',
@@ -1047,7 +1064,6 @@ class BattleEngine
             );
         }
 
-        $this->maybeStartOverhaul($state, $level);
     }
 
     private function cityRepair(BattleState $state, CityIntent $intent): void

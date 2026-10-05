@@ -242,7 +242,7 @@ class BattleEngineTest extends TestCase
     {
         $level = $this->level('stored-night');
         $state = $this->startState($level);
-        $state->coreResilience = 52;
+        $state->coreResilience = 37;
         $state->turn = 2;
         $state->intent = $level->intentForTurn(2);
 

@@ -9,5 +9,5 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Domain/Game/** | .ai/rules/game.md |
 | app/Services/OpenData/** | .ai/rules/open-data.md |
 | app/Services/Game/** | .ai/rules/services-game.md |
-| app/Domain/Game/Solver/** | .ai/rules/solver.md |
+| app/Domain/Game/Solver/**, app/Console/Commands/SolveLevelsCommand.php | .ai/rules/solver.md |
 | tests/** | .ai/rules/tests.md |

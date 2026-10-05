@@ -3,6 +3,7 @@
 namespace App\Http\Resources\V1;
 
 use App\Domain\Game\LevelDefinition;
+use App\Domain\Game\Phases\LevelPhaseDefinition;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -56,8 +57,14 @@ class LevelResource extends JsonResource
             'forecast' => $this->available
                 ? array_map(function (int $turn): array {
                     $phase = $this->resource->scheduledPhaseForTurn($turn);
+                    $conditional = array_any($this->resource->levelPhases, static fn (LevelPhaseDefinition $act): bool => $act->startsWhen->turnThreshold() === null);
+                    $intent = $this->resource->intentForTurn($turn, null, $phase->id)->toArray();
 
-                    return $this->resource->intentForTurn($turn, null, $phase->id)->toArray() + ['level_phase_id' => $phase->id];
+                    if ($conditional) {
+                        $intent['description'] .= '（未啟動重整的回合基線；幕次與兩回合倒數會依對局改變，以當前預告為準）';
+                    }
+
+                    return $intent + ['level_phase_id' => $phase->id] + ($conditional ? ['conditional' => true] : []);
                 }, range(1, $this->maxTurns))
                 : [],
         ];

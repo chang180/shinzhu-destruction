@@ -301,9 +301,17 @@ class DifficultyReportTest extends TestCase
         ], $cells['empty-cup']['level_phases']);
         $this->assertSame(2.0, $cells['empty-cup']['avg_level_phase_changes']);
 
-        // 單一幕的關卡只有第一幕，重整的機制狀態不算換幕。
-        $this->assertSame([['id' => 'main', 'order' => 1, 'reach_rate' => 1.0, 'avg_entry_turn' => 1.0]], $cells['stored-night']['level_phases']);
-        $this->assertSame(0.0, $cells['stored-night']['avg_level_phase_changes']);
-        $this->assertSame([['id' => 'main', 'reach_rate' => 1.0]], $report['levels'][1]['strategies']['random']['level_phase_reach']);
+        // 此格未完成／中止重整，因此第三幕沒有進入回合，不能記成回合零。
+        $this->assertSame([
+            ['id' => 'county-alert', 'order' => 1, 'reach_rate' => 1.0, 'avg_entry_turn' => 1.0],
+            ['id' => 'overhaul-warning', 'order' => 2, 'reach_rate' => 1.0, 'avg_entry_turn' => 4.0],
+            ['id' => 'last-night', 'order' => 3, 'reach_rate' => 0.0, 'avg_entry_turn' => null],
+        ], $cells['stored-night']['level_phases']);
+        $this->assertSame(1.0, $cells['stored-night']['avg_level_phase_changes']);
+        $this->assertSame([
+            ['id' => 'county-alert', 'reach_rate' => 1.0],
+            ['id' => 'overhaul-warning', 'reach_rate' => 1.0],
+            ['id' => 'last-night', 'reach_rate' => 0.0],
+        ], $report['levels'][1]['strategies']['random']['level_phase_reach']);
     }
 }

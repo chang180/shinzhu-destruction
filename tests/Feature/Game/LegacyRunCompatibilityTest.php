@@ -14,7 +14,7 @@ class LegacyRunCompatibilityTest extends TestCase
     /** @return list<array{string}> */
     public static function oldRuleVersions(): array
     {
-        return [['5.0.0'], ['5.0.1']];
+        return [['5.0.0'], ['5.0.1'], ['6.0.0']];
     }
 
     #[DataProvider('oldRuleVersions')]
