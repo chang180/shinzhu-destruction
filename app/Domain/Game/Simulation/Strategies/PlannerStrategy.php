@@ -16,7 +16,7 @@ use App\Domain\Game\TurnResult;
  */
 class PlannerStrategy extends LookaheadStrategy
 {
-    public function __construct(ScenarioModifiers $modifiers, private readonly CardCatalog $cards)
+    public function __construct(ScenarioModifiers $modifiers, protected readonly CardCatalog $cards)
     {
         parent::__construct($modifiers);
     }

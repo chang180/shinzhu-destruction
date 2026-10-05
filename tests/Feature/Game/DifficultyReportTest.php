@@ -92,7 +92,7 @@ class DifficultyReportTest extends TestCase
         // noon-fold：1 牌組，meter-feast：2 牌組；9 情境 × 7 策略。
         $this->assertCount((1 + 2) * 9 * 7, $report['cells']);
         $this->assertCount(count($report['cells']) + 1, file($firstCsv));
-        $this->assertSame('p10-di-2', $report['meta']['index_version']);
+        $this->assertSame('p10-di-3', $report['meta']['index_version']);
         $this->assertSame(['noon-fold', 'meter-feast'], array_column($report['levels'], 'level'));
         $this->assertSame(0, array_sum(array_column($report['cells'], 'illegal_choices')));
 

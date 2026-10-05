@@ -220,8 +220,8 @@ class DifficultyReportCommand extends Command
             $metricKeys = array_keys($result['cells'][0]['avg_metrics'] ?? []);
             $recoveryKeys = [
                 'planner_baseline_wins', 'mistakes_injected', 'eligible_mistake_games', 'recoveries_after_mistake',
-                'no_eligible_mistake_games', 'window_not_reached_games', 'legacy_second_same_semantics',
-                'legacy_second_tied', 'recovery_rate', 'avg_finite_score_delta', 'min_finite_score_delta',
+                'no_eligible_mistake_games', 'missed_interrupt_mistakes', 'walked_into_shield_mistakes',
+                'recovery_rate', 'avg_finite_score_delta', 'min_finite_score_delta',
                 'mistakes_skipping_a_winning_move',
             ];
 

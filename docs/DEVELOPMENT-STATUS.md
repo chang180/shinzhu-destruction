@@ -20,6 +20,7 @@
 | P10-0 難度量測與 3.1.0 基線 | 待驗收 | [P10-0 報告](phase-reports/P10-0.md)：新增 `game:difficulty-report`（9／27 情境 × 合法獎勵牌組 × 7 策略）、`forecast-aware` 與 `planner-one-mistake` 策略及 difficulty_index；未改 `config/game.php` 與 `rules_version 3.1.0`。基線顯示五關難度曲線不單調（第 3 關比第 2 關易、第 5 關比第 4 關易）。P10-0.1 修正失誤量測（語義不同且分數嚴格較低、同 seed 配對恢復率、`p10-di-2`、拒絕非法 CLI 選項），結論不變。`solver` 未實作，列為 P10-1 前置；真人試玩待補 |
 | P10-1 三幕引擎與設定驗證器 | 待驗收 | [P10-1 報告](phase-reports/P10-1.md)：typed level phase（`level_phases`、四種觸發、載入時驗證）、與第 5 關重整機制狀態分離的 `level_phase_id`／`level_phase_change`、API 幕次欄位；五關包成單一等價幕次，90 局＋重整＋舊存檔＋反事實樣本逐項相同，`game:simulate` 與 p10-di-2 quick 基線逐位元相同。新增離線 solver（`game:solve`），600 個代表格全數可解並重播。`rules_version 3.1.0` 不變；尚無真正三幕內容（P10-2） |
 | P10-2 第 1、2 關三幕化 | 待驗收 | [P10-2 報告](phase-reports/P10-2.md)：第 1 關試杯／斷補／空杯小考、第 2 關單盾示範／輪班防線／交錯窗口，觸發只用回合門檻，靜態預告逐回合標示幕次；升 `rules_version 4.0.0`，3.1.0 舊局唯讀（反事實比較也改為 409）。quick／full 兩關 planner 與 forecast-aware 都在目標區間，第 2 關比第 1 關高 +0.109／+0.071；**失誤恢復率兩關都高於目標**，已列原因未放寬門檻。難度報告加入幕次到達率。第 3～5 關未動，五關曲線仍不單調；真人試玩待補 |
+| P10-2.1 失誤量測語意修正 | 待驗收 | [P10-2.1 報告](phase-reports/P10-2.1.md)：`planner-one-mistake` 改成只注入本關核心機制的明確錯誤（`missed_interrupt`／`walked_into_shield`），兩者都要求 planner 最佳打法本身就是正確處理；`INDEX_VERSION` 升 `p10-di-3`。舊定義實測近七成不是機制錯誤，第 2 關甚至把正確打斷標成失誤。第 2 關恢復率落進目標（full 89.2%→65.4%），第 1 關仍超出上限 1.2 點且**未放寬門檻**。六個未改策略逐欄相同，`rules_version 4.0.0` 與第 1、2 關數值未動 |
 | P09 正式部署 | 未開始 | Hostinger 實測、備份還原及 README 切換 |
 
 ## 最新實作基線
@@ -41,6 +42,7 @@
 - 同一次結算產生的事件全部掛在該行動所屬回合，含回合推進；依 `turn` 分組的重播與演出可以直接使用。
 - 只有 `POST /api/v1/runs` 會建立匿名戰役；唯讀端點不寫入。
 - `php artisan game:simulate` 產生策略矩陣；驗收門檻已釘進 `tests/Feature/Game/StrategyMatrixTest.php`。
+- 難度量測的 `INDEX_VERSION` 現為 `p10-di-3`。`p10-di-1`／`p10-di-2`／`p10-di-3` 的公式相同但第三項語意不同，**不可互相比較**；舊數字留在各自的階段報告。
 - `config/opendata.php` 是三個部會來源的唯一清單；resource URL 由 `data.gov.tw` 資料集 API 的 `distribution` 取得，不在程式內拼湊。
 - `data_snapshots` 只存正規化結果（實測 2.2–5.7 KB／筆，上游原始為 0.8–283 KB）；發布為原子操作，失敗保留最近有效快照。
 - 無有效快照時使用 `database/fixtures/opendata/*.demo.json`，`quality` 固定 `demo`，UI 必須顯示「示範情境」。

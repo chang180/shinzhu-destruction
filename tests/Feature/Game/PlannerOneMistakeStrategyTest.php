@@ -13,6 +13,10 @@ use App\Domain\Game\Simulation\Strategies\PlannerOneMistakeStrategy;
 use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
 use Tests\TestCase;
 
+/**
+ * P10-2.1 的失誤語意：只承認本關核心機制上明確可辨識的錯誤處理，
+ * 不把 planner 的次佳合法行動當失誤。
+ */
 class PlannerOneMistakeStrategyTest extends TestCase
 {
     private function neutral(): ScenarioModifiers
@@ -27,6 +31,11 @@ class PlannerOneMistakeStrategyTest extends TestCase
         return new PlannerOneMistakeStrategy($this->neutral(), app(CardCatalog::class));
     }
 
+    private function planner(): PlannerStrategy
+    {
+        return new PlannerStrategy($this->neutral(), app(CardCatalog::class));
+    }
+
     /**
      * @param  array<string, int>|null  $deck
      */
@@ -36,62 +45,149 @@ class PlannerOneMistakeStrategyTest extends TestCase
             ->run(app(LevelRepository::class)->get($levelId), $this->neutral(), $strategy, $seed, 'w0h0l0', $deck);
     }
 
-    public function test_another_copy_of_the_best_card_is_not_counted_as_a_mistake(): void
+    public function test_attacking_into_a_same_element_shield_when_a_bypass_exists_is_a_mechanic_mistake(): void
     {
-        // 4.0.0 noon-fold seed 11 第 3 回合（第一幕的熱盾不可打斷，窗口落在第二幕的水盾）：
-        // 最佳是 long-flow-2，排名第二是同招的 long-flow-3。
-        $report = $this->play('noon-fold', $this->strategy(), 11)->strategyReport;
+        // noon-fold seed 1 第 3 回合：第一幕的熱盾（16）還站著，planner 最佳是打水系繞過它。
+        $report = $this->play('noon-fold', $this->strategy(), 1)->strategyReport;
 
-        $this->assertSame(3, $report['turn']);
-        $this->assertSame('long-flow-2', $report['best']['card_id']);
-        $this->assertSame('long-flow-3', $report['legacy_second']['card_id']);
-        $this->assertTrue($report['legacy_second_same_semantics']);
         $this->assertSame(PlannerOneMistakeStrategy::STATUS_INJECTED, $report['status']);
-        $this->assertNotSame(PlannerOneMistakeStrategy::signature($report['best']), PlannerOneMistakeStrategy::signature($report['mistake']));
-        $this->assertSame('probe.land', $report['mistake']['skill_id']);
+        $this->assertSame(PlannerOneMistakeStrategy::KIND_WALKED_INTO_SHIELD, $report['mistake_kind']);
+        $this->assertSame(3, $report['turn']);
+        $this->assertSame('probe.water', $report['best']['skill_id']);
+        $this->assertSame('breach.heat', $report['mistake']['skill_id']);
+        $this->assertSame(['heat'], $report['context']['shielded_elements']);
+        $this->assertSame(16, $report['context']['shield_amount']);
     }
 
-    public function test_an_action_tied_with_the_best_score_is_not_a_strictly_worse_mistake(): void
+    public function test_switching_element_to_bypass_a_shield_is_never_the_mistake(): void
     {
-        // empty-cup seed 6 第 3 回合：breach.land 與 breach.heat 同分，真正的失誤要往下找。
-        $report = $this->play('empty-cup', $this->strategy(), 6)->strategyReport;
+        /*
+         * 同一局：擾序、換系進攻都是合理打法，不能被標成失誤。
+         * 唯一算失誤的是撞上那道熱盾。
+         */
+        $report = $this->play('noon-fold', $this->strategy(), 1)->strategyReport;
+        $shielded = $report['context']['shielded_elements'];
 
-        $this->assertTrue($report['legacy_second_tied']);
-        $this->assertFalse($report['legacy_second_same_semantics']);
-        $this->assertSame('breach.land', $report['best']['skill_id']);
-        $this->assertSame('probe.heat', $report['mistake']['skill_id']);
-        $this->assertSame(9.25, $report['score_delta']);
+        $mistakeElement = str_contains($report['mistake']['skill_id'], '.')
+            ? explode('.', $report['mistake']['skill_id'])[1]
+            : null;
+
+        $this->assertContains($mistakeElement, $shielded, '失誤必須是撞上站著的同系護盾');
+        $this->assertNotSame('probe.water', $report['mistake']['skill_id']);
+        $this->assertNotSame('breach.water', $report['mistake']['skill_id']);
     }
 
-    public function test_a_window_with_only_one_legal_play_is_marked_no_eligible_mistake_and_follows_the_planner(): void
+    public function test_a_correct_interrupt_is_never_labelled_the_mistake(): void
     {
-        // 全是水系破陣：第 3 回合（第一個可打斷預告）破陣還在冷卻，合法出牌只剩蓄勢。
-        $deck = ['spend-tide' => 15];
+        /*
+         * P10-2（p10-di-2）在這一局把 disrupt.water 標成失誤——那正是打斷可打斷水盾的
+         * 正確打法。新定義下它不可能是失誤。
+         */
+        $report = $this->play('noon-fold', $this->strategy(), 1)->strategyReport;
+
+        $this->assertNotSame('disrupt.water', $report['mistake']['skill_id']);
+    }
+
+    public function test_ignoring_an_interruptible_repair_the_player_could_stop_is_a_mechanic_mistake(): void
+    {
+        // empty-cup seed 1 第 3 回合（斷補幕）：可打斷的水系修復 19，planner 最佳就是去打斷。
+        $report = $this->play('empty-cup', $this->strategy(), 1)->strategyReport;
+
+        $this->assertSame(PlannerOneMistakeStrategy::STATUS_INJECTED, $report['status']);
+        $this->assertSame(PlannerOneMistakeStrategy::KIND_MISSED_INTERRUPT, $report['mistake_kind']);
+        $this->assertSame(3, $report['turn']);
+        $this->assertSame('disrupt.water', $report['best']['skill_id']);
+        $this->assertSame('repair', $report['context']['intent_type']);
+        $this->assertSame('water', $report['context']['intent_element']);
+        $this->assertSame(19, $report['context']['intent_magnitude']);
+
+        // 失誤必須是「不處理這個預告」，而不是另一張同樣能打斷的牌。
+        $this->assertNotSame('disrupt.water', $report['mistake']['skill_id']);
+    }
+
+    public function test_no_eligible_mistake_when_the_hand_can_never_make_a_clear_mechanic_error(): void
+    {
+        /*
+         * 牌組裡沒有水系擾序，所以 planner 永遠不可能「本來要打斷」；
+         * 第 1 關也沒有護盾。整局都沒有明確的機制錯誤可以注入。
+         */
+        $deck = ['long-flow' => 5, 'open-chill' => 5, 'trample-green' => 5];
 
         $mistake = $this->play('empty-cup', $this->strategy(), 1, $deck);
-        $planner = $this->play('empty-cup', new PlannerStrategy($this->neutral(), app(CardCatalog::class)), 1, $deck);
 
         $this->assertSame(PlannerOneMistakeStrategy::STATUS_NO_ELIGIBLE, $mistake->strategyReport['status']);
-        $this->assertSame(3, $mistake->strategyReport['turn']);
+        $this->assertNull($mistake->strategyReport['turn']);
+        $this->assertNull($mistake->strategyReport['mistake_kind']);
         $this->assertNull($mistake->strategyReport['mistake']);
+    }
+
+    public function test_a_game_without_an_eligible_mistake_plays_exactly_like_the_planner(): void
+    {
+        $deck = ['long-flow' => 5, 'open-chill' => 5, 'trample-green' => 5];
+
+        $mistake = $this->play('empty-cup', $this->strategy(), 1, $deck);
+        $planner = $this->play('empty-cup', $this->planner(), 1, $deck);
+
+        $this->assertSame(PlannerOneMistakeStrategy::STATUS_NO_ELIGIBLE, $mistake->strategyReport['status']);
         $this->assertSame($planner->actions, $mistake->actions);
+        $this->assertSame($planner->outcome, $mistake->outcome);
+        $this->assertSame($planner->coreRemaining, $mistake->coreRemaining);
+    }
+
+    public function test_the_same_level_deck_scenario_and_seed_reproduce_the_same_mistake(): void
+    {
+        foreach (['empty-cup', 'noon-fold'] as $levelId) {
+            $first = $this->play($levelId, $this->strategy(), 7);
+            $second = $this->play($levelId, $this->strategy(), 7);
+
+            $this->assertSame($first->strategyReport, $second->strategyReport, $levelId);
+            $this->assertSame($first->actions, $second->actions, $levelId);
+            $this->assertSame($first->outcome, $second->outcome, $levelId);
+            $this->assertSame($first->coreRemaining, $second->coreRemaining, $levelId);
+        }
     }
 
     public function test_injects_exactly_one_mistake_per_game_and_resets_between_seeds(): void
     {
         $strategy = $this->strategy();
-        $planner = new PlannerStrategy($this->neutral(), app(CardCatalog::class));
 
         foreach ([1, 2, 3] as $seed) {
-            $mistake = $this->play('empty-cup', $strategy, $seed);
-            $baseline = $this->play('empty-cup', $planner, $seed);
-            $turn = $mistake->strategyReport['turn'];
-            $index = $turn - 1;
+            $mistake = $this->play('noon-fold', $strategy, $seed);
+            $baseline = $this->play('noon-fold', $this->planner(), $seed);
+            $report = $mistake->strategyReport;
 
-            $this->assertSame(PlannerOneMistakeStrategy::STATUS_INJECTED, $mistake->strategyReport['status'], "seed {$seed}");
-            $this->assertSame(array_slice($baseline->actions, 0, $index), array_slice($mistake->actions, 0, $index), "seed {$seed}");
-            $this->assertSame($mistake->strategyReport['mistake']['skill_id'], $mistake->actions[$index]['skill_id'], "seed {$seed}");
+            $this->assertSame(PlannerOneMistakeStrategy::STATUS_INJECTED, $report['status'], "seed {$seed}");
+
+            $index = $this->indexOfTurn($mistake->actions, $report['turn']);
+
+            // 失誤之前和 planner 一模一樣，失誤那一手不同。
+            $this->assertSame(
+                array_slice($baseline->actions, 0, $index),
+                array_slice($mistake->actions, 0, $index),
+                "seed {$seed}"
+            );
+            $this->assertSame($report['mistake']['skill_id'], $mistake->actions[$index]['skill_id'], "seed {$seed}");
             $this->assertNotSame($baseline->actions[$index]['skill_id'], $mistake->actions[$index]['skill_id'], "seed {$seed}");
+
+            // 之後不再注入第二次。
+            $this->assertCount(1, array_filter(
+                [$report],
+                static fn (array $row): bool => $row['status'] === PlannerOneMistakeStrategy::STATUS_INJECTED,
+            ));
         }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $actions
+     */
+    private function indexOfTurn(array $actions, int $turn): int
+    {
+        foreach ($actions as $index => $action) {
+            if ($action['turn'] === $turn) {
+                return $index;
+            }
+        }
+
+        $this->fail("找不到第 {$turn} 回合的行動");
     }
 }

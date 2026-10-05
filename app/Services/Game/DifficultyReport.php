@@ -32,17 +32,19 @@ use InvalidArgumentException;
  */
 class DifficultyReport
 {
-    public const INDEX_VERSION = 'p10-di-2';
+    public const INDEX_VERSION = 'p10-di-3';
 
     public const INDEX_FORMULA = '0.35*(1-planner) + 0.25*(1-forecast_aware) + 0.25*(1-one_mistake_recovery) + 0.15*planner_winning_turn_budget';
 
     /**
-     * p10-di-1（P10-0）用 planner-one-mistake 的無條件勝率當第三項，而且失誤可能只是
-     * 同招的另一張實體牌。只為新舊對照保留，不作排序依據。
+     * 先前版本的第三項語意，只為說明用，不再由本報告計算：
+     * p10-di-1（P10-0）用無條件勝率且失誤可能只是同招另一張牌；
+     * p10-di-2（P10-0.1～P10-2）用配對恢復率，但失誤只要求「語義不同且分數嚴格較低」，
+     * 實測約七成不是機制錯誤。兩者的數字留在各自的階段報告，不能和 p10-di-3 混用。
      */
-    public const LEGACY_INDEX_VERSION = 'p10-di-1';
+    public const SUPERSEDED_INDEX_VERSIONS = ['p10-di-1', 'p10-di-2'];
 
-    public const ONE_MISTAKE_RECOVERY = 'paired by (level, deck, scenario, seed): recoveries_after_mistake / eligible_mistake_games; eligible = planner won and a semantically different, strictly lower-scored mistake was injected; pooled over the level';
+    public const ONE_MISTAKE_RECOVERY = 'paired by (level, deck, scenario, seed): recoveries_after_mistake / eligible_mistake_games; eligible = planner won and one mechanic mistake was injected (missed_interrupt: planner would interrupt an interruptible repair/shield/overhaul and we did not; walked_into_shield: planner bypassed a standing same-element shield and we attacked into it); pooled over the level';
 
     public const SUITES = ['quick', 'full'];
 
@@ -75,8 +77,7 @@ class DifficultyReport
     public const MISTAKE_COLUMNS = [
         'level', 'deck', 'scenario', 'seed', 'planner_won', 'won_after_mistake', 'status', 'turn',
         'best_signature', 'best_card', 'best_score', 'mistake_signature', 'mistake_card', 'mistake_score',
-        'score_delta', 'legacy_second_signature', 'legacy_second_card', 'legacy_second_same_semantics',
-        'legacy_second_tied',
+        'score_delta', 'mistake_kind', 'intent_type', 'intent_element', 'shielded_elements',
     ];
 
     private const WEAK_STRATEGIES = ['random', 'single-water', 'legacy-cycle'];
@@ -274,8 +275,8 @@ class DifficultyReport
                 'index_version' => self::INDEX_VERSION,
                 'index_formula' => self::INDEX_FORMULA,
                 'one_mistake_recovery' => self::ONE_MISTAKE_RECOVERY,
-                'legacy_index_version' => self::LEGACY_INDEX_VERSION,
-                'legacy_index_note' => 'difficulty_index_p10_di_1 uses the unconditional planner-one-mistake win rate; kept only for comparison',
+                'superseded_index_versions' => self::SUPERSEDED_INDEX_VERSIONS,
+                'superseded_index_note' => 'p10-di-1 and p10-di-2 used different one-mistake definitions and are not comparable with p10-di-3; their numbers stay in the P10-0 and P10-2 reports. difficulty_index_unconditional_variant substitutes the unconditional planner-one-mistake win rate into the same formula and is only a sanity check, not the index.',
                 'weighting' => 'every (scenario, deck) cell of a level has equal weight',
                 'solver' => 'separate offline command game:solve (P10-1); planner results are not a solvability proof',
                 'level_phase_metrics' => self::LEVEL_PHASE_METRICS,
@@ -350,9 +351,8 @@ class DifficultyReport
             'eligible_mistake_games' => 0,
             'recoveries_after_mistake' => 0,
             'no_eligible_mistake_games' => 0,
-            'window_not_reached_games' => 0,
-            'legacy_second_same_semantics' => 0,
-            'legacy_second_tied' => 0,
+            'missed_interrupt_mistakes' => 0,
+            'walked_into_shield_mistakes' => 0,
         ];
         $deltas = [];
         $terminalBest = 0;
@@ -367,9 +367,8 @@ class DifficultyReport
             $counts['planner_baseline_wins'] += $baselineWon ? 1 : 0;
             $counts['mistakes_injected'] += $injected ? 1 : 0;
             $counts['no_eligible_mistake_games'] += $status === PlannerOneMistakeStrategy::STATUS_NO_ELIGIBLE ? 1 : 0;
-            $counts['window_not_reached_games'] += $status === PlannerOneMistakeStrategy::STATUS_WINDOW_NOT_REACHED ? 1 : 0;
-            $counts['legacy_second_same_semantics'] += ($report['legacy_second_same_semantics'] ?? false) ? 1 : 0;
-            $counts['legacy_second_tied'] += ($report['legacy_second_tied'] ?? false) ? 1 : 0;
+            $counts['missed_interrupt_mistakes'] += ($report['mistake_kind'] ?? null) === PlannerOneMistakeStrategy::KIND_MISSED_INTERRUPT ? 1 : 0;
+            $counts['walked_into_shield_mistakes'] += ($report['mistake_kind'] ?? null) === PlannerOneMistakeStrategy::KIND_WALKED_INTO_SHIELD ? 1 : 0;
 
             if ($baselineWon && $injected) {
                 $counts['eligible_mistake_games']++;
@@ -428,10 +427,12 @@ class DifficultyReport
             'mistake_card' => $report['mistake']['card_id'] ?? null,
             'mistake_score' => $report['mistake']['score'] ?? null,
             'score_delta' => $report['score_delta'] ?? null,
-            'legacy_second_signature' => $signature($report['legacy_second'] ?? null),
-            'legacy_second_card' => $report['legacy_second']['card_id'] ?? null,
-            'legacy_second_same_semantics' => $report['legacy_second_same_semantics'] ?? null,
-            'legacy_second_tied' => $report['legacy_second_tied'] ?? null,
+            'mistake_kind' => $report['mistake_kind'] ?? null,
+            'intent_type' => $report['context']['intent_type'] ?? null,
+            'intent_element' => $report['context']['intent_element'] ?? null,
+            'shielded_elements' => isset($report['context']['shielded_elements'])
+                ? implode('+', $report['context']['shielded_elements'])
+                : null,
         ];
     }
 
@@ -577,7 +578,7 @@ class DifficultyReport
     {
         $planner = $strategies['planner']['weighted_win_rate'] ?? null;
         $forecast = $strategies['forecast-aware']['weighted_win_rate'] ?? null;
-        $legacyMistake = $strategies['planner-one-mistake']['weighted_win_rate'] ?? null;
+        $unconditionalMistake = $strategies['planner-one-mistake']['weighted_win_rate'] ?? null;
 
         $mistakeCells = array_values(array_filter($cells, static fn (array $cell): bool => $cell['strategy'] === 'planner-one-mistake'));
         $eligible = array_sum(array_column($mistakeCells, 'eligible_mistake_games'));
@@ -605,11 +606,11 @@ class DifficultyReport
             'eligible_mistake_games' => $eligible,
             'recoveries_after_mistake' => array_sum(array_column($mistakeCells, 'recoveries_after_mistake')),
             'no_eligible_mistake_games' => array_sum(array_column($mistakeCells, 'no_eligible_mistake_games')),
-            'window_not_reached_games' => array_sum(array_column($mistakeCells, 'window_not_reached_games')),
-            'legacy_second_same_semantics' => array_sum(array_column($mistakeCells, 'legacy_second_same_semantics')),
-            'legacy_second_tied' => array_sum(array_column($mistakeCells, 'legacy_second_tied')),
-            'one_mistake_unconditional_win_rate' => $legacyMistake,
-            'difficulty_index_p10_di_1' => $index($legacyMistake),
+            'missed_interrupt_mistakes' => array_sum(array_column($mistakeCells, 'missed_interrupt_mistakes')),
+            'walked_into_shield_mistakes' => array_sum(array_column($mistakeCells, 'walked_into_shield_mistakes')),
+            // 無條件勝率只供參考：它把「沒有可注入失誤」的局也算進分母，不是恢復率。
+            'one_mistake_unconditional_win_rate' => $unconditionalMistake,
+            'difficulty_index_unconditional_variant' => $index($unconditionalMistake),
         ];
     }
 
