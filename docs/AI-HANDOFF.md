@@ -1,5 +1,9 @@
 # AI 派工與階段交接規範
 
+## 2026-10-05 P10-1 三幕引擎交接
+
+P10-1 已完成三幕引擎前置，但**沒有任何關卡變成真正三幕**。關卡幕次存在 `BattleState::$levelPhaseId`（`state.level_phase_id`、事件 `level_phase_change`），和第 5 關重整的機制狀態 `state.phase`（standby／overhaul、事件 `phase_change`）分開；設定改為 `level_phases`（預告表在幕內）與 `mechanic_states`。觸發只有 `turn_gte`／`core_lte`／`flag_true`／`any_of`，載入時驗證。五關目前各一幕 `main`，等價證據見 `tests/Fixtures/p10-1/equivalence.json` 與 `LevelPhaseEquivalenceTest`。新增離線 solver `php artisan game:solve`，只證明存在解，不是玩家策略。P10-0／P10-0.1 報告裡「worktree 逐位元相同」的舊比對方法有誤（`vendor/` 符號連結），已用正確方法重做且結論成立。下一包 P10-2，入口見 [P10-1 報告](phase-reports/P10-1.md)；未部署。
+
 ## 2026-10-05 P10-0 難度量測交接
 
 依 [P10 計畫](P10-DIFFICULTY-PROGRESSION-PLAN.md) 完成 P10-0：新增 `php artisan game:difficulty-report`（`--suite=quick|full`、`--seeds`、`--json`、`--csv`），量測五關 × 9／27 情境 × 合法獎勵牌組 × 7 策略，含新策略 `forecast-aware`、`planner-one-mistake` 與逐關 `difficulty_index`。規則、關卡、城市意圖與 `rules_version 3.1.0` 完全未改；`game:simulate` 輸出與改動前逐位元相同。3.1.0 基線證實曲線不單調（第 2→3、第 4→5 關 difficulty_index 下降），且一次失誤幾乎不影響勝率。`solver` 未實作，planner 不能當可解性證明。下一包是 P10-1（三幕引擎與設定驗證器），入口與數字見 [P10-0 報告](phase-reports/P10-0.md)；本包已提交 `caf5df9` 並推送 `main`，未部署。

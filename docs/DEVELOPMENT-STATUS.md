@@ -18,6 +18,7 @@
 | P07 行動複盤與反事實比較 | 待驗收 | [P07 報告](phase-reports/P07.md)：新增規則式反事實比較服務（`CounterfactualComparator`＋`POST /api/v1/runs/{run}/counterfactual`），換掉一次已結算的決策後交給模擬策略接手續局；戰報頁新增「如果這回合改蓄勢」即時比較。兩套獨立結局文案／畫面／音效確認為 P04～P06 已完成。全五關各一勝一敗共 10 份機器策略樣本已抽查。172 個後端測試（新增 8 個）、41 個前端純邏輯測試、`npm run build` 全部通過。**真人試玩、手機 viewport 檢查與音效試聽仍待補** |
 | P08 全面驗收 | 進行中 | [P08 報告](phase-reports/P08.md)：依使用者選定的方案，同張實體牌只能留到下一手一次，規則升至 `3.1.0`；每回合換 1 張與最多留 2 張不變。手牌、前端及五關策略矩陣自動檢查已通過，真正的手機與真人難度回測待補。[易用性計畫](P08-USABILITY-REVISION-PLAN.md)的字級、卡牌用途／目標與結算首屏已實作；47 項前端測試、五關 10 份引擎樣本與本機勝敗／桌機／390px／320px 畫面檢查通過，見 [QA 紀錄](QA-REPORT.md)。真人、手機實機與其餘 P08 驗收照原計畫追蹤 |
 | P10-0 難度量測與 3.1.0 基線 | 待驗收 | [P10-0 報告](phase-reports/P10-0.md)：新增 `game:difficulty-report`（9／27 情境 × 合法獎勵牌組 × 7 策略）、`forecast-aware` 與 `planner-one-mistake` 策略及 difficulty_index；未改 `config/game.php` 與 `rules_version 3.1.0`。基線顯示五關難度曲線不單調（第 3 關比第 2 關易、第 5 關比第 4 關易）。P10-0.1 修正失誤量測（語義不同且分數嚴格較低、同 seed 配對恢復率、`p10-di-2`、拒絕非法 CLI 選項），結論不變。`solver` 未實作，列為 P10-1 前置；真人試玩待補 |
+| P10-1 三幕引擎與設定驗證器 | 待驗收 | [P10-1 報告](phase-reports/P10-1.md)：typed level phase（`level_phases`、四種觸發、載入時驗證）、與第 5 關重整機制狀態分離的 `level_phase_id`／`level_phase_change`、API 幕次欄位；五關包成單一等價幕次，90 局＋重整＋舊存檔＋反事實樣本逐項相同，`game:simulate` 與 p10-di-2 quick 基線逐位元相同。新增離線 solver（`game:solve`），600 個代表格全數可解並重播。`rules_version 3.1.0` 不變；尚無真正三幕內容（P10-2） |
 | P09 正式部署 | 未開始 | Hostinger 實測、備份還原及 README 切換 |
 
 ## 最新實作基線

@@ -1,7 +1,7 @@
 # P10 正式上線後難度曲線與關卡三幕化計畫
 
 - 建立日期：2026-10-05
-- 狀態：P10-0 已交付待驗收（[報告](phase-reports/P10-0.md)）；P10-1 起尚未動工
+- 狀態：P10-0、P10-1 已交付待驗收（[P10-0](phase-reports/P10-0.md)、[P10-1](phase-reports/P10-1.md)）；P10-2 起尚未動工
 - 基準：`rules_version 3.1.0`、五關正式版已部署
 - 目的：修正五關難度沒有穩定遞增、每關只有單段戰鬥而缺少內部節奏的問題
 - 範圍：Laravel／Vue 正式版；`docs/` GitHub Pages 歷史原型不修改
@@ -121,6 +121,50 @@ difficulty_index =
 戰鬥畫面加入不遮擋手牌的「第幾幕／本幕目標／本幕新壓力」區塊。幕切換只播放短提示，不占用下一回合 30 秒。完整預告仍顯示每回合會發生什麼，不能只寫抽象名稱。
 
 戰報增加：玩家在哪一幕結束、各幕是否正確處理核心機制、哪一幕開始失去節奏。不得用「進入第三幕」本身當作失敗原因，仍需引用實際修復、護盾、逾時、打斷與傷害事件。
+
+### 4.3 P10-1 已實作的幕次契約（2026-10-05）
+
+P10-1 建立了下列契約；P10-2 起的三幕內容必須沿用，改動需先更新本節與測試。
+
+**設定（`config/game.php`）**
+
+```php
+'level_phases' => [
+    [
+        'id' => 'main',                    // 穩定 ID，同一關不可重複
+        'label' => '全關',                 // 顯示名稱
+        'objective' => '…',               // 本幕目標（公開）
+        'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+        'intents' => [3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 14, 'interruptible' => true]],
+        'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
+    ],
+],
+'mechanic_states' => ['standby', 'overhaul'],   // 原 'phases'：只給第 5 關重整機制用
+```
+
+- 預告表與預設意圖在**各幕之內**，關卡頂層不再有 `intents`／`default_intent`。
+- 觸發條件只有 `turn_gte`（即將開始的回合 ≥ value）、`core_lte`（核心 ≤ value）、`flag_true`（`first_interrupt_done`、`overhaul_started`、`overhaul_stopped`，且必須是這一關機制真的會設定的旗標）、`any_of`（非空子條件）。不接受其他欄位或型別。
+- 載入時由 `LevelPhaseValidator` 檢查；不合法即丟 `InvalidLevelConfigException`（reason code：`phase_missing_first`、`phase_duplicate_id`、`phase_first_not_initial`、`trigger_unknown_type`、`trigger_unknown_field`、`trigger_field_type`、`trigger_unknown_flag`、`trigger_flag_not_settable`、`trigger_empty_any_of`、`phase_order_regression`、`phase_unreachable`、`phase_missing_default_intent`、`intent_invalid`、`intent_turn_out_of_range`）。
+- 驗證器只判定**結構上不可達**（回合超過上限、`core_lte` < 1、這關不會設定的旗標）；`core_lte`／`flag_true` 在某一局是否真的會到達屬執行期，不是設定錯誤。
+
+**狀態與事件**
+
+| 概念 | 欄位 | 事件 |
+|---|---|---|
+| 關卡幕次 | `BattleState::$levelPhaseId`／`state.level_phase_id`（舊存檔為 null，視為第一幕） | `level_phase_change`：before `{level_phase_id}`、after `{level_phase_id, label, objective, from_turn}`、reason_code `level_phase_<trigger type>` |
+| 機制狀態（第 5 關重整） | `BattleState::$phase`／`state.phase`（standard／standby／overhaul，語意不變） | `phase_change`：`overhaul_started`／`overhaul_stopped`／`overhaul_completed`（不變） |
+
+切幕時點固定在 `advanceTurn()` 開頭：玩家行動 → 城市回應 → 效果期限 → **判定切幕並記錄事件** → 回合 +1 → 產生下一回合預告。每個邊界最多前進一幕，不回退。已展示的本回合預告不替換；切幕不重置任何數值、手牌、牌堆、護盾、seed 或截止時間語意。
+
+**對外 API**
+
+- `GET /api/v1/levels`：每關新增 `phases`（`id`、`order`、`label`、`objective`、`starts_when`、`starts_when_summary`、`next_phase_summary`）。
+- `GET /api/v1/runs/{run}`：新增 `level_phase`（同上欄位＋`total`），`state` 新增 `level_phase_id`。既有欄位語意不變。
+- 尚未處理：多幕關卡的靜態 `forecast` 目前一律用第一幕的預告表，P10-2 加入第二幕時必須一併決定預告怎麼呈現。
+
+**模擬量測**：`SimulationResult::$phaseChanges` 只記機制狀態，新增的 `$levelPhaseChanges` 只記幕次；P10 難度報告的 JSON／CSV 在 P10-1 刻意不加欄位，以保持 p10-di-2 quick 基線逐位元相同，幕次欄位由第一個多幕關卡（P10-2）加入。
+
+**可解性 solver**：`php artisan game:solve`（`App\Domain\Game\Solver\SolvabilitySolver`）。見 [P10-1 報告](phase-reports/P10-1.md)。
 
 ## 5. AI Agent 執行工作包
 

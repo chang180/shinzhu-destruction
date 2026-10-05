@@ -9,7 +9,8 @@ final readonly class SimulationResult
     /**
      * @param  list<array{turn: int, skill_id: string, target: string|null}>  $actions
      * @param  array<string, int>  $metrics  由結算事件統計的量測欄位，見 BattleSimulator::emptyMetrics()
-     * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges
+     * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges  機制狀態變化（第 5 關重整 standby／overhaul），不是幕次
+     * @param  list<array{turn: int, from: string|null, to: string, reason_code: string}>  $levelPhaseChanges  關卡幕次變化（P10-1）
      * @param  array<string, mixed>  $strategyReport  InstrumentedStrategy 的逐局紀錄（例如失誤注入）
      */
     public function __construct(
@@ -27,6 +28,7 @@ final readonly class SimulationResult
         public array $metrics = [],
         public array $phaseChanges = [],
         public array $strategyReport = [],
+        public array $levelPhaseChanges = [],
     ) {}
 
     public function won(): bool

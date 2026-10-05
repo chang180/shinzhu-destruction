@@ -1,0 +1,121 @@
+<?php
+
+namespace Tests\Feature\Game;
+
+use App\Domain\Game\BattleEngine;
+use App\Domain\Game\BattleState;
+use App\Domain\Game\Cards\CardCatalog;
+use App\Domain\Game\LevelRepository;
+use App\Domain\Game\Scenario\ScenarioModifiers;
+use App\Domain\Game\Simulation\Strategies\ForecastAwareStrategy;
+use App\Domain\Game\Simulation\Strategies\PlannerStrategy;
+use App\Domain\Game\Simulation\Strategies\RandomStrategy;
+use App\Domain\Game\Simulation\Strategy;
+use Tests\TestCase;
+
+/**
+ * P10-1 把五關包成單一等價關卡幕次；規則行為必須和動工前逐項相同。
+ *
+ * 期望值來自 P10-1 動工前錄下的 tests/Fixtures/p10-1/equivalence.json（見 meta.generated_at_commit），
+ * 不是由現在的程式算出來的。公開局面只比對當時就存在的欄位。
+ */
+class LevelPhaseEquivalenceTest extends TestCase
+{
+    /**
+     * @var array<string, mixed>
+     */
+    private static array $fixture = [];
+
+    private const SCENARIOS = ['low' => -0.15, 'mid' => 0.0, 'high' => 0.15];
+
+    private function fixture(): array
+    {
+        return self::$fixture = self::$fixture ?: json_decode((string) file_get_contents(base_path('tests/Fixtures/p10-1/equivalence.json')), true);
+    }
+
+    private function recorder(): EquivalenceRecorder
+    {
+        return new EquivalenceRecorder(app(BattleEngine::class));
+    }
+
+    private function strategy(string $name, ScenarioModifiers $modifiers): Strategy
+    {
+        return match ($name) {
+            'planner' => new PlannerStrategy($modifiers, app(CardCatalog::class)),
+            'random' => new RandomStrategy,
+            'forecast-aware' => new ForecastAwareStrategy(app(CardCatalog::class)),
+        };
+    }
+
+    public function test_every_level_scenario_strategy_and_seed_replays_the_recorded_actions_events_and_state(): void
+    {
+        $fixture = $this->fixture();
+
+        foreach ($fixture['games'] as $key => $expected) {
+            [$levelId, $scenario, $strategy, $seed] = explode('|', $key);
+            $modifiers = EquivalenceRecorder::modifiers(self::SCENARIOS[$scenario]);
+
+            $actual = $this->recorder()->record(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy($strategy, $modifiers), (int) $seed, $fixture['meta']['public_keys']);
+
+            $this->assertSame($expected, $actual, $key);
+        }
+    }
+
+    public function test_full_event_sequences_match_for_every_level(): void
+    {
+        $fixture = $this->fixture();
+
+        foreach ($fixture['full_events'] as $levelId => $expected) {
+            $modifiers = EquivalenceRecorder::modifiers(0.0);
+
+            $actual = $this->recorder()->record(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy('planner', $modifiers), 1, $fixture['meta']['public_keys'], true);
+
+            $this->assertSame($expected, $actual, $levelId);
+        }
+    }
+
+    public function test_stored_night_overhaul_start_stop_and_completion_samples_are_unchanged(): void
+    {
+        $fixture = $this->fixture();
+
+        foreach ($fixture['overhaul'] as $kind => $expected) {
+            $modifiers = EquivalenceRecorder::modifiers(self::SCENARIOS[$expected['scenario']]);
+            $sample = ['scenario' => $expected['scenario'], 'strategy' => $expected['strategy'], 'seed' => $expected['seed']];
+
+            $actual = $sample + $this->recorder()->record(app(LevelRepository::class)->get('stored-night'), $modifiers, $this->strategy($expected['strategy'], $modifiers), $expected['seed'], $fixture['meta']['public_keys'], true);
+
+            $this->assertSame($expected, $actual, $kind);
+            $this->assertContains('overhaul_'.match ($kind) {
+                'stopped' => 'stopped',
+                'completed' => 'completed',
+                'started_then_won' => 'started',
+            }, array_column($actual['events'], 'reason_code'));
+            $this->assertNotContains('level_phase_change', array_column($actual['events'], 'type'));
+        }
+    }
+
+    public function test_a_save_written_before_level_phases_restores_and_continues_identically(): void
+    {
+        $fixture = $this->fixture()['legacy_save'];
+        $modifiers = EquivalenceRecorder::modifiers(0.0);
+        $this->assertArrayNotHasKey('level_phase_id', $fixture['state']);
+
+        $restored = BattleState::fromArray($fixture['state']);
+        $actual = $this->recorder()->record(app(LevelRepository::class)->get('stored-night'), $modifiers, $this->strategy('planner', $modifiers), 1, $this->fixture()['meta']['public_keys'], false, $restored);
+
+        $this->assertSame(array_diff_key($fixture, ['level' => 1, 'seed' => 1, 'state' => 1]), $actual);
+        $this->assertSame($fixture['state'], EquivalenceRecorder::pick($restored->toArray(), array_keys($fixture['state'])));
+    }
+
+    public function test_counterfactual_continuations_are_unchanged(): void
+    {
+        foreach ($this->fixture()['counterfactual'] as $key => $expected) {
+            [$levelId, $decision] = explode('|', $key);
+            $modifiers = EquivalenceRecorder::modifiers(0.0);
+
+            $actual = $this->recorder()->counterfactual(app(LevelRepository::class)->get($levelId), $modifiers, $this->strategy('planner', $modifiers), 1, (int) $decision);
+
+            $this->assertSame($expected, $actual, $key);
+        }
+    }
+}

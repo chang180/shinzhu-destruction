@@ -342,12 +342,20 @@ return [
             ],
             'apostle_power' => 'interrupt_refund',
             'apostle_power_value' => 2,
-            'intents' => [
-                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 14, 'interruptible' => true],
-                6 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+            'level_phases' => [
+                [
+                    'id' => 'main',
+                    'label' => '全關',
+                    'objective' => '現在出破陣，或留擾序等修復窗口。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+                    'intents' => [
+                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 14, 'interruptible' => true],
+                        6 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
+                ],
             ],
-            'default_intent' => ['type' => 'reinforce', 'element' => 'water', 'magnitude' => 4, 'interruptible' => false],
-            'phases' => [],
+            'mechanic_states' => [],
         ],
 
         'noon-fold' => [
@@ -383,15 +391,23 @@ return [
             ],
             'apostle_power' => 'interrupt_refund',
             'apostle_power_value' => 2,
-            'intents' => [
-                2 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
-                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 20, 'interruptible' => true],
-                4 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
-                6 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                7 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
-                8 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
+            'level_phases' => [
+                [
+                    'id' => 'main',
+                    'label' => '全關',
+                    'objective' => '留強牌等護盾退場，或直接換一系繞過去。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+                    'intents' => [
+                        2 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
+                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 20, 'interruptible' => true],
+                        4 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+                        6 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                        7 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
+                        8 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 18, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 4, 'interruptible' => false],
+                ],
             ],
-            'default_intent' => ['type' => 'reinforce', 'element' => 'heat', 'magnitude' => 4, 'interruptible' => false],
             'reward' => [
                 'prompt' => '折晝結束。晏沉讓你把一張試探換成一張真正的手段——只能挑一張，牌組仍然是 15 張。',
                 'options' => [
@@ -399,7 +415,7 @@ return [
                     'smoke-screen' => ['add' => 'smoke-screen', 'remove' => 'open-chill', 'style' => '干擾'],
                 ],
             ],
-            'phases' => [],
+            'mechanic_states' => [],
         ],
 
         'meter-feast' => [
@@ -437,16 +453,24 @@ return [
             'apostle_power' => 'pulse_combo_refund',
             'apostle_power_value' => 1,
             'pulse_turns' => [4, 8],
-            'intents' => [
-                2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
-                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
-                5 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
-                6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                7 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
-                9 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
+            'level_phases' => [
+                [
+                    'id' => 'main',
+                    'label' => '全關',
+                    'objective' => '為脈衝回合留牌、留惡意，並決定何時交出終招。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+                    'intents' => [
+                        2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 16, 'interruptible' => true],
+                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
+                        5 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 16, 'interruptible' => true],
+                        6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                        7 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
+                        9 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 22, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 4, 'interruptible' => false],
+                ],
             ],
-            'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 4, 'interruptible' => false],
-            'phases' => [],
+            'mechanic_states' => [],
         ],
 
         'mirror-shade' => [
@@ -487,12 +511,20 @@ return [
                 'magnitude' => 20,
                 'from_turn' => 2,
             ],
-            'intents' => [
-                3 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                6 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
-                9 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
+            'level_phases' => [
+                [
+                    'id' => 'main',
+                    'label' => '全關',
+                    'objective' => '誘出城市的反制，再換系打它沒防到的那一邊。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+                    'intents' => [
+                        3 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                        6 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
+                        9 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 22, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'shield', 'element' => 'land', 'magnitude' => 12, 'interruptible' => true],
+                ],
             ],
-            'default_intent' => ['type' => 'shield', 'element' => 'land', 'magnitude' => 12, 'interruptible' => true],
             'reward' => [
                 'prompt' => '鏡蔭讀不到的那一手，晏沉替你留了兩張。挑一張換進牌組，準備最後一關。',
                 'options' => [
@@ -500,7 +532,7 @@ return [
                     'sluice-jam' => ['add' => 'sluice-jam', 'remove' => 'long-flow', 'style' => '干擾'],
                 ],
             ],
-            'phases' => [],
+            'mechanic_states' => [],
         ],
 
         'stored-night' => [
@@ -545,17 +577,25 @@ return [
                 'repair_magnitude' => 48,
                 'required_interrupts' => 2,
             ],
-            'intents' => [
-                2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
-                3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
-                5 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
-                6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 20, 'interruptible' => true],
-                8 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 22, 'interruptible' => true],
-                10 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
-                11 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 24, 'interruptible' => true],
+            'level_phases' => [
+                [
+                    'id' => 'main',
+                    'label' => '全關',
+                    'objective' => '以兩次不同系干擾中止重整，或集中輸出搶先結束。',
+                    'starts_when' => ['type' => 'turn_gte', 'value' => 1],
+                    'intents' => [
+                        2 => ['type' => 'shield', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
+                        3 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 18, 'interruptible' => true],
+                        5 => ['type' => 'shield', 'element' => 'land', 'magnitude' => 18, 'interruptible' => true],
+                        6 => ['type' => 'repair', 'element' => 'land', 'magnitude' => 20, 'interruptible' => true],
+                        8 => ['type' => 'repair', 'element' => 'heat', 'magnitude' => 22, 'interruptible' => true],
+                        10 => ['type' => 'shield', 'element' => 'heat', 'magnitude' => 20, 'interruptible' => true],
+                        11 => ['type' => 'repair', 'element' => 'water', 'magnitude' => 24, 'interruptible' => true],
+                    ],
+                    'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 5, 'interruptible' => false],
+                ],
             ],
-            'default_intent' => ['type' => 'reinforce', 'element' => 'land', 'magnitude' => 5, 'interruptible' => false],
-            'phases' => ['standby', 'overhaul'],
+            'mechanic_states' => ['standby', 'overhaul'],
         ],
     ],
 ];

@@ -52,3 +52,7 @@ Since rules_version 3.1.0, a physical card kept into the next hand cannot be kep
 
 ## Current game rule version
 The 3.0.0 city-rules section above records the P05 baseline. Current rules_version is 3.1.0 after the P08 consecutive keep limit; consult config/game.php and docs/BALANCE.md for the current version. Old 3.0.0 runs remain readable/replayable but cannot accept new actions.
+
+## Level phases (acts) are separate from the overhaul mechanic state
+Since P10-1, BattleState::$phase / state.phase / phase_change events mean only the level MECHANIC state (stored-night standby/overhaul, others 'standard'); config key is `mechanic_states`. Level acts live in BattleState::$levelPhaseId (`level_phase_id`, null in pre-P10-1 saves = first phase) and emit `level_phase_change`. Never reuse `phase` for acts and never count overhaul_started as an act change.
+Acts are configured as `level_phases` (id, label, objective, starts_when, intents, default_intent); intents live inside phases, not at level top. Triggers are only turn_gte/core_lte/flag_true/any_of, validated at load by LevelPhaseValidator (InvalidLevelConfigException). Transition happens in advanceTurn: after city response and expiry, before turn++ and next intent; at most one step per boundary, never backwards; turn_gte compares the upcoming turn. The already shown intent is never replaced and nothing else is reset.

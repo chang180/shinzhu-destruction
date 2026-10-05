@@ -82,6 +82,7 @@ class BattleSimulator
         $counter = 0;
         $metrics = self::emptyMetrics();
         $phaseChanges = [];
+        $levelPhaseChanges = [];
 
         if ($strategy instanceof InstrumentedStrategy) {
             $strategy->beginGame();
@@ -95,7 +96,7 @@ class BattleSimulator
                     $level,
                     $modifiers,
                 );
-                $this->measure($state, $result, $metrics, $phaseChanges);
+                $this->measure($state, $result, $metrics, $phaseChanges, $levelPhaseChanges);
                 $state = $result->state;
 
                 continue;
@@ -136,7 +137,7 @@ class BattleSimulator
                 'skill_id' => $choice['skill_id'] ?? null,
                 'target' => $choice['target'] ?? null,
             ];
-            $this->measure($state, $result, $metrics, $phaseChanges);
+            $this->measure($state, $result, $metrics, $phaseChanges, $levelPhaseChanges);
             $state = $result->state;
         }
 
@@ -158,6 +159,7 @@ class BattleSimulator
             maxTurns: $level->maxTurns,
             metrics: $metrics,
             phaseChanges: $phaseChanges,
+            levelPhaseChanges: $levelPhaseChanges,
             strategyReport: $strategy instanceof InstrumentedStrategy ? $strategy->gameReport() : [],
         );
     }
@@ -197,10 +199,24 @@ class BattleSimulator
      * （最後一項在對局結束時另計）。
      *
      * @param  array<string, int>  $metrics
+     *                                       機制狀態（$state->phase，第 5 關重整）與關卡幕次（$state->levelPhaseId）分開記錄，
+     *                                       重整啟動不會被算成進入下一幕。
      * @param  list<array{turn: int, from: string, to: string, reason_code: string}>  $phaseChanges
+     * @param  list<array{turn: int, from: string|null, to: string, reason_code: string}>  $levelPhaseChanges
      */
-    private function measure(BattleState $before, TurnResult $result, array &$metrics, array &$phaseChanges): void
+    private function measure(BattleState $before, TurnResult $result, array &$metrics, array &$phaseChanges, array &$levelPhaseChanges): void
     {
+        foreach ($result->events as $event) {
+            if ($event->type === 'level_phase_change') {
+                $levelPhaseChanges[] = [
+                    'turn' => $before->turn,
+                    'from' => $event->before['level_phase_id'] ?? null,
+                    'to' => $event->after['level_phase_id'],
+                    'reason_code' => $event->reasonCode,
+                ];
+            }
+        }
+
         $pendingBreach = false;
 
         foreach ($result->events as $event) {

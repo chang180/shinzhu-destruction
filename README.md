@@ -8,7 +8,7 @@
 
 - [分階段開發計畫](docs/DEVELOPMENT-PLAN.md)：P00～P09 依賴、交付與驗收，可逐階段派給其他 AI。
 - [P08 試玩回饋改版計畫](docs/P08-USABILITY-REVISION-PLAN.md)：字級、卡牌用途／目標說明與結算首屏已實作；同張牌不能連續留的規則已推送。自動與本機畫面檢查見 [P08 QA 紀錄](docs/QA-REPORT.md)，真人回測待補。
-- [P10 難度曲線計畫](docs/P10-DIFFICULTY-PROGRESSION-PLAN.md)：P10-0 已建立 `game:difficulty-report` 與 3.1.0 難度基線（曲線不單調、規則未改），見 [P10-0 報告](docs/phase-reports/P10-0.md)；P10-1 起才動關卡。
+- [P10 難度曲線計畫](docs/P10-DIFFICULTY-PROGRESSION-PLAN.md)：P10-0 已建立 `game:difficulty-report` 與 3.1.0 難度基線（曲線不單調、規則未改），見 [P10-0 報告](docs/phase-reports/P10-0.md)；P10-1 已建立幕次引擎（五關目前各一幕、行為等價）與離線可解性 solver（`game:solve`），見 [P10-1 報告](docs/phase-reports/P10-1.md)；P10-2 起才動關卡。
 - [技術規格](docs/TECHNICAL-SPEC.md)：版本、Boost 非互動全選、SQLite、資料來源及 Hostinger 部署。
 - [資料契約](docs/DATA-CONTRACT.md)：三個部會來源的正規化快照欄位、單位、品質門檻、失敗分類與備援。
 - [平衡鎖版](docs/BALANCE.md)：`rules_version`、技能表、傷害公式、情境修正換算與策略矩陣驗收。

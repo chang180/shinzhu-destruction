@@ -3,9 +3,11 @@
 namespace App\Http\Resources\V1;
 
 use App\Domain\Game\BattleEngine;
+use App\Domain\Game\BattleState;
 use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\Element;
 use App\Domain\Game\LevelRepository;
+use App\Domain\Game\Phases\LevelPhaseResolver;
 use App\Models\Run;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -43,6 +45,9 @@ class RunResource extends JsonResource
             'version' => $this->version,
             'outcome' => $this->outcome->value,
             'state' => $state->toPublicArray(),
+            // 關卡幕次（P10-1）。和 state.phase（第 5 關重整的機制狀態）是兩件事；
+            // 舊存檔沒有 state.level_phase_id 時視為第一幕。
+            'level_phase' => $levels->has($this->level_id) ? $this->levelPhase($levels, $state) : null,
             'compatible' => $compatible,
             'available_actions' => $compatible ? $engine->availableActions($state) : [],
             'cards' => $cards->toArray(),
@@ -60,6 +65,18 @@ class RunResource extends JsonResource
             // 不用自己的時鐘判定逾時。
             'server_time' => Carbon::now()->toIso8601ZuluString('millisecond'),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function levelPhase(LevelRepository $levels, BattleState $state): array
+    {
+        $level = $levels->get($this->level_id);
+        $index = LevelPhaseResolver::index($level, $state);
+
+        return $level->levelPhases[$index]->toPublicArray($index + 1, $level->levelPhases[$index + 1] ?? null)
+            + ['total' => count($level->levelPhases)];
     }
 
     /**

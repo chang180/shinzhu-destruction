@@ -2,6 +2,10 @@
 
 namespace App\Domain\Game;
 
+use App\Domain\Game\Phases\LevelPhaseDefinition;
+use App\Domain\Game\Phases\LevelPhaseValidator;
+use App\Domain\Game\Phases\PhaseTrigger;
+
 /**
  * 一關的完整規則來源。
  *
@@ -15,14 +19,13 @@ final readonly class LevelDefinition
      * @param  array<string, int>  $defenses  系別 => 初始防線
      * @param  list<string>  $dataElements  這一關會受情境修正影響的系別
      * @param  array<string, int>  $deck  牌型 => 張數
-     * @param  array<int, array<string, mixed>>  $intents  回合 => 預告設定
-     * @param  array<string, mixed>  $defaultIntent
+     * @param  list<LevelPhaseDefinition>  $levelPhases  關卡幕次，依設定順序單向前進；預告表在各幕裡
      * @param  list<int>  $pulseTurns
      * @param  array<string, mixed>|null  $overhaul
      * @param  float|null  $modifierCap  這一關對每系情境修正的額外上限（三系綜合的關卡用）
      * @param  array<string, mixed>|null  $adaptiveShield  城市鏡射玩家上一次進攻系別的護盾
      * @param  array<string, mixed>|null  $reward  通關後的牌組獎勵（兩選一）
-     * @param  list<string>  $phases
+     * @param  list<string>  $mechanicStates  關卡機制狀態（第 5 關重整的 standby／overhaul），與幕次無關
      */
     public function __construct(
         public string $id,
@@ -43,14 +46,13 @@ final readonly class LevelDefinition
         public array $briefing,
         public string $apostlePower,
         public int $apostlePowerValue,
-        public array $intents,
-        public array $defaultIntent,
+        public array $levelPhases,
         public array $pulseTurns = [],
         public ?array $overhaul = null,
         public ?float $modifierCap = null,
         public ?array $adaptiveShield = null,
         public ?array $reward = null,
-        public array $phases = [],
+        public array $mechanicStates = [],
     ) {}
 
     /**
@@ -58,6 +60,13 @@ final readonly class LevelDefinition
      */
     public static function fromConfig(string $id, array $definition): self
     {
+        $phases = array_map(
+            static fn (mixed $phase): LevelPhaseDefinition => LevelPhaseDefinition::fromConfig($id, $definition['max_turns'], $phase),
+            array_values($definition['level_phases'] ?? []),
+        );
+
+        LevelPhaseValidator::validate($id, $definition['max_turns'], $phases, self::settableFlags($definition));
+
         return new self(
             id: $id,
             sequence: $definition['sequence'],
@@ -76,14 +85,68 @@ final readonly class LevelDefinition
             briefing: $definition['briefing'],
             apostlePower: $definition['apostle_power'],
             apostlePowerValue: $definition['apostle_power_value'],
-            intents: $definition['intents'],
-            defaultIntent: $definition['default_intent'],
+            levelPhases: $phases,
             pulseTurns: $definition['pulse_turns'] ?? [],
             overhaul: $definition['overhaul'] ?? null,
             modifierCap: $definition['modifier_cap'] ?? null,
             adaptiveShield: $definition['adaptive_shield'] ?? null,
             reward: $definition['reward'] ?? null,
-            phases: $definition['phases'] ?? [],
+            mechanicStates: $definition['mechanic_states'] ?? [],
+        );
+    }
+
+    /**
+     * 這一關的機制實際會設定哪些旗標，幕次條件只能引用這些。
+     *
+     * @param  array<string, mixed>  $definition
+     * @return list<string>
+     */
+    private static function settableFlags(array $definition): array
+    {
+        $flags = [];
+
+        if (($definition['apostle_power'] ?? null) === 'interrupt_refund') {
+            $flags[] = 'first_interrupt_done';
+        }
+
+        if (($definition['overhaul'] ?? null) !== null) {
+            $flags[] = 'overhaul_started';
+            $flags[] = 'overhaul_stopped';
+        }
+
+        return array_values(array_intersect($flags, array_keys(PhaseTrigger::FLAGS)));
+    }
+
+    public function firstPhase(): LevelPhaseDefinition
+    {
+        return $this->levelPhases[0];
+    }
+
+    /**
+     * 指定 ID 的幕；null 或找不到時回第一幕（舊存檔沒有幕次欄位）。
+     */
+    public function phase(?string $phaseId): LevelPhaseDefinition
+    {
+        foreach ($this->levelPhases as $phase) {
+            if ($phase->id === $phaseId) {
+                return $phase;
+            }
+        }
+
+        return $this->firstPhase();
+    }
+
+    /**
+     * 對外公開的幕次清單，依設定順序。
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function publicPhases(): array
+    {
+        return array_map(
+            fn (LevelPhaseDefinition $phase, int $index): array => $phase->toPublicArray($index + 1, $this->levelPhases[$index + 1] ?? null),
+            $this->levelPhases,
+            array_keys($this->levelPhases),
         );
     }
 
@@ -110,19 +173,19 @@ final readonly class LevelDefinition
         return max(-$this->modifierCap, min($this->modifierCap, $modifier));
     }
 
-    public function hasScheduledIntent(int $turn): bool
+    public function hasScheduledIntent(int $turn, ?string $phaseId = null): bool
     {
-        return array_key_exists($turn, $this->intents);
+        return array_key_exists($turn, $this->phase($phaseId)->intents);
     }
 
     /**
      * 這一回合的預告是否由「鏡射玩家上一次進攻的系別」決定。
      * 回合表寫死的預告優先——那是玩家開局就讀得到的固定行程。
      */
-    public function mirrorsPlayerOnTurn(int $turn): bool
+    public function mirrorsPlayerOnTurn(int $turn, ?string $phaseId = null): bool
     {
         return $this->adaptiveShield !== null
-            && ! $this->hasScheduledIntent($turn)
+            && ! $this->hasScheduledIntent($turn, $phaseId)
             && $turn >= $this->adaptiveShield['from_turn'];
     }
 
@@ -132,16 +195,19 @@ final readonly class LevelDefinition
     }
 
     /**
-     * 第 turn 回合結束時城市會做的事。回合表沒有指定就用預設意圖，
+     * 第 turn 回合結束時城市會做的事，依所在幕次的預告表；回合表沒有指定就用該幕的預設意圖，
      * 因此每一回合都有可讀的預告，不會出現「城市這回合不知道要幹嘛」。
+     * $phaseId 為 null 代表第一幕（開局與舊存檔）。
      */
-    public function intentForTurn(int $turn, ?Element $mirrored = null): CityIntent
+    public function intentForTurn(int $turn, ?Element $mirrored = null, ?string $phaseId = null): CityIntent
     {
-        if ($this->mirrorsPlayerOnTurn($turn)) {
-            return $this->mirrorIntent($turn, $mirrored);
+        $phase = $this->phase($phaseId);
+
+        if ($this->mirrorsPlayerOnTurn($turn, $phase->id)) {
+            return $this->mirrorIntent($turn, $mirrored, $phase);
         }
 
-        $definition = $this->intents[$turn] ?? $this->defaultIntent;
+        $definition = $phase->intents[$turn] ?? $phase->defaultIntent;
 
         return new CityIntent(
             type: $definition['type'],
@@ -159,10 +225,10 @@ final readonly class LevelDefinition
      * $mirrored 為 null 代表「還沒有人出手」或這是開局就能讀到的靜態預告表，
      * 此時退回預設系別並在說明裡寫明規則，不假裝城市已經選好了。
      */
-    private function mirrorIntent(int $turn, ?Element $mirrored): CityIntent
+    private function mirrorIntent(int $turn, ?Element $mirrored, LevelPhaseDefinition $phase): CityIntent
     {
         $magnitude = $this->adaptiveShield['magnitude'];
-        $element = $mirrored ?? Element::from($this->defaultIntent['element']);
+        $element = $mirrored ?? Element::from($phase->defaultIntent['element']);
         $description = $mirrored === null
             ? "第 {$turn} 回合結束時：城市鏡射你最近一次進攻的系別，架起 {$magnitude} 點同系護盾（可用該系擾序打斷）"
             : "第 {$turn} 回合結束時：城市讀到你上一次的{$element->label()}系進攻，架起 {$magnitude} 點{$element->label()}系護盾（可用{$element->label()}系擾序打斷）";

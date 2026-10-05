@@ -33,6 +33,8 @@ final class BattleState
      * @param  list<string>  $drawPile  抽牌堆順序——機密，不送到前端
      * @param  list<string>  $discardPile  棄牌堆
      * @param  array<string, mixed>  $flags  一次性觸發旗標與關卡計數器
+     * @param  string  $phase  關卡**機制狀態**（第 5 關重整的 standby／overhaul，其他關 standard），不是幕次
+     * @param  string|null  $levelPhaseId  目前的關卡幕次 ID（P10-1）；舊存檔沒有這個欄位時為 null，視為第一幕
      */
     public function __construct(
         public int $turn,
@@ -68,6 +70,7 @@ final class BattleState
         public int $shuffleCount,
         public int $timeouts,
         public int $deckSeed,
+        public ?string $levelPhaseId = null,
     ) {}
 
     public function copy(): self
@@ -106,6 +109,7 @@ final class BattleState
             $this->shuffleCount,
             $this->timeouts,
             $this->deckSeed,
+            $this->levelPhaseId,
         );
     }
 
@@ -222,6 +226,7 @@ final class BattleState
             'swap_used' => $this->swapUsed,
             'shuffle_count' => $this->shuffleCount,
             'timeouts' => $this->timeouts,
+            'level_phase_id' => $this->levelPhaseId,
         ];
     }
 
@@ -276,6 +281,7 @@ final class BattleState
             $state['shuffle_count'],
             $state['timeouts'],
             $state['deck_seed'],
+            $state['level_phase_id'] ?? null,
         );
     }
 }

@@ -5,6 +5,7 @@ namespace App\Domain\Game;
 use App\Domain\Game\Cards\CardCatalog;
 use App\Domain\Game\Cards\Deck;
 use App\Domain\Game\Exceptions\InvalidActionException;
+use App\Domain\Game\Phases\LevelPhaseResolver;
 use App\Domain\Game\Scenario\ScenarioModifiers;
 
 /**
@@ -77,7 +78,7 @@ class BattleEngine
             breachedElements: [],
             lastAttackElement: null,
             intent: $level->intentForTurn(1),
-            phase: $level->phases === [] ? 'standard' : $level->phases[0],
+            phase: $level->mechanicStates === [] ? 'standard' : $level->mechanicStates[0],
             flags: [],
             version: 1,
             outcome: Outcome::InProgress,
@@ -94,6 +95,7 @@ class BattleEngine
             shuffleCount: 0,
             timeouts: 0,
             deckSeed: $seed,
+            levelPhaseId: $level->firstPhase()->id,
         );
     }
 
@@ -1149,6 +1151,8 @@ class BattleEngine
 
     private function advanceTurn(BattleState $state, LevelDefinition $level): void
     {
+        $this->advanceLevelPhase($state, $level);
+
         $state->turn++;
         $state->version++;
 
@@ -1173,6 +1177,32 @@ class BattleEngine
                 'phase' => $state->phase,
             ],
             'cue.turn.advance',
+        );
+    }
+
+    /**
+     * 關卡幕次切換。固定在回合邊界：玩家行動、城市回應、效果期限都處理完，
+     * 推進回合與產生下一回合預告之前。已經展示的本回合預告不會被替換；
+     * 切幕不重置任何數值、手牌、牌堆、護盾或 seed，只換下一回合起用的預告表。
+     *
+     * 這和第 5 關重整的機制狀態（$state->phase，phase_change 事件）是兩條獨立的線。
+     */
+    private function advanceLevelPhase(BattleState $state, LevelDefinition $level): void
+    {
+        $from = LevelPhaseResolver::current($level, $state);
+        $to = LevelPhaseResolver::transition($level, $state);
+
+        if ($to === null) {
+            return;
+        }
+
+        $state->levelPhaseId = $to->id;
+
+        $this->record($state, 'level_phase_change', BattleEvent::CITY, null, 'level_phase_'.$to->startsWhen->type,
+            ['level_phase_id' => $from->id],
+            ['starts_when' => $to->startsWhen->toArray()],
+            ['level_phase_id' => $to->id, 'label' => $to->label, 'objective' => $to->objective, 'from_turn' => $state->turn + 1],
+            'cue.level_phase.change',
         );
     }
 
@@ -1204,6 +1234,7 @@ class BattleEngine
         return $level->intentForTurn(
             $state->turn,
             $state->lastAttackElement === null ? null : Element::from($state->lastAttackElement),
+            $state->levelPhaseId,
         );
     }
 
