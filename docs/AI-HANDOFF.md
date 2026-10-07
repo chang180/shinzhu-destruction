@@ -1,5 +1,11 @@
 # AI 派工與階段交接規範
 
+## 2026-10-07 正式站狀態核對（文件更新）
+
+P10-6／P10-7 交接當時寫「未部署」，之後正式站已更新：Hostinger 工作目錄 `git status` 乾淨、程式為 `07d884e`（其後僅快轉一筆文件修正 `0969dc7`），`public/build` 建置時間為 2026-10-06 08:40（+0800），含幕次 UI 字串「條件幕」。2026-10-07 複查：首頁與 `GET /api/v1/levels` HTTP 200，`rules_version` 為 **7.0.0**；`.env` 403、`vendor/autoload.php` 404；Laravel 為 production、Debug 關閉。
+
+本次核對**沒有**重跑 [P10-7 §7.4](phase-reports/P10-7.md) 的完整九項冒煙（五關開局、整局結算、5.0.1 舊局唯讀、cron）、備份還原與回退演練，P09 仍為進行中。README、DEVELOPMENT-STATUS 已同步為 7.0.0 與上述狀態。
+
 ## 2026-10-06 P10-7 全曲線驗收、模擬試玩與發布備置交接
 
 **`rules_version` 維持 7.0.0**：本包只加測試、量測工具與證據，沒有動 `config/game.php`、引擎、結算順序或任何數值。

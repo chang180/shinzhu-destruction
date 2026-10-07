@@ -2,23 +2,50 @@
 
 世外高人｜2026 新竹縣智慧沙盒創新計畫參賽原型。
 
-## 新版開發計畫（2026-09-09）
+## 目前進度（2026-10-07）
 
-預計完整重製為最新版穩定 Laravel + Vue、SQLite 與 Hostinger PHP 共享空間上的 **限時卡牌策略遊戲，規劃 3 關主線＋2 關進階挑戰**。P01 已完成 Laravel 13.30.1、Vue 3.5.42、Vite 8.2.2、TypeScript 5.9.3、SQLite 與 Laravel Boost 2.7.1 基礎；P02 已完成三個中央部會資料 adapter、正規化快照與示範情境備援；P03 已完成伺服器權威戰鬥引擎、事件契約與平衡鎖版。P04 已交付首關的五張手牌、留牌／換牌、30 秒決策窗口與不限時練習；進入戰鬥會自動發牌，出牌演出後直接接續下一個決策窗口，卡牌單擊即施放。P05 已交付其餘四關的城市機制、數值與牌組、第 2 與第 4 關後的牌組獎勵，以及主線收手與進階兩種戰役終幕，規則升至 `rules_version 3.0.0`。P06 已交付 23 張原創插畫、WebP 正式資產、來源 manifest 與關卡／事件實際載入。P07 已交付規則式反事實比較服務（換掉一次決策，交給模擬策略接手續局）與戰報頁的一鍵比較，並確認兩套獨立結局文案／畫面／音效完備。音效試聽與真人試玩仍待驗收。2026-10-05 已將 `a6cd2f8` 更新至 Hostinger 正式站，首頁及關卡 API 回應 HTTP 200；完整 P09 部署、備份還原及回退驗收仍進行中。詳見[試玩後改版計畫](docs/P04-REVISION-PLAN.md)、[P06 報告](docs/phase-reports/P06.md)與 [P07 報告](docs/phase-reports/P07.md)。
+**線上版：`rules_version 7.0.0`，已在 Hostinger 正式站運作**（程式對應 `07d884e`；首頁與 `GET /api/v1/levels` 回 HTTP 200，`.env` 403、`vendor/` 404，production、Debug 關閉）。技術棧：Laravel 13.30.1、Vue 3.5.42 + TypeScript 5.9.3、Vite 8.2.2、SQLite，Hostinger PHP 共享空間，不需 Node 常駐程序、Redis 或 queue worker。
 
-- [分階段開發計畫](docs/DEVELOPMENT-PLAN.md)：P00～P09 依賴、交付與驗收，可逐階段派給其他 AI。
-- [P08 試玩回饋改版計畫](docs/P08-USABILITY-REVISION-PLAN.md)：字級、卡牌用途／目標說明與結算首屏已實作；同張牌不能連續留的規則已推送。自動與本機畫面檢查見 [P08 QA 紀錄](docs/QA-REPORT.md)，真人回測待補。
-- [P10 難度曲線計畫](docs/P10-DIFFICULTY-PROGRESSION-PLAN.md)：P10-0 已建立 `game:difficulty-report` 與 3.1.0 難度基線（曲線不單調、規則未改），見 [P10-0 報告](docs/phase-reports/P10-0.md)；P10-1 已建立幕次引擎與離線可解性 solver（`game:solve`），見 [P10-1 報告](docs/phase-reports/P10-1.md)；P10-2 已把第 1、2 關改成三幕並升 `rules_version 4.0.0`（第 2 關比第 1 關高 ≥ 0.05，失誤恢復率仍未達目標），見 [P10-2 報告](docs/phase-reports/P10-2.md)；P10-3 已把第 3 關改成三幕；補修升至 `5.0.1`，full planner 84.85%、forecast-aware 64.65%、恢復率 44.53%、L2→L3 +0.0886，已由使用者確認驗收完成；原 5.0.0 的 forecast-aware 70.30% 未達紀錄保留，見 [P10-3 報告](docs/phase-reports/P10-3.md)。P10-4 已交付第 4 關照影／借影／反制考核三幕與誘盾換系診斷，升至 `6.0.0`，full planner 72.91%、forecast-aware 35.87%、恢復率 42.19%、L3→L4 +0.1398，使用者已確認驗收完成並授權推送，見 [P10-4 報告](docs/phase-reports/P10-4.md)。第 5 關待後續工作包。
-- [技術規格](docs/TECHNICAL-SPEC.md)：版本、Boost 非互動全選、SQLite、資料來源及 Hostinger 部署。
-- [資料契約](docs/DATA-CONTRACT.md)：三個部會來源的正規化快照欄位、單位、品質門檻、失敗分類與備援。
-- [平衡鎖版](docs/BALANCE.md)：`rules_version`、技能表、傷害公式、情境修正換算與策略矩陣驗收。
-- [遊戲設計](docs/GAME-DESIGN.md)：策略難度、施招、城市防守及玩家勝利複盤。
-- [美術與音效規格](docs/ART-AUDIO-SPEC.md)、[素材來源與下載紀錄](docs/ASSET-SOURCES.md)：原創生成與免費開放素材搭配。
-- [AI 派工與交接](docs/AI-HANDOFF.md)、[開發進度](docs/DEVELOPMENT-STATUS.md)：可複製派工文字與實際狀態。
-- [Boost 安裝紀錄](docs/BOOST-SETUP.md)：非互動全選的版本、agent 矩陣、產物核對與限制。
-- [P00 基線報告](docs/phase-reports/P00.md)、[P01 基礎報告](docs/phase-reports/P01.md)、[P02 資料報告](docs/phase-reports/P02.md)、[P03 引擎報告](docs/phase-reports/P03.md)：各階段可重現的驗收證據。
-- [P04 第 1 關切片報告](docs/phase-reports/P04.md)：枯潮教授・晏沉、完整第 1 關演出、勝敗複盤與瀏覽器驗收證據。
-- [P05 五關戰役報告](docs/phase-reports/P05.md)：第 2～5 關內容與平衡、牌組獎勵、兩種戰役終幕與 100 seed 策略矩陣。
+這是一款**限時卡牌策略遊戲**：玩家是反派學生，要用五張手牌、每回合 30 秒的決策窗口，把虛構城市的韌性降到零。**3 關主線＋2 關進階挑戰**，第 3 關通關即可收手結束計畫，也可以接受進階畢業考。
+
+### 已經做到的事
+
+- **伺服器權威、完全沒有亂數的戰鬥引擎**：相同輸入必得相同事件與結局，重播不需保存亂數狀態；舊版本的局只能唯讀與重播，不會被新規則改寫。
+- **五關各有獨立機制**：可打斷的修復、系別輪替護盾、需求脈衝、鏡射護盾、核心重整倒數；第 2、4 關後可挑牌組獎勵（兩選一替換、牌組維持 15 張）。
+- **三幕關卡結構（P10）**：每一關都分成三幕，戰鬥畫面、開局簡報與戰報都會顯示目前第幾幕、本幕目標與下一幕條件；第 5 關的第三幕由局面觸發，介面會標成「條件幕」。
+- **難度曲線有證據**：五關難度指數在 7.0.0 首次完全單調遞增（0.1854 → 0.3081 → 0.3967 → 0.5365 → 0.6107，每關至少 +0.05）。發布矩陣是 27 情境 × 全部合法牌組 × 300 seeds＝**567,000 局**，並以 `DifficultyProgressionTest` 釘成必要回歸；離線 solver 證明 **81,000 格全部可解**（未解 0、未知 0）。
+- **23 張原創插畫（WebP）**，來源與雜湊有 manifest，依關卡與事件載入；兩套獨立結局（主線收手／進階終幕）的文案、畫面與音效俱全。
+- **戰後複盤**：戰報以伺服器事件說明核心變化、最後一擊與最多三條原因，並提供規則式反事實比較（換掉一次決策，交給模擬策略接手續局）。
+- **易用性**：必要字級 16px，卡牌有用途與目標說明；同一張實體牌不能連續留牌。
+- **中央部會資料作為情境輸入**：水利署水庫水情、國科會園區用水、內政部國土利用，經正規化快照與品質標示（`fresh`／`stale`／`demo`／`unavailable`）進入遊戲；**這是有限幅度的遊戲修正，不是災害預測**。
+- **品質檢查**：314 個後端測試、65 個前端邏輯測試、TypeScript、Pint 與建置皆通過。
+
+### 還沒完成（老實說）
+
+- **真人試玩尚未進行**：全部勝率都來自機器策略；10 位模擬玩家的 `game:playtest` 量不到「是否理解失敗原因」與主觀難度。
+- **真實瀏覽器／手機實機檢查**（320／390／桌機）與 **14 個原創音效 cue** 仍待補。
+- **兩個已揭露、門檻未放寬的缺口**：第 1 關失誤恢復率 91.23%（目標 75–90%）；第 5 關第三幕到達率 16.5%、重整中止機制很少被觸發。
+- **P09 正式部署驗收未完整**：資料來源抓取與 cron、快照暖機、備份還原與回退演練仍待補。
+
+### 文件導覽
+
+- [開發進度](docs/DEVELOPMENT-STATUS.md)、[AI 派工與交接](docs/AI-HANDOFF.md)：實際狀態、驗收證據與下一步。
+- [試玩後改版計畫](docs/P04-REVISION-PLAN.md)（三關主線＋兩關進階）、[分階段開發計畫](docs/DEVELOPMENT-PLAN.md)。
+- [P10 難度曲線計畫](docs/P10-DIFFICULTY-PROGRESSION-PLAN.md)與報告：[P10-0 基線](docs/phase-reports/P10-0.md)、[P10-1 三幕引擎與 solver](docs/phase-reports/P10-1.md)、[P10-2 第 1、2 關](docs/phase-reports/P10-2.md)（[2.1 失誤量測](docs/phase-reports/P10-2.1.md)）、[P10-3 第 3 關](docs/phase-reports/P10-3.md)、[P10-4 第 4 關](docs/phase-reports/P10-4.md)、[P10-5 第 5 關](docs/phase-reports/P10-5.md)、[P10-6 三幕 UI](docs/phase-reports/P10-6.md)、[P10-7 全曲線驗收與部署清單](docs/phase-reports/P10-7.md)。
+- [P08 易用性計畫](docs/P08-USABILITY-REVISION-PLAN.md)與 [QA 紀錄](docs/QA-REPORT.md)、[P08 報告](docs/phase-reports/P08.md)。
+- [技術規格](docs/TECHNICAL-SPEC.md)、[資料契約](docs/DATA-CONTRACT.md)、[平衡鎖版](docs/BALANCE.md)、[遊戲設計](docs/GAME-DESIGN.md)。
+- [美術與音效規格](docs/ART-AUDIO-SPEC.md)、[素材來源](docs/ASSET-SOURCES.md)、[P06 報告](docs/phase-reports/P06.md)、[P07 報告](docs/phase-reports/P07.md)、[Boost 安裝紀錄](docs/BOOST-SETUP.md)。
+- 早期階段報告：[P00](docs/phase-reports/P00.md)、[P01](docs/phase-reports/P01.md)、[P02](docs/phase-reports/P02.md)、[P03](docs/phase-reports/P03.md)、[P04](docs/phase-reports/P04.md)、[P05](docs/phase-reports/P05.md)。
+
+### 開發與驗證指令
+
+```sh
+php artisan game:simulate --seeds=20            # 策略矩陣
+php artisan game:difficulty-report --suite=quick # 難度指數與失誤恢復率
+php artisan game:solve                           # 離線證明關卡可解
+php artisan game:playtest                        # 模擬新手世代代替真人試玩
+php artisan opendata:refresh                     # 更新中央部會資料快照
+```
 
 ## Phase 1 已完成的新版基礎
 
@@ -37,7 +64,7 @@
 
 ## Phase 3 已完成的戰鬥引擎
 
-- 規則只有一份，位於 `app/Domain/Game/`；`rules_version` 現為 `6.0.0`（P10-4：第 4 關三幕化與 9 回合反制考核），數值與公式以[平衡鎖版](docs/BALANCE.md)為準。1.0.0、2.0.0、3.0.0、3.1.0、4.0.0、5.0.0 與 5.0.1 的舊局只能讀取與重播。
+- 規則只有一份，位於 `app/Domain/Game/`；`rules_version` 現為 `7.0.0`（P10-5：第 5 關三幕化與重整節奏；P10-0～P10-4 依序為其餘各關三幕化），數值與公式以[平衡鎖版](docs/BALANCE.md)為準。1.0.0、2.0.0、3.0.0、3.1.0、4.0.0、5.0.0、5.0.1 與 6.0.0 的舊局只能讀取與重播。
 - **完全沒有亂數**：城市行為由關卡預告表決定，相同輸入必得相同事件與結局，重播不需保存亂數狀態。
 - 六個 `/api/v1` JSON 介面掛在 `web` middleware group，仍受工作階段與 CSRF 保護；匿名存檔綁 HttpOnly session。
 - 同一個 `action_id` 重送回放原結果不重新結算；版本過期回 409，規則不合法回 422 且不消耗回合或惡意。
@@ -59,7 +86,7 @@
 - 3.1.0 依新試玩回饋限制同一張實體牌連續留牌；每回合最多留 2 張、免費換 1 張維持原規則。五關 100 seed 策略矩陣仍過既有門檻；難度體感尚待真人回測，見 [P08 報告](docs/phase-reports/P08.md)。
 - 第 2、4 關通關後各挑一次牌組獎勵：兩張新牌二選一，**替換**掉一張既有試探，牌組維持 15 張。新牌重用既有技能，只換卡面——獎勵是策略分支，不是永久增傷。牌組在開局時凍結，之後挑的牌只影響下一局。
 - 第 3 關通關即完成主線目標，可以收下戰果結束計畫，也可以接受進階畢業考；收手不是失敗，之後仍可挑戰進階，進階失敗也不撤銷主線通關。第 5 關通關取得進階終幕。
-- 素材仍沿用第 1 關的圖，四張新牌與後四關場景沒有卡圖；3.0.0 的真人試玩、時長紀錄與手機實機尚未進行。
+- P05 當時沿用第 1 關的圖；P06 已補齊 23 張原創插畫（見上方進度）。真人試玩、時長紀錄與手機實機仍未進行。
 
 ### 新版本機驗證
 
