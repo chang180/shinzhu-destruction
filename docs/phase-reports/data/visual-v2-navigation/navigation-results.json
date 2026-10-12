@@ -1,0 +1,174 @@
+{
+  "site": "local HTTPS shell; real engine fixtures",
+  "checks": [
+    {
+      "width": 2560,
+      "level": "empty-cup",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 2560,
+      "level": "noon-fold",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 2560,
+      "level": "meter-feast",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 2560,
+      "level": "mirror-shade",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 2560,
+      "level": "stored-night",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 2560,
+      "resumed_turn": 2,
+      "saved_hand_preserved": true,
+      "readonly_label": true,
+      "finished_report_label": true
+    },
+    {
+      "width": 1280,
+      "level": "empty-cup",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 1280,
+      "level": "noon-fold",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 1280,
+      "level": "meter-feast",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 1280,
+      "level": "mirror-shade",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 1280,
+      "level": "stored-night",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 1280,
+      "resumed_turn": 2,
+      "saved_hand_preserved": true,
+      "readonly_label": true,
+      "finished_report_label": true
+    },
+    {
+      "width": 390,
+      "level": "empty-cup",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 390,
+      "level": "noon-fold",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 390,
+      "level": "meter-feast",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 390,
+      "level": "mirror-shade",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 390,
+      "level": "stored-night",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 390,
+      "resumed_turn": 2,
+      "saved_hand_preserved": true,
+      "readonly_label": true,
+      "finished_report_label": true
+    },
+    {
+      "width": 320,
+      "level": "empty-cup",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 320,
+      "level": "noon-fold",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 320,
+      "level": "meter-feast",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 320,
+      "level": "mirror-shade",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 320,
+      "level": "stored-night",
+      "scroll_top": 0,
+      "heading_focused": true,
+      "complete_art_visible": true
+    },
+    {
+      "width": 320,
+      "resumed_turn": 2,
+      "saved_hand_preserved": true,
+      "readonly_label": true,
+      "finished_report_label": true
+    }
+  ],
+  "issues": []
+}

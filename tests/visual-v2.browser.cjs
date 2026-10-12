@@ -20,6 +20,9 @@ foreach ((new LevelRepository($config['levels']))->all() as $level) {
     $revealed = $engine->apply($start, new ActionRequest(actionId: 'qa-reveal', expectedVersion: $start->version, type: ActionType::Reveal), $level, $modifiers)->state;
     $base = ['run_id' => 'visual-qa-'.$level->id, 'level_id' => $level->id, 'mode' => 'practice', 'rules_version' => $config['rules_version'], 'compatible' => true, 'cards' => $cards->toArray(), 'snapshots' => [], 'scenario' => ['modifiers' => [], 'reasons' => []], 'data_notes' => [], 'server_time' => gmdate('c')];
     $output[$level->id]['opening'] = $base + ['outcome' => 'in_progress', 'version' => $revealed->version, 'state' => $revealed->toPublicArray(), 'available_actions' => $engine->availableActions($revealed), 'history' => []];
+    $progress = $engine->apply($revealed, new ActionRequest(actionId: 'qa-progress', expectedVersion: $revealed->version, type: ActionType::Play, fixedSkillId: 'gather'), $level, $modifiers)->state;
+    $progress = $engine->apply($progress, new ActionRequest(actionId: 'qa-next-reveal', expectedVersion: $progress->version, type: ActionType::Reveal), $level, $modifiers)->state;
+    $output[$level->id]['progress'] = $base + ['outcome' => 'in_progress', 'version' => $progress->version, 'state' => $progress->toPublicArray(), 'available_actions' => $engine->availableActions($progress), 'history' => []];
     foreach (['planner', 'gather'] as $strategy) {
         for ($seed = 1; $seed <= 30; $seed++) {
             $state = $engine->start($level, $seed); $history = [];
@@ -51,6 +54,7 @@ const fixtures = JSON.parse(execFileSync('php', ['-r', imports + php], { maxBuff
   const original = await catalogResponse.json();
   assert.equal(original.rules_version, '8.0.0');
   let selected = 'noon-fold', view = 'opening', reward = false;
+  let savedRecords = [];
   const issues = [], requests = [], checks = [], briefingGeometry = [];
   let initialBytes = null;
   const page = await context.newPage();
@@ -73,7 +77,7 @@ const fixtures = JSON.parse(execFileSync('php', ['-r', imports + php], { maxBuff
       } else catalog.campaign.pending_reward = null;
       return route.fulfill({ json: catalog });
     }
-    if (url.pathname.endsWith('/runs') && route.request().method() === 'GET') return route.fulfill({ json: { data: [] } });
+    if (url.pathname.endsWith('/runs') && route.request().method() === 'GET') return route.fulfill({ json: { data: savedRecords } });
     if (url.pathname.endsWith('/runs') && route.request().method() === 'POST') {
       const data = structuredClone(fixtures[selected][view]);
       // Milestone screens are only shown in challenge mode; the fixtures have no running clock.
@@ -102,6 +106,55 @@ const fixtures = JSON.parse(execFileSync('php', ['-r', imports + php], { maxBuff
     await page.locator(view === 'opening' ? '.briefing' : '.report').waitFor({ state: 'visible' });
   }
   try {
+    if (process.env.VISUAL_QA_NAVIGATION_ONLY === '1') {
+      const navigationChecks = [];
+      for (const width of [2560, 1280, 390, 320]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.emulateMedia({ reducedMotion: width === 390 ? 'reduce' : 'no-preference' });
+        for (const id of ['empty-cup', 'noon-fold', 'meter-feast', 'mirror-shade', 'stored-night']) {
+          selected = id; view = 'opening'; savedRecords = [];
+          await page.goto(base, { waitUntil: 'networkidle' });
+          const name = original.levels.find(level => level.level_id === id).name;
+          const entry = page.locator('.route li').filter({ hasText: name }).getByRole('button');
+          await entry.scrollIntoViewIfNeeded();
+          assert.ok(await page.evaluate(() => scrollY > 0), 'start from the scrolled level picker');
+          await entry.click(); await page.locator('.briefing').waitFor();
+          await page.locator('.briefing-art img').evaluate(img => img.decode());
+          assert.equal(await page.evaluate(() => scrollY), 0, 'entering a level must start at the top');
+          assert.equal(await page.locator('.briefing h1').evaluate(el => el === document.activeElement), true, 'heading focus must remain accessible without scrolling');
+          const frame = await page.locator('.briefing-art').boundingBox();
+          assert.ok(frame.y >= 0 && frame.y + frame.height <= 900, 'complete briefing art must be visible');
+          await page.screenshot({ path: `${evidence}/${width}-${id}-entry.png` });
+          navigationChecks.push({ width, level: id, scroll_top: 0, heading_focused: true, complete_art_visible: true });
+        }
+        selected = 'empty-cup'; view = 'progress';
+        const progress = fixtures[selected].progress;
+        savedRecords = [
+          { run_id: progress.run_id, level_id: selected, mode: 'practice', turn: 2, outcome: 'in_progress', compatible: true },
+          { run_id: 'old-readonly', level_id: selected, mode: 'challenge', turn: 3, outcome: 'in_progress', compatible: false },
+          { run_id: 'finished', level_id: selected, mode: 'practice', turn: 7, outcome: 'player_victory', compatible: true },
+        ];
+        await page.goto(base, { waitUntil: 'networkidle' });
+        const list = page.locator('.save-list');
+        assert.equal(await list.getByRole('button').count(), 3);
+        assert.match(await list.innerText(), /舊版紀錄・唯讀/);
+        assert.match(await list.innerText(), /毀滅成功・查看戰報/);
+        const resume = list.getByRole('button').filter({ hasText: '繼續第 2 回合' });
+        assert.match(await resume.innerText(), /已完成 1 回合/);
+        assert.match(await resume.innerText(), new RegExp(original.levels[0].name));
+        await list.scrollIntoViewIfNeeded();
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'trial records must fit the viewport');
+        await page.screenshot({ path: `${evidence}/${width}-trial-records.png` });
+        await resume.click(); await page.locator('.battle').waitFor();
+        assert.equal((await page.locator('.turn strong').innerText()).trim(), '02');
+        assert.equal(await page.locator('.card-face').count(), progress.state.hand.length);
+        navigationChecks.push({ width, resumed_turn: 2, saved_hand_preserved: true, readonly_label: true, finished_report_label: true });
+      }
+      assert.deepEqual(issues, []);
+      fs.writeFileSync(`${evidence}/navigation-results.json`, JSON.stringify({ site: 'local HTTPS shell; real engine fixtures', checks: navigationChecks, issues }, null, 2));
+      console.log(JSON.stringify({ navigation_checks: navigationChecks.length, issues }));
+      return;
+    }
     if (process.env.VISUAL_QA_SOURCES_ONLY === '1') {
       const sourceChecks = [];
       for (const width of [2560, 1280, 390, 320]) {

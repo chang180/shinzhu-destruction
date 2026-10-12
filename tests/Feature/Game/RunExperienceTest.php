@@ -4,8 +4,10 @@ namespace Tests\Feature\Game;
 
 use App\Domain\Game\BattleState;
 use App\Domain\Game\LevelRepository;
+use App\Domain\Game\Outcome;
 use App\Models\Run;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -44,10 +46,71 @@ class RunExperienceTest extends TestCase
         $this->getJson('/api/v1/runs')->assertOk()->assertJsonPath('data', []);
         $this->assertDatabaseCount('campaigns', 0);
         $id = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->json('data.run_id');
+        $this->getJson('/api/v1/runs')->assertJsonPath('data', []);
+        $this->holdOneTurn($id, 'started')->assertOk();
         $this->getJson('/api/v1/runs')->assertJsonPath('data.0.run_id', $id);
         $this->withSession(['campaign_anonymous_id' => 'another-player'])->getJson('/api/v1/runs')->assertJsonPath('data', []);
         $this->postJson("/api/v1/runs/{$id}/retry")->assertNotFound();
         $this->assertDatabaseCount('runs', 1);
+    }
+
+    public function test_revealing_without_finishing_a_turn_does_not_create_a_resume_record(): void
+    {
+        $id = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->assertCreated()->json('data.run_id');
+        $this->postJson("/api/v1/runs/{$id}/actions", [
+            'action_id' => 'first-reveal', 'expected_version' => 1, 'type' => 'reveal',
+        ])->assertOk();
+        $this->getJson('/api/v1/runs')->assertOk()->assertJsonPath('data', []);
+        $this->assertDatabaseCount('runs', 1);
+        $this->getJson("/api/v1/runs/{$id}")->assertOk()->assertJsonPath('data.state.turn', 1);
+    }
+
+    public function test_empty_starts_do_not_displace_real_progress_and_resume_reads_the_saved_state(): void
+    {
+        $id = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup', 'mode' => 'practice'])->assertCreated()->json('data.run_id');
+        $saved = $this->holdOneTurn($id, 'progress')->assertOk()->json('data');
+        for ($index = 0; $index < 21; $index++) {
+            $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->assertCreated();
+        }
+        $this->getJson('/api/v1/runs')->assertOk()->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.run_id', $id)->assertJsonPath('data.0.turn', 2)
+            ->assertJsonPath('data.0.mode', 'practice')->assertJsonPath('data.0.compatible', true);
+        $this->getJson("/api/v1/runs/{$id}")->assertOk()
+            ->assertJsonPath('data.state', $saved['state'])->assertJsonPath('data.version', $saved['version']);
+        $this->assertDatabaseCount('runs', 22);
+        $this->assertDatabaseCount('run_actions', 2);
+    }
+
+    public function test_finished_first_turn_and_incompatible_progress_remain_readable_records(): void
+    {
+        $finishedId = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->assertCreated()->json('data.run_id');
+        $finished = Run::query()->where('public_id', $finishedId)->firstOrFail();
+        $finished->forceFill(['outcome' => Outcome::CityHeld, 'state' => array_replace($finished->state, ['outcome' => 'city_held'])])->save();
+        $oldId = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->assertCreated()->json('data.run_id');
+        $this->holdOneTurn($oldId, 'old-progress')->assertOk();
+        Run::query()->where('public_id', $oldId)->update(['rules_version' => '3.0.0']);
+        $this->getJson('/api/v1/runs')->assertOk()->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.run_id', $oldId)->assertJsonPath('data.0.compatible', false)
+            ->assertJsonPath('data.1.run_id', $finishedId)->assertJsonPath('data.1.outcome', 'city_held');
+    }
+
+    public function test_trial_records_order_by_last_progress_instead_of_creation(): void
+    {
+        try {
+            Carbon::setTestNow('2026-10-13 12:00:00');
+            $first = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup', 'mode' => 'practice'])->assertCreated()->json('data.run_id');
+            $this->holdOneTurn($first, 'first')->assertOk();
+            Carbon::setTestNow('2026-10-13 12:01:00');
+            $second = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup', 'mode' => 'practice'])->assertCreated()->json('data.run_id');
+            $this->holdOneTurn($second, 'second')->assertOk();
+            Carbon::setTestNow('2026-10-13 12:02:00');
+            $this->holdOneTurn($first, 'first-resumed')->assertOk();
+            $this->getJson('/api/v1/runs')->assertOk()->assertJsonCount(2, 'data')
+                ->assertJsonPath('data.0.run_id', $first)->assertJsonPath('data.0.turn', 3)
+                ->assertJsonPath('data.1.run_id', $second)->assertJsonPath('data.1.turn', 2);
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_same_scenario_retry_preserves_frozen_metadata_and_modifiers_and_resets_the_state(): void

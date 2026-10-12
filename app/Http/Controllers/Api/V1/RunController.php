@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Game\LevelRepository;
+use App\Domain\Game\Outcome;
 use App\Domain\Game\RunMode;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\RunResource;
@@ -11,6 +12,7 @@ use App\Models\Run;
 use App\Services\Game\CampaignResolver;
 use App\Services\Game\Exceptions\RunConflictException;
 use App\Services\Game\RunService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -22,7 +24,12 @@ class RunController extends Controller
     {
         $campaign = $campaigns->existing($request);
         $runs = $campaign === null ? collect() : Run::query()
-            ->where('campaign_id', $campaign->id)->latest('id')->limit(20)->get();
+            ->where('campaign_id', $campaign->id)
+            ->where(static function (Builder $query): void {
+                $query->where('outcome', '!=', Outcome::InProgress->value)
+                    ->orWhere('state->turn', '>', 1);
+            })
+            ->latest('updated_at')->latest('id')->limit(20)->get();
 
         return response()->json(['data' => $runs->map(static fn (Run $run): array => [
             'run_id' => $run->public_id,
@@ -30,6 +37,7 @@ class RunController extends Controller
             'mode' => $run->mode,
             'outcome' => $run->outcome->value,
             'turn' => $run->state['turn'],
+            'compatible' => $run->rules_version === config('game.rules_version'),
             'updated_at' => $run->updated_at->toIso8601String(),
         ])->all()]);
     }

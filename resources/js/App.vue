@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, forecastLines, nextHandText, shouldAutoReveal, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText, actSteps, currentAct, nextActText, actBriefingLines, reportActs, isConditionalAct } from './game';
 import type { BattleEvent, Campaign, Card, Choice, CounterfactualComparison, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
-import { assetUrl as asset, assetSrcSet, presentationFor, professorReview, phaseLine, rewardCopy, mainFinaleCopy, finaleFrames } from './game';
+import { assetUrl as asset, assetSrcSet, presentationFor, professorReview, phaseLine, rewardCopy, mainFinaleCopy, finaleFrames, savedRunLabel } from './game';
 
 const page = ref<'lobby' | 'briefing' | 'battle' | 'report' | 'reward'>('lobby');
 const levels = ref<Level[]>([]);
@@ -109,7 +109,12 @@ function fixedReason(card: Card): string {
 function noteFor(card: Card | undefined): string {
     return card ? dataNoteText(run.value?.data_notes[card.element as never], card.element) : '';
 }
-function focusHeading(): void { void nextTick(() => document.querySelector<HTMLElement>('main h1, main h2')?.focus()); }
+function focusHeading(resetScroll = false): void {
+    void nextTick(() => {
+        document.querySelector<HTMLElement>('main h1, main h2')?.focus({ preventScroll: resetScroll });
+        if (resetScroll) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    });
+}
 // P10-6：三幕顯示一律從伺服器公開的 state.level_phase_id 與 level.phases 推導。
 const acts = computed(() => (run.value ? actSteps(level.value, run.value.state) : []));
 const act = computed(() => (run.value ? currentAct(level.value, run.value.state) : undefined));
@@ -123,7 +128,7 @@ function showRun(value: Run, briefing = false): void {
     previewedCard.value = undefined; counterfactuals.value = {};
     page.value = value.outcome !== 'in_progress' ? 'report' : briefing ? 'briefing' : 'battle';
     if (!value.compatible) notice.value = '這一局使用舊版規則。可以查看紀錄，請回學院另開新局。';
-    focusHeading();
+    focusHeading(page.value === 'briefing');
 }
 async function loadLobby(): Promise<void> {
     if (busy.value || playing.value) return;
@@ -373,7 +378,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         <button v-if="reward" class="primary" :disabled="locked" @click="openReward">有一張新禁術等你挑選 · {{ reward.level_name }} ↗</button>
                         <details><summary>目前牌組 · {{ Object.values(campaign.deck).reduce((sum, count) => sum + count, 0) }} 張</summary><ul class="deck-list"><li v-for="entry in currentDeck" :key="entry.name"><b>{{ entry.name }} ×{{ entry.count }}</b><small>{{ entry.role }}</small></li></ul><p class="small">牌組獎勵是替換不是增牌；每一局在開局時凍結牌組，之後挑的牌從下一局生效。</p></details>
                     </div>
-                </div><div class="save-list"><p class="eyebrow">你的試煉紀錄 · 本瀏覽器</p><p v-if="!savedRuns.length">還沒有紀錄。從第一次大膽的決策開始。</p><button v-for="saved in savedRuns" :key="saved.run_id" :disabled="locked" @click="openRun(saved.run_id)"><span>{{ saved.outcome === 'in_progress' ? '繼續試煉' : saved.outcome === 'player_victory' ? '毀滅成功・查看戰報' : '城市守住・查看戰報' }}<small>{{ saved.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</small></span><small>第 {{ saved.turn }} 回合 ↗</small></button><p class="small">匿名紀錄依賴本瀏覽器 Cookie；清除後無法找回。</p></div></section>
+                </div><div class="save-list"><p class="eyebrow">你的試煉紀錄 · 本瀏覽器</p><p v-if="!savedRuns.length">完成至少一回合後，這裡會顯示續玩進度與戰報。</p><button v-for="saved in savedRuns" :key="saved.run_id" :disabled="locked" @click="openRun(saved.run_id)"><span>{{ savedRunLabel(saved) }}<small>{{ levels.find(item => item.level_id === saved.level_id)?.name ?? saved.level_id }} · {{ saved.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</small></span><small>{{ saved.outcome === 'in_progress' ? `已完成 ${saved.turn - 1} 回合` : `第 ${saved.turn} 回合` }} ↗</small></button><p class="small">只列出有實際回合進度的局與已結束戰報。匿名紀錄依賴本瀏覽器 Cookie；清除後無法找回。</p></div></section>
             </template>
             <template v-else-if="page === 'reward' && reward">
                 <section class="content-width reward">
@@ -407,7 +412,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                             <li v-for="(lesson, index) in level?.briefing?.lessons ?? []" :key="index">{{ lesson }}</li>
                             <li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，點擊同樣立即執行。</li>
                         </ol>
-                        <button class="primary" :disabled="locked" @click="enterBattle">明白了，開始連續試煉 ↗</button><p class="small">本局情境與牌序已凍結。回學院後可繼續，不用一次打完。</p></div>
+                        <button class="primary" :disabled="locked" @click="enterBattle">明白了，開始連續試煉 ↗</button><p class="small">本局情境與牌序已凍結。完成一回合後，可從學院的試煉紀錄接續。</p></div>
                 </section>
                 <section v-if="page === 'battle'" class="battle content-width">
                     <div class="battle-heading"><div><p class="eyebrow">CHAPTER {{ String(level?.sequence ?? 1).padStart(2, '0') }} / {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ run.level_id === 'mirror-shade' ? '城市反制你的上一手' : level?.subtitle }}</h1></div>

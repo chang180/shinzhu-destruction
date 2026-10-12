@@ -78,7 +78,13 @@ export function deckSummary(deck: Record<string, number>, cards: Record<string, 
         .filter(([, count]) => count > 0)
         .map(([type, count]) => ({ name: cards[type]?.name ?? type, count, role: cards[type]?.role ?? '' }));
 }
-export interface SavedRun { run_id: string; level_id: string; mode: RunMode; turn: number; outcome: Outcome }
+export interface SavedRun { run_id: string; level_id: string; mode: RunMode; turn: number; outcome: Outcome; compatible?: boolean; updated_at?: string }
+
+export function savedRunLabel(saved: SavedRun): string {
+    if (saved.outcome === 'player_victory') return '毀滅成功・查看戰報';
+    if (saved.outcome === 'city_held') return '城市守住・查看戰報';
+    return saved.compatible === false ? '舊版紀錄・唯讀' : `繼續第 ${saved.turn} 回合`;
+}
 export interface Settlement { events: BattleEvent[]; version: number; state: BattleState; replayed: boolean; server_time: string }
 export const elements: Element[] = ['water', 'heat', 'land'];
 export const elementNames = { water: '水', heat: '熱', land: '土地' };

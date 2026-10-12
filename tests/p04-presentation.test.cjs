@@ -426,6 +426,14 @@ test('the first briefing uses a native landscape image with the same delivery si
   }
 });
 
+test('trial records distinguish real progress, old read-only runs and completed reports', () => {
+  const { savedRunLabel } = context.exports;
+  assert.equal(savedRunLabel({ turn: 4, outcome: 'in_progress', compatible: true }), '繼續第 4 回合');
+  assert.equal(savedRunLabel({ turn: 2, outcome: 'in_progress', compatible: false }), '舊版紀錄・唯讀');
+  assert.equal(savedRunLabel({ turn: 7, outcome: 'player_victory', compatible: false }), '毀滅成功・查看戰報');
+  assert.equal(savedRunLabel({ turn: 9, outcome: 'city_held', compatible: true }), '城市守住・查看戰報');
+});
+
 test('final professor reviews use recorded overhaul outcomes, including neutral old saves', () => {
   const { professorReview } = context.exports;
   const review = (outcome, reasons = []) => professorReview({ level_id: 'stored-night', outcome, history: [{ events: reasons.map(reason_code => ({ reason_code })) }] });
