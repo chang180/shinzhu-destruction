@@ -29,7 +29,6 @@ final class BattleState
      * @param  array<string, bool>  $breachedElements  防線曾降到 0 且尚未回補到可再觸發
      * @param  array<string, string>  $deck  實體牌 ID => 牌型
      * @param  list<string>  $hand  已揭示的手牌
-     * @param  list<string>  $keptLastTurn  上回合留到這手的牌，本回合不可再留
      * @param  list<string>  $drawPile  抽牌堆順序——機密，不送到前端
      * @param  list<string>  $discardPile  棄牌堆
      * @param  array<string, mixed>  $flags  一次性觸發旗標與關卡計數器
@@ -59,11 +58,9 @@ final class BattleState
         public Outcome $outcome,
         public array $deck,
         public array $hand,
-        public array $keptLastTurn,
         public array $drawPile,
         public array $discardPile,
         public int $handSize,
-        public int $maxKeep,
         public string $turnPhase,
         public ?string $deadlineAt,
         public bool $swapUsed,
@@ -98,11 +95,9 @@ final class BattleState
             $this->outcome,
             $this->deck,
             $this->hand,
-            $this->keptLastTurn,
             $this->drawPile,
             $this->discardPile,
             $this->handSize,
-            $this->maxKeep,
             $this->turnPhase,
             $this->deadlineAt,
             $this->swapUsed,
@@ -217,10 +212,8 @@ final class BattleState
             'outcome' => $this->outcome->value,
             'deck' => $this->deck,
             'hand' => $this->hand,
-            'kept_last_turn' => $this->keptLastTurn,
             'discard_pile' => $this->discardPile,
             'hand_size' => $this->handSize,
-            'max_keep' => $this->maxKeep,
             'turn_phase' => $this->turnPhase,
             'deadline_at' => $this->deadlineAt,
             'swap_used' => $this->swapUsed,
@@ -240,7 +233,7 @@ final class BattleState
         if (! array_key_exists('deck', $state)) {
             $state += [
                 'deck' => [], 'hand' => [], 'draw_pile' => [], 'discard_pile' => [],
-                'hand_size' => 0, 'max_keep' => 0,
+                'hand_size' => 0,
                 'turn_phase' => self::PHASE_AWAITING_REVEAL,
                 'deadline_at' => null, 'swap_used' => false,
                 'shuffle_count' => 0, 'timeouts' => 0, 'deck_seed' => 0,
@@ -270,11 +263,9 @@ final class BattleState
             Outcome::from($state['outcome']),
             $state['deck'],
             $state['hand'],
-            $state['kept_last_turn'] ?? [],
             $state['draw_pile'],
             $state['discard_pile'],
             $state['hand_size'],
-            $state['max_keep'],
             $state['turn_phase'],
             $state['deadline_at'],
             $state['swap_used'],

@@ -31,8 +31,9 @@ class SolvabilitySolverTest extends TestCase
         $level = app(LevelRepository::class)->get('mirror-shade');
         $modifiers = EquivalenceRecorder::modifiers(-0.15);
 
-        $first = $this->solver()->solve($level, $modifiers, 3, null, 2000);
-        $second = $this->solver()->solve($level, $modifiers, 3, null, 2000);
+        // 手牌留存後每回合多了換牌分支，2000 個節點不夠，這個樣本需要預設預算。
+        $first = $this->solver()->solve($level, $modifiers, 3, null, 20000);
+        $second = $this->solver()->solve($level, $modifiers, 3, null, 20000);
 
         $this->assertSame(SolverStatus::Solved, $first->status);
         $this->assertSame($first->toArray(), $second->toArray());
@@ -46,12 +47,12 @@ class SolvabilitySolverTest extends TestCase
         $deck = app(DifficultyReport::class)->deckVariants($level)['smoke-screen+hollow-ground'];
         $modifiers = EquivalenceRecorder::modifiers(-0.15);
 
-        $planner = (new BattleSimulator(app(BattleEngine::class)))->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 3, 'w-h-l-', $deck);
-        $solved = $this->solver()->solve($level, $modifiers, 3, $deck, 2000);
+        $planner = (new BattleSimulator(app(BattleEngine::class)))->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 5, 'w-h-l-', $deck);
+        $solved = $this->solver()->solve($level, $modifiers, 5, $deck, 2000);
 
         $this->assertFalse($planner->won());
         $this->assertSame(SolverStatus::Solved, $solved->status);
-        $this->assertSame(Outcome::PlayerVictory, $this->solver()->replay($level, $modifiers, 3, $deck, $solved->path)->outcome);
+        $this->assertSame(Outcome::PlayerVictory, $this->solver()->replay($level, $modifiers, 5, $deck, $solved->path)->outcome);
     }
 
     public function test_running_out_of_budget_is_reported_as_unknown_not_as_unsolvable(): void

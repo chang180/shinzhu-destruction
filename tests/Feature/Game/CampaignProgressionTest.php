@@ -103,7 +103,7 @@ class CampaignProgressionTest extends TestCase
             $choice = $strategy->choose($state, $engine, $level, new Randomizer);
 
             $this->postJson(route('api.v1.runs.actions.store', ['run' => $runId]), $payload + [
-                'type' => 'play',
+                'type' => $choice['type'],
                 'card_id' => $choice['card_id'],
                 'fixed' => $choice['fixed'],
                 'keep' => $choice['keep'] ?? [],

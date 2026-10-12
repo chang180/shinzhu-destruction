@@ -54,10 +54,62 @@ abstract class LookaheadStrategy implements Strategy
             return self::gather();
         }
 
-        $action = $best[0];
-        $action['keep'] = $this->keep($state, $action);
+        return $this->swapChoice($state, $ranked) ?? $best[0];
+    }
 
-        return $action;
+    /**
+     * 手牌留存之後，換牌是唯一主動清掉用不上的牌的方式，所以會看畫面的玩家每回合都用掉它：
+     * 先換走這一手最沒用的牌（不是打算打出的那張），再出牌。
+     *
+     * 目前打不出去的牌（冷卻、惡意不足）不在候選裡，是留給之後的，不換；
+     * 這回合就能贏的時候也不必換。
+     *
+     * @param  list<array{0: array<string, mixed>, 1: float}>  $ranked
+     * @return array<string, mixed>|null
+     */
+    private function swapChoice(BattleState $state, array $ranked): ?array
+    {
+        if ($state->swapUsed || ($state->drawPile === [] && $state->discardPile === [])) {
+            return null;
+        }
+
+        [$best, $bestScore] = $ranked[0];
+
+        if ($bestScore === INF) {
+            return null;
+        }
+
+        $target = $this->swapTarget($state, $ranked, $best['card_id'] ?? null);
+
+        return $target === null
+            ? null
+            : ['type' => 'swap', 'card_id' => $target, 'fixed' => null, 'skill_id' => null, 'target' => null];
+    }
+
+    /**
+     * 預設：換走這一手分數最低、又不是打算打出的牌。
+     *
+     * @param  list<array{0: array<string, mixed>, 1: float}>  $ranked
+     */
+    protected function swapTarget(BattleState $state, array $ranked, ?string $playedCardId): ?string
+    {
+        $target = null;
+        $lowest = INF;
+
+        foreach ($ranked as [$action, $score]) {
+            $cardId = $action['card_id'] ?? null;
+
+            if ($cardId === null || $cardId === $playedCardId) {
+                continue;
+            }
+
+            if ($score < $lowest) {
+                $lowest = $score;
+                $target = $cardId;
+            }
+        }
+
+        return $target;
     }
 
     /**
@@ -117,17 +169,6 @@ abstract class LookaheadStrategy implements Strategy
      * @param  array<string, mixed>  $action
      */
     abstract protected function score(BattleState $before, TurnResult $result, array $action): float;
-
-    /**
-     * 預設不留牌：多看新牌。會布局的策略覆寫這個方法。
-     *
-     * @param  array<string, mixed>  $action
-     * @return list<string>
-     */
-    protected function keep(BattleState $state, array $action): array
-    {
-        return [];
-    }
 
     /**
      * @return array<string, mixed>

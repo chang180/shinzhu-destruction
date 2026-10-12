@@ -90,30 +90,6 @@ class InvalidActionException extends RuntimeException
         return new self('nothing_to_swap', '抽牌堆與棄牌堆都沒有牌可以換');
     }
 
-    /**
-     * @param  list<string>  $keep
-     */
-    public static function keepNotInHand(array $keep): self
-    {
-        return new self('keep_not_in_hand', '要留下的牌必須是本回合未打出的手牌', ['keep' => $keep]);
-    }
-
-    public static function keepLimitExceeded(int $limit, int $requested): self
-    {
-        return new self('keep_limit_exceeded', "最多只能留 {$limit} 張牌，這次指定了 {$requested} 張", [
-            'limit' => $limit,
-            'requested' => $requested,
-        ]);
-    }
-
-    /**
-     * @param  list<string>  $cards
-     */
-    public static function keepConsecutiveTurns(array $cards): self
-    {
-        return new self('keep_consecutive_turns', '同一張牌只能留到下一手，不能連續再留', ['cards' => $cards]);
-    }
-
     public static function fixedActionNotAllowed(string $skillId): self
     {
         return new self('fixed_action_not_allowed', "{$skillId} 不是手牌旁的固定行動", ['skill_id' => $skillId]);

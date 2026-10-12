@@ -47,9 +47,60 @@ class ForecastAwareStrategy implements Strategy
             return null;
         }
 
-        $choice['keep'] = $this->keep($state, $choice);
+        return $this->swapAway($state, $plays, $choice) ?? $choice;
+    }
 
-        return $choice;
+    /**
+     * 經驗法則：手牌會留存，同一系留兩張用不到，所以把「重複系別裡衝擊最低、又不是打算打的」那張換掉。
+     * 每一系只剩一張就不換——這個玩家想保留每個系別的選擇；
+     * 目前打不出去的牌（冷卻、惡意不足，不在合法清單裡）也不動。
+     *
+     * @param  list<array<string, mixed>>  $plays
+     * @param  array<string, mixed>  $choice
+     * @return array<string, mixed>|null
+     */
+    private function swapAway(BattleState $state, array $plays, array $choice): ?array
+    {
+        if ($state->swapUsed || ($state->drawPile === [] && $state->discardPile === [])) {
+            return null;
+        }
+
+        $played = $choice['card_id'] ?? null;
+        $perElement = [];
+
+        foreach ($plays as $action) {
+            $cardId = $action['card_id'] ?? null;
+            $element = $cardId === null ? null : $this->skill($state, $cardId)?->element?->value;
+
+            if ($element !== null) {
+                $perElement[$element] = ($perElement[$element] ?? 0) + 1;
+            }
+        }
+
+        $target = null;
+        $lowest = PHP_INT_MAX;
+
+        foreach ($plays as $action) {
+            $cardId = $action['card_id'] ?? null;
+            $skill = $cardId === null ? null : $this->skill($state, $cardId);
+
+            if ($cardId === null || $cardId === $played || $skill === null) {
+                continue;
+            }
+
+            if (($perElement[$skill->element?->value] ?? 0) <= 1) {
+                continue;
+            }
+
+            if ($skill->baseImpact < $lowest) {
+                $lowest = $skill->baseImpact;
+                $target = $cardId;
+            }
+        }
+
+        return $target === null
+            ? null
+            : ['type' => 'swap', 'card_id' => $target, 'fixed' => null, 'skill_id' => null, 'target' => null];
     }
 
     /**
@@ -115,27 +166,6 @@ class ForecastAwareStrategy implements Strategy
         }
 
         return $best;
-    }
-
-    /**
-     * 惡意不夠打的破陣留到下一手；同張牌不連續留。
-     *
-     * @param  array<string, mixed>  $choice
-     * @return list<string>
-     */
-    private function keep(BattleState $state, array $choice): array
-    {
-        foreach ($state->hand as $instanceId) {
-            if ($instanceId === $choice['card_id'] || in_array($instanceId, $state->keptLastTurn, true)) {
-                continue;
-            }
-
-            if ($this->skill($state, $instanceId)?->kind === SkillKind::Breach) {
-                return [$instanceId];
-            }
-        }
-
-        return [];
     }
 
     private function skill(BattleState $state, string $instanceId): ?Skill

@@ -266,7 +266,7 @@ class DecisionWindowTest extends TestCase
 
         $this->assertContains('impact', array_column($response->json('data.events'), 'type'));
         $this->assertSame(0, $this->state($runId)->timeouts);
-        $this->assertCount(5, $state->hand);
+        $this->assertCount($state->handSize, $state->hand);
     }
 
     public function test_a_second_tab_cannot_settle_the_same_turn_twice(): void

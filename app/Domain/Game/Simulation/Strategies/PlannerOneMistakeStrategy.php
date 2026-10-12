@@ -124,8 +124,6 @@ class PlannerOneMistakeStrategy extends PlannerStrategy implements InstrumentedS
             'context' => $context,
         ];
 
-        $action['keep'] = $this->keep($state, $action);
-
         return $action;
     }
 

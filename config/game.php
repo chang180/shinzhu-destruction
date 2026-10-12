@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'rules_version' => '7.0.0',
+    'rules_version' => '8.0.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -135,15 +135,15 @@ return [
     | 手牌與決策窗口
     |--------------------------------------------------------------------------
     |
-    | 每回合手牌 5 張、出 1 張；最多留 2 張到下回合，同張不能連續留。
-    | 另有每回合一次的免費換牌。
+    | 手牌上限 4 張，每回合出 1 張；沒出的牌自動留在手上，揭牌時只補到上限
+    | （手牌留存，8.0.0 起取代每回合重發加留牌的規則）。另有每回合一次的免費換牌，
+    | 是唯一主動換掉不想要的牌的方式。
     | 蓄勢與終招不是牌，是手牌旁的固定行動——否則勝負會取決於有沒有抽到終招。
     |
     */
 
     'hand' => [
-        'size' => 5,
-        'max_keep' => 2,
+        'size' => 4,
         'swaps_per_turn' => 1,
     ],
 
@@ -399,7 +399,7 @@ return [
                 ],
             ],
             'defenses' => [
-                Element::Water->value => 36,
+                Element::Water->value => 35,
                 Element::Heat->value => 34,
                 Element::Land->value => 34,
             ],
@@ -642,9 +642,9 @@ return [
                 ],
             ],
             'defenses' => [
-                Element::Water->value => 26,
-                Element::Heat->value => 28,
-                Element::Land->value => 30,
+                Element::Water->value => 27,
+                Element::Heat->value => 29,
+                Element::Land->value => 31,
             ],
             'data_elements' => [Element::Water->value, Element::Heat->value, Element::Land->value],
             // 三系同時採用：每系的情境修正再夾一次，避免「資料好壞」本身決定勝負。

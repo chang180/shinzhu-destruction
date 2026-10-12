@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, forecastLines, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText, actSteps, currentAct, nextActText, actBriefingLines, reportActs, isConditionalAct } from './game';
+import { api, ApiError, PendingAction, PendingStorageError, cardGuide, reportSummary, reportFindings, dataNoteText, briefingTimingText, briefingLines, forecastLines, nextHandText, shouldAutoReveal, soundStatusText, secondsLeft, serverOffset, playedName, elements, elementNames, unavailableText, eventText, cueImage, cueDuration, visibleEvents, canPlay, levelStatusText, nextPlayableLevel, endingFor, deckSummary, apostleAsset, briefingAsset, reportAsset, sceneAsset, fetchCounterfactual, counterfactualText, actSteps, currentAct, nextActText, actBriefingLines, reportActs, isConditionalAct } from './game';
 import type { BattleEvent, Campaign, Card, Choice, CounterfactualComparison, Level, Run, RunMode, SavedRun, Settlement } from './game';
 import { BattleAudio } from './audio';
+import { assetUrl as asset, presentationFor, professorReview, phaseLine, rewardCopy, mainFinaleCopy, finaleFrames } from './game';
 
 const page = ref<'lobby' | 'briefing' | 'battle' | 'report' | 'reward'>('lobby');
 const levels = ref<Level[]>([]);
@@ -17,7 +18,6 @@ const error = ref('');
 const notice = ref('');
 const mode = ref<RunMode>('challenge');
 const previewedCard = ref<Card>();
-const keep = ref<string[]>([]);
 const currentEvent = ref<BattleEvent>();
 const pending = new PendingAction({
     getItem: key => sessionStorage.getItem(key),
@@ -60,7 +60,10 @@ const nextLevel = computed(() => nextPlayableLevel(levels.value, mode.value));
 const ending = computed(() => run.value ? endingFor(run.value, campaign.value, campaign.value?.main_finale ?? '', campaign.value?.advanced_finale ?? '') : null);
 const reward = computed(() => campaign.value?.pending_reward ?? null);
 const currentDeck = computed(() => deckSummary(campaign.value?.deck ?? {}, cards.value));
-const advancedFinaleFrames = ['advanced-finale-1', 'advanced-finale-2', 'advanced-finale-3'];
+const advancedFinaleFrames = finaleFrames;
+const narrative = computed(() => presentationFor(run.value?.level_id ?? ''));
+const review = computed(() => run.value ? professorReview(run.value) : '');
+const briefingTitle = computed(() => narrative.value?.headline.split('\n') ?? briefingLines(level.value));
 const advancedEntry = computed(() => levels.value.find(l => l.tier === 'advanced' && canPlay(l, mode.value)));
 const locked = computed(() => busy.value || playing.value || uncertain.value);
 const revealed = computed(() => state.value?.turn_phase === 'decision');
@@ -71,7 +74,6 @@ const summary = computed(() => run.value ? reportSummary(run.value) : null);
 const highlights = computed(() => run.value ? reportFindings(run.value) : []);
 const hand = computed(() => (state.value?.hand ?? []).map(id => ({ id, card: cardFor(id) })).filter(entry => !!entry.card));
 const fixedCards = computed(() => Object.values(run.value?.cards ?? {}).filter(card => ['gather', 'ultimate'].includes(card.skill_id)));
-const canKeepMore = computed(() => keep.value.length < (state.value?.max_keep ?? 2));
 const sourceNames: Record<string, string> = { 'wra.reservoir_conditions': '水利署・水庫水情', 'nstc.science_park_water': '國科會・園區用水', 'moi.land_use': '內政部・國土利用' };
 const qualityNames: Record<string, string> = { demo: '示範情境', fresh: '開局時有效資料', stale: '開局時已過期資料', unavailable: '資料不可得' };
 const hint = computed(() => {
@@ -79,8 +81,8 @@ const hint = computed(() => {
     if (!revealed.value) return nextHandText(mode.value);
     if (state.value.breach_available) return '防線已裂開！下一個行動會用掉破綻，連逾時也算。把窗口留給值得的一擊。';
     if (state.value.intent?.interruptible) return '城市正準備修復。看看手上有沒有同系的擾序牌；打斷成功會直接劃掉那條預告。';
-    if (state.value.turn === 1) return '先勾選最多 2 張留牌，再點要打出的牌；點牌會立即施放。每回合另有一次免費換牌。';
-    return '點牌會立即施放。換系能緩解原系抗性，連續三種不同系進攻會連攜；手上沒有想要的牌時，換牌與蓄勢都是退路。';
+    if (state.value.turn === 1) return '沒打出的牌會留在手上，只補到上限。點牌立即施放；每回合有一次免費換牌，用來清掉用不上的牌。';
+    return '點牌會立即施放。換系能緩解原系抗性，連續三種不同系進攻會連攜；手上的牌會留到你用掉它——想留的破陣就留著，用不上的牌換掉。';
 });
 
 function cardFor(instanceId: string): Card | undefined {
@@ -106,14 +108,6 @@ function fixedReason(card: Card): string {
 function noteFor(card: Card | undefined): string {
     return card ? dataNoteText(run.value?.data_notes[card.element as never], card.element) : '';
 }
-function toggleKeep(instanceId: string): void {
-    if (locked.value || !revealed.value || !state.value || !canKeepCard(state.value, instanceId)) return;
-    keep.value = keep.value.includes(instanceId)
-        ? keep.value.filter(id => id !== instanceId)
-        : canKeepMore.value ? [...keep.value, instanceId] : keep.value;
-}
-const p06Assets = new Set(['yan-chen-stern', 'yan-chen-pleased', 'student-silhouette', 'apostle-empty-cup', 'apostle-noon-fold', 'apostle-meter-feast', 'apostle-mirror-shade', 'apostle-stored-night', 'scene-noon-fold', 'scene-meter-feast', 'scene-mirror-shade', 'scene-stored-night', 'skill-water-2', 'skill-heat-2', 'skill-land-2', 'skill-ultimate', 'defense-success-1', 'defense-success-2', 'victory-2', 'victory-3', 'advanced-finale-1', 'advanced-finale-2', 'advanced-finale-3']);
-function asset(name: string): string { return `/assets/${p06Assets.has(name) ? 'p06' : 'p04'}/${name}.webp`; }
 function focusHeading(): void { void nextTick(() => document.querySelector<HTMLElement>('main h1, main h2')?.focus()); }
 // P10-6：三幕顯示一律從伺服器公開的 state.level_phase_id 與 level.phases 推導。
 const acts = computed(() => (run.value ? actSteps(level.value, run.value.state) : []));
@@ -125,7 +119,7 @@ function showRun(value: Run, briefing = false): void {
     run.value = value;
     mode.value = value.mode;
     clockOffset.value = serverOffset(value.server_time);
-    previewedCard.value = undefined; keep.value = []; counterfactuals.value = {};
+    previewedCard.value = undefined; counterfactuals.value = {};
     page.value = value.outcome !== 'in_progress' ? 'report' : briefing ? 'briefing' : 'battle';
     if (!value.compatible) notice.value = '這一局使用舊版規則。可以查看紀錄，請回學院另開新局。';
     focusHeading();
@@ -182,7 +176,7 @@ async function start(retry = false, levelId?: string): Promise<void> {
             retry ? {} : { level_id: target, mode: mode.value },
         );
         showRun(result.data, true);
-        for (const name of [sceneAsset(result.data.level_id), apostleAsset(result.data.level_id), briefingAsset(result.data.level_id), reportAsset('player_victory', result.data.level_id), reportAsset('city_held', result.data.level_id), 'skill-water-2', 'skill-heat-2', 'skill-land-2', 'skill-ultimate']) { const image = new Image(); image.src = asset(name); }
+        for (const name of [sceneAsset(result.data.level_id), apostleAsset(result.data.level_id)]) { const image = new Image(); image.src = asset(name); }
     } catch (e) { handleError(e); } finally { busy.value = false; }
 }
 /** 挑一張獎勵牌。它只影響**下一局**：已經開始的那一局在開局時就凍結了牌組。 */
@@ -192,6 +186,7 @@ async function chooseReward(levelId: string, option: string): Promise<void> {
     try {
         campaign.value = (await api<{ data: Campaign }>('/campaign/reward', { level_id: levelId, option })).data;
         notice.value = '新牌已換進牌組，下一局生效。';
+        audio.ui('confirm');
         page.value = 'lobby'; focusHeading();
     } catch (e) { handleError(e); } finally { busy.value = false; }
 }
@@ -213,29 +208,34 @@ async function enterBattle(): Promise<void> {
     await audio.unlock(); page.value = 'battle'; focusHeading();
     if (run.value && shouldAutoReveal(run.value)) await reveal();
 }
-function skip(): void { presentation++; stopWait?.(); stopWait = undefined; currentEvent.value = undefined; audio.stop(); }
+function skip(): void { presentation++; stopWait?.(); stopWait = undefined; currentEvent.value = undefined; audio.stopEffects(); }
 async function present(events: BattleEvent[]): Promise<void> {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     playing.value = true;
     const token = ++presentation;
+    audio.beginPresentation();
     try {
         for (const event of visibleEvents(events)) {
             if (token !== presentation) break;
             currentEvent.value = event;
             await nextTick();
             document.querySelector<HTMLButtonElement>('.cutscene > button')?.focus();
-            audio.play(event);
+            const finale = run.value?.mode === 'challenge' && event.after.outcome === 'player_victory'
+                ? run.value.level_id === campaign.value?.advanced_finale ? 'advanced'
+                    : run.value.level_id === campaign.value?.main_finale && !campaign.value?.stood_down ? 'main' : null
+                : null;
+            audio.play(event, run.value?.level_id, finale);
             await new Promise<void>(resolve => { const timer = setTimeout(resolve, reduced.value ? 180 : cueDuration(event) / speed.value); stopWait = () => { clearTimeout(timer); resolve(); }; });
         }
     } finally {
-        currentEvent.value = undefined; playing.value = false; stopWait = undefined; audio.stop();
+        currentEvent.value = undefined; playing.value = false; stopWait = undefined;
         await nextTick(); previousFocus?.focus();
     }
 }
 /**
  * 送出一次行動。retry 走待確認流程，重送**原本的** action_id 與 payload。
  */
-async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, keepCards: string[] = [], retry = false): Promise<void> {
+async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, retry = false): Promise<void> {
     if (!run.value || busy.value || playing.value || (!retry && uncertain.value)) return;
     if (Date.now() < retryAt.value) { error.value = '仍在等待可重試時間，請稍候。'; return; }
     if (!retry && !choice) return;
@@ -243,12 +243,14 @@ async function send(choice: Pick<Choice, 'type' | 'card_id' | 'fixed'> | null, k
     await audio.unlock();
     let automaticallyReveal = false;
     try {
-        const input = retry ? pending.value!.input : pending.prepare(run.value, choice!, keepCards);
+        const input = retry ? pending.value!.input : pending.prepare(run.value, choice!);
         uncertain.value = true;
         const response = await api<{ data: Settlement }>(`/runs/${run.value.run_id}/actions`, input);
         const latest = (await api<{ data: Run }>(`/runs/${run.value.run_id}`)).data;
         pending.clear(); uncertain.value = false;
         if (input.type === 'play' || input.type === 'timeout') await present(response.data.events);
+        else if (input.type === 'swap') audio.ui('confirm');
+        else if (input.type === 'reveal' && latest.state.phase === 'overhaul') audio.countdown();
         if (latest.outcome !== 'in_progress') {
             // 戰報的下一關需要最新解鎖與最佳成績，不能沿用開局前的關卡列表。
             try {
@@ -272,12 +274,12 @@ async function reveal(): Promise<void> { await send({ type: 'reveal', card_id: n
 async function castCard(instanceId: string): Promise<void> {
     const choice = choiceForCard(instanceId);
     if (!choice || choice.reason || !run.value?.compatible) return;
-    await send(choice, keptCardsForPlay(keep.value, instanceId));
+    await send(choice);
 }
 async function castFixed(skillId: string): Promise<void> {
     const choice = choiceForFixed(skillId);
     if (!choice || choice.reason || !run.value?.compatible) return;
-    await send(choice, keep.value);
+    await send(choice);
 }
 const swap = (instanceId: string) => send({ type: 'swap', card_id: instanceId, fixed: null });
 /**
@@ -294,7 +296,10 @@ async function replay(): Promise<void> {
     await audio.unlock();
     await present(allEvents.value);
 }
-function onVisibility(): void { if (document.hidden) { skip(); audio.stop(); } }
+function onVisibility(): void {
+    if (document.hidden) { skip(); audio.stop(); }
+    else if (page.value === 'battle') audio.setAmbience(run.value?.level_id ?? null);
+}
 function onKey(event: KeyboardEvent): void {
     if (!playing.value) return;
     if (event.key === 'Escape') skip();
@@ -302,8 +307,13 @@ function onKey(event: KeyboardEvent): void {
 }
 watch([muted, reduced, speed, effectsVolume, musicVolume], () => {
     audio.muted = muted.value; audio.effectsVolume = effectsVolume.value; audio.musicVolume = musicVolume.value;
-    if (muted.value) audio.stop();
+    audio.updateVolumes();
+    audio.setAmbience(page.value === 'battle' ? run.value?.level_id ?? null : null);
     try { localStorage.setItem('academy.settings', JSON.stringify({ muted: muted.value, reduced: reduced.value, speed: speed.value, effects: effectsVolume.value, music: musicVolume.value })); } catch { /* Storage is optional for preferences. */ }
+});
+watch([page, () => run.value?.run_id], () => {
+    if (['lobby', 'briefing', 'reward'].includes(page.value)) audio.stopEffects();
+    audio.setAmbience(page.value === 'battle' ? run.value?.level_id ?? null : null);
 });
 watch(remaining, value => { if (value === 0 && revealed.value && !locked.value) void settleTimeout(); });
 onMounted(() => {
@@ -323,14 +333,14 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
             <details class="settings"><summary>聲音與演出</summary><div class="settings-panel">
                 <label><input v-model="muted" type="checkbox" @change="audio.unlock"> 靜音</label>
                 <label>音效 <input v-model.number="effectsVolume" aria-label="音效音量" type="range" min="0" max="1" step=".05"></label>
-                <label>結局樂句 <input v-model.number="musicVolume" aria-label="結局音量" type="range" min="0" max="1" step=".05"></label>
+                <label>氛圍與樂句 <input v-model.number="musicVolume" aria-label="氛圍與結局音量" type="range" min="0" max="1" step=".05"></label>
                 <label><input v-model="reduced" type="checkbox"> 減少動態</label>
                 <label>演出速度 <select v-model.number="speed"><option :value="1">正常</option><option :value="2">兩倍速</option></select></label>
             </div></details>
         </header>
         <div v-if="error" class="message error" role="alert">{{ error }} <button v-if="!uncertain" :disabled="busy" @click="loadLobby">重新載入學院</button></div>
         <div v-if="notice" class="message" role="status">{{ notice }}</div>
-        <div v-if="uncertain" class="message" role="status">行動結果待確認。<button :disabled="busy || playing" @click="run ? send(null, [], true) : loadLobby()">{{ run ? '重試原行動' : '重新連線取回對局' }}</button></div>
+        <div v-if="uncertain" class="message" role="status">行動結果待確認。<button :disabled="busy || playing" @click="run ? send(null, true) : loadLobby()">{{ run ? '重試原行動' : '重新連線取回對局' }}</button></div>
         <p v-if="busy && !playing" class="loading" role="status">正在確認學院紀錄…</p>
         <main>
             <template v-if="page === 'lobby'">
@@ -342,7 +352,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                             <label :class="{ on: mode === 'challenge' }"><input v-model="mode" type="radio" value="challenge"><b>限時挑戰</b><small>每回合 {{ decisionSeconds }} 秒決策；逾時只執行城市回應。</small></label>
                             <label :class="{ on: mode === 'practice' }"><input v-model="mode" type="radio" value="practice"><b>不限時練習</b><small>同一套牌組與城市規則，只關掉截止時間。成績分開記錄。</small></label>
                         </fieldset>
-                        <button class="primary" :disabled="locked || !nextLevel" @click="start()">{{ nextLevel && nextLevel.sequence > 1 ? `繼續計畫 · ${nextLevel.name}` : '簽下入學計畫' }} <span>↗</span></button><p class="small">單人牌組策略 · 手牌 5 張 · {{ soundStatusText(muted) }}（可於右上角調整）</p></div>
+                        <button class="primary" :disabled="locked || !nextLevel" @click="start()">{{ nextLevel && nextLevel.sequence > 1 ? `繼續計畫 · ${nextLevel.name}` : '簽下入學計畫' }} <span>↗</span></button><p class="small">單人牌組策略 · 未出的手牌自動保留 · {{ soundStatusText(muted) }}（可於右上角調整）</p></div>
                     <span class="hero-caption">虛構城市演習 / 非真實災害預測</span>
                 </section>
                 <section class="lobby-bottom"><div><p class="eyebrow">CAMPAIGN · 主線 3 關 / 進階 2 關</p><h2 tabindex="-1">五門禁術</h2>
@@ -365,7 +375,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                 <section class="content-width reward">
                     <p class="eyebrow">DECK REWARD / {{ reward!.level_name }}</p>
                     <h1 tabindex="-1">挑一張，換掉一張。</h1>
-                    <p class="lead">{{ reward!.prompt }}</p>
+                    <p class="lead">{{ rewardCopy(reward!.level_id, reward!.prompt) }}</p>
                     <ul class="reward-options">
                         <li v-for="option in reward!.options" :key="option.key">
                             <b>{{ option.add.name }}<em>{{ option.style }}</em></b>
@@ -381,14 +391,14 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
             </template>
             <template v-else-if="run && state">
                 <section v-if="page === 'briefing'" class="briefing content-width">
-                    <div class="briefing-art"><img :src="asset(briefingAsset(run.level_id))" alt="枯潮教授晏沉，身穿深紫學院長袍，平靜地端著一只空杯"><span>枯潮教授 / 晏沉</span></div>
+                    <div class="briefing-art"><img :src="asset(briefingAsset(run.level_id))" :alt="narrative?.alt ?? '枯潮教授晏沉'"><span>枯潮教授 / 晏沉</span></div>
                     <div><p class="eyebrow">作戰簡報 · 第 {{ level?.sequence }} 關 {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p>
-                        <h1 tabindex="-1"><template v-for="(line, index) in briefingLines(level)" :key="index">{{ line }}<br v-if="index < briefingLines(level).length - 1"></template></h1>
-                        <blockquote class="professor-quote">{{ level?.briefing?.quote }}<small>{{ level?.briefing?.quote_note }}</small></blockquote>
-                        <p class="lead">你有 {{ state.max_turns }} 回合、一副 {{ level?.deck_size }} 張的牌組。核心歸零便通關；回合用盡而城市仍站著，這次試煉就結束。</p>
+                        <h1 tabindex="-1"><template v-for="(line, index) in briefingTitle" :key="index">{{ line }}<br v-if="index < briefingTitle.length - 1"></template></h1>
+                        <blockquote class="professor-quote">{{ narrative?.quote ?? level?.briefing?.quote }}<small>{{ narrative?.note ?? level?.briefing?.quote_note }}</small></blockquote>
+                        <p v-if="narrative" class="briefing-task">{{ narrative.task }}</p><p class="lead">你有 {{ state.max_turns }} 回合、一副 {{ level?.deck_size }} 張的牌組。核心歸零便通關；回合用盡而城市仍站著，這次試煉就結束。</p>
                         <ol class="lesson">
-                            <li><b>每回合五張手牌，點一張立即施放。</b>{{ briefingTimingText(mode) }}</li>
-                            <li><b>最多留 2 張到下一手。</b>同一張不能連續再留；先標記留牌，再點另一張施放。每回合只能免費換 1 張。</li>
+                            <li><b>手牌上限 {{ state.hand_size }} 張，點一張立即施放。</b>{{ briefingTimingText(mode) }}</li>
+                            <li><b>沒打出的牌會留在手上。</b>每回合只補到上限，所以破陣與擾序可以留到預告需要的那一回合。每回合有一次免費換牌，用來清掉用不上的牌。</li>
                             <li v-if="actBriefingLines(level).length"><b>本關分三幕，壓力逐幕改變。</b><ol class="act-lines"><li v-for="line in actBriefingLines(level)" :key="line">{{ line }}</li></ol></li>
                             <li v-for="(lesson, index) in level?.briefing?.lessons ?? []" :key="index">{{ lesson }}</li>
                             <li><b>蓄勢與終招不是牌。</b>它們固定在手牌旁邊，點擊同樣立即執行。</li>
@@ -396,7 +406,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         <button class="primary" :disabled="locked" @click="enterBattle">明白了，開始連續試煉 ↗</button><p class="small">本局情境與牌序已凍結。回學院後可繼續，不用一次打完。</p></div>
                 </section>
                 <section v-if="page === 'battle'" class="battle content-width">
-                    <div class="battle-heading"><div><p class="eyebrow">CHAPTER {{ String(level?.sequence ?? 1).padStart(2, '0') }} / {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ level?.subtitle }}</h1></div>
+                    <div class="battle-heading"><div><p class="eyebrow">CHAPTER {{ String(level?.sequence ?? 1).padStart(2, '0') }} / {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p><h1 tabindex="-1">{{ run.level_id === 'mirror-shade' ? '城市反制你的上一手' : level?.subtitle }}</h1></div>
                         <div class="clock"><div class="turn"><strong>{{ state.turn.toString().padStart(2, '0') }}</strong><span>/ {{ state.max_turns }} 回合</span></div>
                             <div v-if="revealed && remaining !== null" class="countdown" :class="{ urgent }" role="timer" :aria-label="`本回合剩餘 ${remaining} 秒`"><strong>{{ remaining }}</strong><span>秒</span></div>
                             <div v-else-if="revealed" class="countdown practice"><strong>∞</strong><span>不限時</span></div>
@@ -410,11 +420,11 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                                 <small v-if="step.conditional" class="conditional">條件幕</small>
                             </li>
                         </ol>
-                        <p class="act-objective"><b>本幕目標：</b>{{ act?.objective }}</p>
+                        <p v-if="phaseLine(run.level_id, state.level_phase_id)" class="act-voice">晏沉：{{ phaseLine(run.level_id, state.level_phase_id) }}</p><p class="act-objective"><b>本幕目標：</b>{{ act?.objective }}</p>
                         <p v-if="actHint" class="act-next">{{ actHint }}</p>
                     </div>
                     <div class="city-strip">
-                        <div class="city-core"><img :src="asset(sceneAsset(run.level_id))" :alt="`${level?.name}的虛構城市防線`"><img class="apostle-mark" :src="asset(apostleAsset(run.level_id))" :alt="`${level?.name}的禁術使徒`"><div class="core-panel"><span>城市核心 · 打到 0 通關</span><strong>{{ state.core_resilience }}</strong><progress aria-label="城市核心韌性" :value="state.core_resilience" max="100"></progress></div></div>
+                        <div class="city-core" :data-act="acts.findIndex(step => step.status === 'current') + 1" :data-overhaul="state.phase === 'overhaul'" :data-shield="state.shields[0]?.element"><span v-if="state.shields.length" class="battle-shield" aria-hidden="true"></span><img :src="asset(sceneAsset(run.level_id))" :alt="`${level?.name}的虛構城市防線`"><img class="apostle-mark" :src="asset(apostleAsset(run.level_id))" :alt="`${level?.name}的禁術使徒`"><div class="core-panel"><span>城市核心 · 打到 0 通關</span><strong>{{ state.core_resilience }}</strong><progress aria-label="城市核心韌性" :value="state.core_resilience" max="100"></progress></div></div>
                         <div class="city-read">
                             <div class="intent-card" :class="{ interruptible: state.intent?.interruptible }"><small>下一步 · 城市預告</small><p>{{ state.intent?.description ?? '對局已結束' }}</p><span v-if="state.intent?.interruptible" class="tag">可用{{ elementNames[state.intent.element] }}系擾序打斷</span></div>
                             <div class="defenses"><div v-for="element in elements" :key="element" :class="element"><b>{{ elementNames[element] }}系防線 <strong>{{ state.defenses[element] }}</strong></b><progress :aria-label="`${elementNames[element]}系防線`" :value="state.defenses[element]" max="100"></progress><small>抗性 {{ state.resistance[element] }} 層 · 印記 {{ state.sigils[element] }}/{{ state.sigil_cap }}</small></div></div>
@@ -422,7 +432,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         </div>
                     </div>
                     <div class="table-bar"><div class="malice"><span>你的惡意</span><b>{{ state.malice }}<small> / {{ state.malice_cap }}</small></b></div>
-                        <p class="counts">抽牌堆 {{ state.draw_pile_count }} · 棄牌堆 {{ state.discard_pile.length }} · 留牌 {{ keep.length }}/{{ state.max_keep }}</p>
+                        <p class="counts">抽牌堆 {{ state.draw_pile_count }} · 棄牌堆 {{ state.discard_pile.length }} · 手牌 {{ state.hand.length }}/{{ state.hand_size }}</p>
                         <p v-if="revealed" class="professor-note">{{ hint }}</p>
                     </div>
 
@@ -431,7 +441,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     </div>
                     <template v-else>
                         <ul class="hand" aria-label="手牌">
-                            <li v-for="entry in hand" :key="entry.id" :class="[entry.card!.element, { previewed: previewedCard === entry.card, kept: keep.includes(entry.id), unavailable: !!reasonFor(entry.id) }]">
+                            <li v-for="entry in hand" :key="entry.id" :class="[entry.card!.element, { previewed: previewedCard === entry.card, unavailable: !!reasonFor(entry.id) }]">
                                 <button class="card-face" :disabled="locked || !!reasonFor(entry.id) || !run.compatible" :title="reasonFor(entry.id) || `點擊立即施放 ${entry.card!.name}`" @mouseenter="previewedCard = entry.card" @mouseleave="previewedCard = undefined" @focus="previewedCard = entry.card" @blur="previewedCard = undefined" @click="castCard(entry.id)">
                                     <span class="card-top"><b>{{ entry.card!.name }}</b><em>{{ entry.card!.element ? elementNames[entry.card!.element] + '系' : '無系' }}</em></span>
                                     <span class="card-cost">惡意 {{ entry.card!.malice_cost }}<template v-if="entry.card!.cooldown"> · 冷卻 {{ entry.card!.cooldown }}</template></span>
@@ -442,14 +452,13 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                                 </button>
                                 <details class="card-help"><summary>看用途（不出牌）</summary><p>{{ cardGuide(entry.card!).example }}</p><p>{{ entry.card!.text }}</p><p>基礎衝擊 {{ entry.card!.base_impact }} · 防線削弱 {{ -entry.card!.defense_delta }}<br>花費 {{ entry.card!.malice_cost }} 惡意；{{ entry.card!.cooldown ? `使用後，接下來 ${entry.card!.cooldown} 回合不能再用同招。` : '沒有冷卻，可在下一手再次使用。' }}</p><small>{{ noteFor(entry.card!) }}<br>實際傷害會受防線、抗性與護盾影響。</small></details>
                                 <div class="card-tools">
-                                    <button :disabled="locked || !canKeepCard(state, entry.id) || (!keep.includes(entry.id) && !canKeepMore)" :aria-pressed="keep.includes(entry.id)" @click="toggleKeep(entry.id)">{{ !canKeepCard(state, entry.id) ? '上手已留，不能再留' : keep.includes(entry.id) ? '已留牌' : '留到下回合' }}</button>
                                     <button :disabled="locked || !!swapChoice(entry.id)?.reason" @click="swap(entry.id)">{{ state.swap_used ? '已換過' : '換這張' }}</button>
                                 </div>
                             </li>
                         </ul>
                         <div class="preview-bar" aria-live="polite">
                             <template v-if="previewedCard"><b>{{ previewedCard.name }}</b><p>{{ previewedCard.role }}</p><small>基礎衝擊 {{ previewedCard.base_impact }} · 防線 {{ previewedCard.defense_delta }}｜{{ noteFor(previewedCard) }}<br>點擊立即施放；實際戰果由伺服器依防線、抗性、護盾與情境結算。</small></template>
-                            <template v-else><b>先留牌，再出手</b><p>最多留 2 張到下一手，同一張不能連續再留；點擊卡牌立即施放。</p></template>
+                            <template v-else><b>沒打出的牌會留下</b><p>手牌只補到上限；點擊卡牌立即施放，用不上的牌用「換這張」清掉。</p></template>
                         </div>
                         <div class="fixed-actions">
                             <p class="eyebrow">手牌旁的固定行動 · 不佔手牌</p>
@@ -459,14 +468,14 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                             </div>
                         </div>
                     </template>
-                    <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>留牌上限 {{ state.max_keep }} 張，同一張只能留到下一手；換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放選中的牌，也不扣未出的牌費。</p><ol><li v-for="line in forecastLines(level)" :key="line.turn">{{ line.text }}</li></ol></details>
+                    <details class="forecast"><summary>查看完整城市預告與規則細節</summary><p>手牌上限 {{ state.hand_size }} 張，沒打出的牌自動留在手上；換牌每回合 1 次且不推進回合、不重設倒數。逾時不會自動施放任何牌，手牌原封不動。</p><ol><li v-for="line in forecastLines(level)" :key="line.turn">{{ line.text }}</li></ol></details>
                 </section>
                 <section v-if="page === 'report' && summary" class="report content-width" :class="{ victory: run.outcome === 'player_victory' }">
                     <div><p class="eyebrow">第 {{ level?.sequence }} 關 · {{ level?.name }}｜{{ run.mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p>
                         <h1 tabindex="-1">{{ run.outcome === 'player_victory' ? '毀滅成功，通關！' : '城市守住，未通關。' }}</h1>
                         <p class="report-condition">{{ summary.condition }}</p>
                         <dl class="report-stats"><div><dt>城市核心</dt><dd>{{ summary.initialCore ?? '開局值未保存' }} → {{ state.core_resilience }}</dd></div><div><dt>結束回合</dt><dd>{{ summary.turn }} / {{ state.max_turns }}</dd></div><div><dt>逾時</dt><dd>{{ state.timeouts }} 次</dd></div></dl>
-                        <p class="final-move">{{ summary.finalMove }}</p>
+                        <p class="final-move">{{ summary.finalMove }}</p><blockquote class="report-review">晏沉：{{ review }}</blockquote>
                         <ol class="report-causes"><li v-for="(finding, index) in summary.findings" :key="index"><b>{{ finding.turn === null ? '全局' : `第 ${finding.turn} 回合` }}</b> {{ finding.text }}</li></ol>
                         <p v-if="run.mode === 'practice'" class="small">這是練習成績；練習關卡進度分開記錄，限時挑戰仍需自行通關。</p>
                         <p v-if="ending === 'main'">主線三關已通過。你可以收下戰果，或繼續兩關進階畢業考。</p>
@@ -482,10 +491,10 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     </div>
                     <img :src="asset(reportAsset(run.outcome, run.level_id))" :alt="run.outcome === 'player_victory' ? '虛構城市化為懸浮陶片，宣告通關' : '重新穩定的虛構城市防線'">
                 </section>
-                <section v-if="page === 'report' && ending === 'main'" class="content-width ending main"><img class="ending-art" :src="asset('victory-2')" alt="浮空陶片與學院的銅色焰火">
+                <section v-if="page === 'report' && ending === 'main'" class="content-width ending main"><img class="ending-art" :src="asset('main-finale-v2')" alt="晏沉在無字結業卷上落印，三枚禁術封印映出銅光">
                     <p class="eyebrow">CAMPAIGN ENDING / 主線目標達成</p>
                     <h2 tabindex="-1">新竹縣模擬防線，失守。</h2>
-                    <p class="lead">晏沉在名冊上蓋下「{{ campaign?.titles?.main_cleared ?? '毀滅計畫通過' }}」。三門禁術修習完畢，這份計畫已經可以結案。</p>
+                    <p class="lead">晏沉在名冊上蓋下「{{ campaign?.titles?.main_cleared ?? '毀滅計畫通過' }}」。{{ mainFinaleCopy }}</p>
                     <p>接下來由你決定：收下戰果結束本次計畫，或接受進階畢業考——那是兩關更強的城市應變方案，失敗不會撤銷你剛剛拿到的通過。</p>
                     <div class="report-actions">
                         <button class="primary" :disabled="locked" @click="standDown">收下戰果，結束本次計畫</button>
@@ -493,16 +502,16 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                     </div>
                     <p class="small">收手之後仍可從同一份存檔回來挑戰進階；這不是失敗，也不是少拿一個結局。</p>
                 </section>
-                <section v-if="page === 'report' && ending === 'advanced'" class="content-width ending advanced"><img v-for="(frame, index) in advancedFinaleFrames" :key="frame" class="ending-art" :src="asset(frame)" :alt="`進階終幕第 ${index + 1} 幕`">
+                <section v-if="page === 'report' && ending === 'advanced'" class="content-width ending advanced"><figure v-for="(frame, index) in advancedFinaleFrames" :key="frame" class="finale-frame"><img class="ending-art" :src="asset(frame)" :alt="['五枚禁術封印在虛構現代城市上空合攏', '學員在觀測室接過晏沉交付的無字畢業徽章', '黎明照亮化為紙屑的城市模型與學院窗景'][index]" loading="lazy"><figcaption>{{ ['五門禁術，全部交卷。', '晏沉把畢業徽章推到你面前。', '這次，不必補考。'][index] }}</figcaption></figure>
                     <p class="eyebrow">CAMPAIGN ENDING / 進階終幕</p>
                     <h2 tabindex="-1">蓄夜之後，沒有下一個夜晚。</h2>
-                    <p class="lead">五門禁術全數修習完畢。晏沉把空杯倒扣在桌上：「{{ campaign?.titles?.advanced_cleared ?? '首席反派' }}。這個稱號，學院只發給把最後一次重整也打斷的人。」</p>
-                    <p class="small">虛構城市演習；真實的新竹縣不是這場推演的結論。</p>
+                    <p class="lead">五門禁術全數修習完畢。晏沉把空杯倒扣在桌上：「{{ campaign?.titles?.advanced_cleared ?? '首席反派' }}。成績有效。這次，不必補考。」</p>
+                    <p>{{ review }}</p><p class="small">虛構城市演習；真實的新竹縣不是這場推演的結論。</p>
                 </section>
                 <section v-if="page === 'report' && reward" class="content-width ending reward-hint">
                     <p class="eyebrow">DECK REWARD / 牌組獎勵</p>
                     <h2 tabindex="-1">有一張新禁術可以換進牌組。</h2>
-                    <p class="lead">{{ reward?.prompt }}</p>
+                    <p class="lead">{{ reward ? rewardCopy(reward.level_id, reward.prompt) : '' }}</p>
                     <div class="report-actions"><button class="primary" :disabled="locked" @click="openReward">去挑一張 ↗</button></div>
                 </section>
                 <section v-if="page === 'report' && actSections.length" class="content-width report-acts">
@@ -516,7 +525,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                         </li>
                     </ol>
                 </section>
-                <section v-if="page === 'report'" class="content-width report-details"><details><summary>展開完整戰報與演出</summary><p>{{ run.outcome === 'player_victory' ? '晏沉抬杯：「你讓城市沒有下一次。」以下依本局的實際紀錄複盤。' : '晏沉收回空杯：「看看是哪一回合。」以下依本局的實際紀錄複盤。' }}</p><button :disabled="locked" @click="replay">重播本局演出</button><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></details></section>
+                <section v-if="page === 'report'" class="content-width report-details"><details><summary>展開完整戰報與演出</summary><p>以下依本局的實際紀錄複盤。</p><button :disabled="locked" @click="replay">重播本局演出</button><ol class="highlights"><li v-for="(event, index) in highlights" :key="index"><b>{{ event.turn === null ? '全局' : `第 ${event.turn} 回合` }}</b><span>{{ event.text }}</span></li></ol></details></section>
                 <section class="content-width data-panel"><details :open="page === 'briefing'"><summary>本局情境情報 · 開局後不變</summary><p class="small">以下是遊戲情境修正，不是災害預測。正值有利進攻；缺值採中性修正。標示「本關未採用」的系別不會在這一局生效。</p><div class="data-grid"><div v-for="element in elements" :key="element"><b>{{ elementNames[element] }}系 {{ run.data_notes[element]?.applied ? ((run.data_notes[element].modifier ?? 0) * 100).toFixed(1) + '%' : '本關未採用' }}</b><p>{{ run.data_notes[element]?.reason ?? run.scenario.reasons[element]?.message }}</p></div></div><div v-if="!Object.keys(run.snapshots).length" class="message">舊局未保存來源品質。保留原情境數值，不以今日資料冒充。</div><div v-for="(snapshot, source) in run.snapshots" :key="source" class="source-row"><b>{{ sourceNames[source] ?? source }}</b><span>{{ qualityNames[snapshot.quality] ?? snapshot.quality }}</span><small>觀測：{{ snapshot.observed_at ?? (snapshot.period ? Object.values(snapshot.period).join(' / ') : '無觀測日期') }}</small><p v-for="warning in snapshot.warnings" :key="warning" class="small">{{ warning }}</p></div></details></section>
                 <section v-if="run.history.length" class="content-width history"><details><summary>完整行動紀錄 · {{ run.history.length }} 次</summary><article v-for="entry in run.history" :key="entry.sequence"><h3>第 {{ entry.events[0]?.turn }} 回合 / {{ playedName(run, entry.input) }}</h3><ul><li v-for="event in entry.events" :key="event.sequence">{{ eventText(event) }}</li></ul>
                     <div v-if="entry.input.type === 'play' && run.compatible" class="counterfactual">
@@ -528,8 +537,8 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                 </article></details></section>
             </template>
         </main>
-        <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><a href="/docs/ASSET-SOURCES.md" @click.prevent="notice = '圖片：OpenAI image_gen 原創生成。音效：Kenney Impact Sounds（CC0）。完整來源與提示詞見 assets/p06-generation.json、assets/p04-generation.json、assets/third-party/manifest.json。'">素材來源</a></footer>
+        <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><a href="/docs/ASSET-SOURCES.md" @click.prevent="notice = '圖片：OpenAI image_gen 原創生成。新版音訊：原創聲音合成與短樂句。既有素材：Kenney（CC0）。來源與提示詞見 assets/visual-v2-generation.json、assets/visual-v2-audio.json 與既有素材 manifest。'">素材來源</a></footer>
         </div>
-        <div v-if="currentEvent" class="cutscene" :class="{ ultimate: currentEvent.cue_id.includes('ultimate'), triumph: currentEvent.after.outcome === 'player_victory' }" role="dialog" aria-modal="true" aria-label="戰鬥演出"><img :src="asset(cueImage(currentEvent, run?.level_id))" :alt="eventText(currentEvent)"><div class="cutscene-copy"><p class="eyebrow">第 {{ currentEvent.turn }} 回合 / {{ currentEvent.target ? elementNames[currentEvent.target] + '系' : (level?.name ?? '') }}</p><h2>{{ currentEvent.cue_id.includes('ultimate') && currentEvent.type !== 'outcome' ? '揮霍無度・新竹歸寂' : eventText(currentEvent) }}</h2><p v-if="currentEvent.type === 'outcome'">{{ currentEvent.after.outcome === 'player_victory' ? '枯潮修習通過。這一局，城市已無下一次。' : '城市尚存韌性。回到課堂，檢查這次的決策。' }}</p><p v-if="currentEvent.type === 'action_missed'">決策時間用完了。這一回合你沒有出手，城市照預告行動。</p><p v-if="currentEvent.type === 'impact'">護盾吸收 {{ currentEvent.delta.absorbed }} · 命中前有效防線 {{ currentEvent.delta.effective_defense }}</p></div><button @click="skip">跳過演出 · Esc</button></div>
+        <div v-if="currentEvent" class="cutscene" :class="{ ultimate: currentEvent.cue_id.includes('ultimate'), triumph: currentEvent.after.outcome === 'player_victory' }" role="dialog" aria-modal="true" aria-label="戰鬥演出"><img :src="asset(cueImage(currentEvent, run?.level_id))" :alt="eventText(currentEvent)"><div class="cutscene-copy"><p class="eyebrow">第 {{ currentEvent.turn }} 回合 / {{ currentEvent.target ? elementNames[currentEvent.target] + '系' : (level?.name ?? '') }}</p><h2>{{ currentEvent.cue_id.includes('ultimate') && currentEvent.type !== 'outcome' ? (narrative?.ultimate ?? '揮霍無度・新竹歸寂') : eventText(currentEvent) }}</h2><p v-if="currentEvent.type === 'outcome'">{{ currentEvent.after.outcome === 'player_victory' ? `${level?.name ?? '本關'}修習通過。城市核心已歸零。` : '城市尚存韌性。回到課堂，檢查這次的決策。' }}</p><p v-if="currentEvent.type === 'action_missed'">決策時間用完了。這一回合你沒有出手，城市照預告行動。</p><p v-if="currentEvent.type === 'impact'">護盾吸收 {{ currentEvent.delta.absorbed }} · 命中前有效防線 {{ currentEvent.delta.effective_defense }}</p></div><button @click="skip">跳過演出 · Esc</button></div>
     </div>
 </template>

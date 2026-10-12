@@ -19,8 +19,7 @@ interface Strategy
     public function name(): string;
 
     /**
-     * 回傳一個行動描述，形狀與 BattleEngine::legalActions() 的元素相同，
-     * 可另外帶 `keep`（要留到下回合的手牌）。
+     * 回傳一個行動描述，形狀與 BattleEngine::legalActions() 的元素相同。
      *
      * @return array<string, mixed>|null
      */

@@ -207,9 +207,7 @@ final class SolvabilitySolver
 
         foreach ($this->engine->legalActions($state) as $action) {
             if ($action['type'] === 'play') {
-                foreach ($this->keepOptions($state, $action['card_id']) as $keep) {
-                    $candidates[] = ['type' => 'play', 'card_id' => $action['card_id'], 'fixed' => $action['fixed'], 'keep' => $keep];
-                }
+                $candidates[] = ['type' => 'play', 'card_id' => $action['card_id'], 'fixed' => $action['fixed'], 'keep' => []];
             } elseif ($action['type'] === 'swap') {
                 $candidates[] = ['type' => 'swap', 'card_id' => $action['card_id'], 'fixed' => null, 'keep' => []];
             }
@@ -235,35 +233,7 @@ final class SolvabilitySolver
     }
 
     /**
-     * 可留下的手牌組合：不含打出的那張、不含上一手已留過的牌，張數 0～maxKeep。
-     *
-     * @return list<list<string>>
-     */
-    private function keepOptions(BattleState $state, ?string $playedCardId): array
-    {
-        $keepable = array_values(array_filter(
-            $state->hand,
-            static fn (string $id): bool => $id !== $playedCardId && ! in_array($id, $state->keptLastTurn, true),
-        ));
-        sort($keepable);
-
-        $options = [[]];
-
-        foreach ($keepable as $card) {
-            foreach ($options as $option) {
-                if (count($option) < $state->maxKeep) {
-                    $options[] = [...$option, $card];
-                }
-            }
-        }
-
-        usort($options, static fn (array $a, array $b): int => [count($a), $a] <=> [count($b), $b]);
-
-        return $options;
-    }
-
-    /**
-     * 排序鍵：立即勝利優先；出牌優先於換牌，逾時最後；再依局面評估由佳到差，同分少留牌、保持列舉順序。
+     * 排序鍵：立即勝利優先；出牌優先於換牌，逾時最後；再依局面評估由佳到差，同分保持列舉順序。
      * 排序只影響找到路徑的速度，不影響結論的正確性——每個子節點都會被展開，除非預算用完。
      *
      * @param  array{type: string, card_id: string|null, fixed: string|null, keep: list<string>}  $step
@@ -279,7 +249,6 @@ final class SolvabilitySolver
                 default => 2,
             },
             self::evaluate($next),
-            count($step['keep']),
             $index,
         ];
     }

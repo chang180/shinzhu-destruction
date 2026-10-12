@@ -11,7 +11,7 @@ namespace App\Domain\Game;
  */
 final readonly class ActionRequest
 {
-    /** @var list<string> 出牌時要留到下回合的手牌（不含打出的那張） */
+    /** @var list<string> 8.0.0 起已停用：未出的牌一律自動留在手上。保留欄位只為舊客戶端與舊紀錄的相容，引擎不讀它 */
     public array $keep;
 
     /**

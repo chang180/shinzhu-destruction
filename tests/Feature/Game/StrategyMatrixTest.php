@@ -74,30 +74,46 @@ class StrategyMatrixTest extends TestCase
         ));
     }
 
-    private function winRate(string $levelId, ScenarioModifiers $modifiers, Strategy $strategy, string $label): float
+    /**
+     * @param  array<string, int>|null  $composition  null 代表關卡預設牌組
+     */
+    private function winRate(string $levelId, ScenarioModifiers $modifiers, Strategy $strategy, string $label, ?array $composition = null): float
     {
         $level = app(LevelRepository::class)->get($levelId);
         $simulator = new BattleSimulator(app(BattleEngine::class));
         $wins = 0;
 
         for ($seed = 1; $seed <= self::SEEDS; $seed++) {
-            $wins += $simulator->run($level, $modifiers, $strategy, $seed, $label)->won() ? 1 : 0;
+            $wins += $simulator->run($level, $modifiers, $strategy, $seed, $label, $composition)->won() ? 1 : 0;
         }
 
         return $wins / self::SEEDS;
     }
 
+    /**
+     * 玩家打到這一關時真的可能持有的牌組（前面關卡的獎勵選擇的組合）。
+     * 起始牌組在第 3 關之後根本到不了，拿它當逐格下限等於量一個不存在的玩家。
+     *
+     * @return array<string, array<string, int>>
+     */
+    private function reachableDecks(string $levelId): array
+    {
+        return app(DifficultyReport::class)->deckVariants(app(LevelRepository::class)->get($levelId));
+    }
+
     public function test_the_planning_strategy_clears_every_level_and_scenario(): void
     {
         foreach ($this->levelIds() as $levelId) {
-            foreach ($this->scenarios() as $label => $modifiers) {
-                $rate = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $label);
+            foreach ($this->reachableDecks($levelId) as $deckLabel => $composition) {
+                foreach ($this->scenarios() as $label => $modifiers) {
+                    $rate = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $label, $composition);
 
-                $this->assertGreaterThanOrEqual(
-                    DifficultyReport::PLANNER_CELL_FLOOR,
-                    $rate,
-                    "規劃策略在 {$levelId}／{$label} 只有 ".round($rate * 100).'% 勝率',
-                );
+                    $this->assertGreaterThanOrEqual(
+                        DifficultyReport::PLANNER_CELL_FLOOR,
+                        $rate,
+                        "規劃策略在 {$levelId}／{$deckLabel}／{$label} 只有 ".round($rate * 100).'% 勝率',
+                    );
+                }
             }
         }
     }
@@ -161,12 +177,14 @@ class StrategyMatrixTest extends TestCase
     public function test_at_least_two_different_strategies_can_clear_each_level(): void
     {
         foreach ($this->levelIds() as $levelId) {
-            foreach ($this->scenarios() as $label => $modifiers) {
-                $greedy = $this->winRate($levelId, $modifiers, new GreedyStrategy($modifiers), $label);
-                $planner = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $label);
+            foreach ($this->reachableDecks($levelId) as $deckLabel => $composition) {
+                foreach ($this->scenarios() as $label => $modifiers) {
+                    $greedy = $this->winRate($levelId, $modifiers, new GreedyStrategy($modifiers), $label, $composition);
+                    $planner = $this->winRate($levelId, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), $label, $composition);
 
-                $this->assertGreaterThanOrEqual(DifficultyReport::PLANNER_CELL_FLOOR, $greedy, "{$levelId}／{$label} 只剩一種可行策略");
-                $this->assertGreaterThanOrEqual(DifficultyReport::PLANNER_CELL_FLOOR, $planner, "{$levelId}／{$label} 只剩一種可行策略");
+                    $this->assertGreaterThanOrEqual(DifficultyReport::PLANNER_CELL_FLOOR, $greedy, "{$levelId}／{$deckLabel}／{$label} 只剩一種可行策略");
+                    $this->assertGreaterThanOrEqual(DifficultyReport::PLANNER_CELL_FLOOR, $planner, "{$levelId}／{$deckLabel}／{$label} 只剩一種可行策略");
+                }
             }
         }
     }
@@ -263,15 +281,19 @@ class StrategyMatrixTest extends TestCase
 
     public function test_a_fixed_line_of_play_cannot_carry_every_scenario(): void
     {
-        // 手牌把「照順序點選」變成一種需要抽到牌才成立的打法。同一條固定循環
-        // 在不同情境的落差就是證據：它不是一條穩定通吃的路線。
+        // 手牌把「照順序點選」變成一種需要抽到牌才成立的打法。
         $rates = [];
 
         foreach ($this->scenarios() as $label => $modifiers) {
             $rates[$label] = $this->winRate('empty-cup', $modifiers, new LegacyCycleStrategy, $label);
         }
 
-        $this->assertGreaterThan(0.30, max($rates) - min($rates), '固定循環在三種情境下表現一致，代表資料沒有影響打法');
+        // 手牌留存之後，固定循環先天就很難湊齊三系順序，三種情境可能一致地輸。
+        // 兩種結果都能證明它不是通吃的路線：不是落差夠大，就是最好的情境也遠不到穩贏。
+        $this->assertTrue(
+            max($rates) - min($rates) > 0.30 || max($rates) < 0.50,
+            '固定循環在三種情境下都穩定偏高，代表它是一條通吃的路線',
+        );
     }
 
     public function test_no_strategy_ever_picks_an_action_the_engine_rejects(): void

@@ -129,7 +129,10 @@ class LevelPhaseEquivalenceTest extends TestCase
         $actual = $this->recorder()->record(app(LevelRepository::class)->get('stored-night'), $modifiers, $this->strategy('planner', $modifiers), 1, $this->fixture()['meta']['public_keys'], false, $restored);
 
         $this->assertNotSame(array_diff_key($fixture, ['level' => 1, 'seed' => 1, 'state' => 1]), $actual);
-        $this->assertSame($fixture['state'], EquivalenceRecorder::pick($restored->toArray(), array_keys($fixture['state'])));
+        // 8.0.0 起手牌留存，kept_last_turn 與 max_keep 不再是存檔欄位；舊存檔多出的這兩個鍵讀入時被忽略。
+        $retired = ['kept_last_turn' => 1, 'max_keep' => 1];
+        $expectedState = array_diff_key($fixture['state'], $retired);
+        $this->assertSame($expectedState, EquivalenceRecorder::pick($restored->toArray(), array_keys($expectedState)));
     }
 
     public function test_stored_night_counterfactuals_differ_from_the_historical_rule_recordings(): void

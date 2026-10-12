@@ -9,7 +9,7 @@ use App\Domain\Game\Exceptions\InvalidActionException;
 use Tests\TestCase;
 
 /**
- * 手牌規則：抽牌、留牌、換牌、洗牌（P04-REVISION-PLAN §4）。
+ * 手牌規則：抽牌、手牌留存、換牌、洗牌（P04-REVISION-PLAN §4）。
  *
  * 這些測試不看傷害，只看牌去了哪裡——牌組總數必須永遠守恆，
  * 否則「牌組 15 張」就只是文件上的數字。
@@ -43,7 +43,7 @@ class CardHandTest extends TestCase
         $revealed = $this->reveal($state, null, '2026-09-09T00:00:30.000Z');
 
         $this->assertSame(BattleState::PHASE_DECISION, $revealed->turnPhase);
-        $this->assertCount(5, $revealed->hand);
+        $this->assertCount($revealed->handSize, $revealed->hand);
         $this->assertSame('2026-09-09T00:00:30.000Z', $revealed->deadlineAt);
         $this->assertSame(15, $this->totalCards($revealed));
     }
@@ -56,125 +56,77 @@ class CardHandTest extends TestCase
         $this->apply($state, new ActionRequest('again', $state->version, ActionType::Reveal));
     }
 
-    public function test_keeping_cards_carries_them_into_the_next_hand_and_discards_the_rest(): void
+    public function test_only_the_played_card_leaves_the_hand_and_the_rest_stay(): void
     {
         $state = $this->reveal($this->startState());
         $played = $state->hand[0];
-        $kept = [$state->hand[1], $state->hand[2]];
+        $stayed = array_slice($state->hand, 1);
 
-        $result = $this->apply($state, new ActionRequest(
+        $after = $this->apply($state, new ActionRequest(
             actionId: 'play',
             expectedVersion: $state->version,
             type: ActionType::Play,
             cardId: $played,
-            keep: $kept,
-        ));
+        ))->state;
 
-        $after = $result->state;
-
-        $this->assertSame($kept, $after->hand);
-        $this->assertContains($played, $after->discardPile);
+        $this->assertSame($stayed, $after->hand);
+        $this->assertSame([$played], $after->discardPile);
         $this->assertSame(15, $this->totalCards($after));
 
-        // 留下的牌佔住下一手的位置：只補到 5 張，不是額外多拿。
+        // 揭牌只補到上限：四張原手牌留著，只抽一張新牌。
         $next = $this->reveal($after);
-        $this->assertCount(5, $next->hand);
-        $this->assertSame($kept, array_slice($next->hand, 0, 2));
+        $this->assertCount($next->handSize, $next->hand);
+        $this->assertSame($stayed, array_slice($next->hand, 0, $next->handSize - 1));
     }
 
-    public function test_the_card_that_was_played_cannot_also_be_kept(): void
+    public function test_a_fixed_action_costs_no_card_and_leaves_a_full_hand(): void
     {
         $state = $this->reveal($this->startState());
-        $played = $state->hand[0];
+        $before = $state->hand;
 
-        $this->expectExceptionMessage('要留下的牌必須是本回合未打出的手牌');
-        $this->apply($state, new ActionRequest(
-            actionId: 'play',
+        $after = $this->apply($state, new ActionRequest(
+            actionId: 'gather',
             expectedVersion: $state->version,
-            type: ActionType::Play,
-            cardId: $played,
-            keep: [$played],
-        ));
-    }
-
-    public function test_keeping_more_than_the_limit_is_rejected(): void
-    {
-        $state = $this->reveal($this->startState());
-
-        try {
-            $this->apply($state, new ActionRequest(
-                actionId: 'play',
-                expectedVersion: $state->version,
-                type: ActionType::Play,
-                cardId: $state->hand[0],
-                keep: [$state->hand[1], $state->hand[2], $state->hand[3]],
-            ));
-            $this->fail('留牌超過上限應該被拒絕');
-        } catch (InvalidActionException $exception) {
-            $this->assertSame('keep_limit_exceeded', $exception->reasonCode);
-        }
-    }
-
-    public function test_a_card_cannot_be_kept_for_two_consecutive_turns(): void
-    {
-        $state = $this->reveal($this->startState());
-        $keptCard = $state->hand[1];
-
-        $nextTurn = $this->apply($state, new ActionRequest(
-            actionId: 'keep-once',
-            expectedVersion: $state->version,
-            type: ActionType::Play,
-            cardId: $state->hand[0],
-            keep: [$keptCard],
-        ))->state;
-        $this->assertSame([$keptCard], $nextTurn->toPublicArray()['kept_last_turn']);
-        $nextTurn = BattleState::fromArray($nextTurn->toArray());
-        $nextTurn = $this->reveal($nextTurn);
-        $before = $nextTurn->toArray();
-
-        try {
-            $this->apply($nextTurn, new ActionRequest(
-                actionId: 'keep-twice',
-                expectedVersion: $nextTurn->version,
-                type: ActionType::Play,
-                cardId: null,
-                fixedSkillId: 'gather',
-                keep: [$keptCard],
-            ));
-            $this->fail('同一張牌不能連續留到第三手');
-        } catch (InvalidActionException $exception) {
-            $this->assertSame('keep_consecutive_turns', $exception->reasonCode);
-            $this->assertSame($before, $nextTurn->toArray());
-        }
-    }
-
-    public function test_a_new_card_can_still_be_kept_after_a_previous_card_was_kept(): void
-    {
-        $state = $this->reveal($this->startState());
-        $previousCard = $state->hand[1];
-
-        $nextTurn = $this->apply($state, new ActionRequest(
-            actionId: 'keep-first',
-            expectedVersion: $state->version,
-            type: ActionType::Play,
-            cardId: $state->hand[0],
-            keep: [$previousCard],
-        ))->state;
-        $nextTurn = $this->reveal($nextTurn);
-        $newCard = $nextTurn->hand[1];
-
-        $after = $this->apply($nextTurn, new ActionRequest(
-            actionId: 'keep-new',
-            expectedVersion: $nextTurn->version,
             type: ActionType::Play,
             cardId: null,
             fixedSkillId: 'gather',
-            keep: [$newCard],
         ))->state;
 
-        $this->assertSame([$newCard], $after->hand);
-        $this->assertContains($previousCard, $after->discardPile);
-        $this->assertSame(15, $this->totalCards($after));
+        $this->assertSame($before, $after->hand);
+        $this->assertSame([], $after->discardPile);
+
+        $next = $this->reveal($after);
+        $this->assertSame($before, $next->hand);
+    }
+
+    public function test_a_timeout_keeps_the_hand_instead_of_discarding_it(): void
+    {
+        $state = $this->reveal($this->startState());
+
+        $after = $this->apply($state, new ActionRequest(
+            actionId: 'late',
+            expectedVersion: $state->version,
+            type: ActionType::Timeout,
+        ))->state;
+
+        $this->assertSame($state->hand, $after->hand);
+        $this->assertSame([], $after->discardPile);
+    }
+
+    public function test_a_legacy_keep_list_is_ignored_and_never_rejects_a_play(): void
+    {
+        $state = $this->reveal($this->startState());
+        $played = $state->hand[0];
+
+        $after = $this->apply($state, new ActionRequest(
+            actionId: 'legacy',
+            expectedVersion: $state->version,
+            type: ActionType::Play,
+            cardId: $played,
+            keep: [$played, $state->hand[1], $state->hand[2], $state->hand[3]],
+        ))->state;
+
+        $this->assertSame(array_slice($state->hand, 1), $after->hand);
     }
 
     public function test_a_swap_replaces_one_card_without_advancing_the_turn_or_resetting_the_deadline(): void
@@ -190,7 +142,7 @@ class CardHandTest extends TestCase
             cardId: $target,
         ))->state;
 
-        $this->assertCount(5, $after->hand);
+        $this->assertCount($after->handSize, $after->hand);
         $this->assertNotContains($target, $after->hand);
         // 換掉的牌先離開可抽集合，所以不可能立刻被換回來。
         $this->assertContains($target, $after->discardPile);
@@ -250,22 +202,29 @@ class CardHandTest extends TestCase
         $state = $this->reveal($this->startState());
         $shuffles = $state->shuffleCount;
 
-        // 15 張牌、每回合抽 5 張：第三回合揭牌時抽牌堆一定見底。
-        for ($turn = 1; $turn <= 3; $turn++) {
-            $state = $this->reveal($state);
-            $state = $this->apply($state, new ActionRequest(
-                actionId: 'play-'.$turn,
-                expectedVersion: $state->version,
-                type: ActionType::Play,
-                cardId: null,
-                fixedSkillId: 'gather',
-            ))->state;
-        }
+        // 抽牌堆還有牌時，補牌不洗牌。
+        $state = $this->apply($state, new ActionRequest(
+            actionId: 'play-1',
+            expectedVersion: $state->version,
+            type: ActionType::Play,
+            cardId: $state->hand[0],
+        ))->state;
+        $state = $this->reveal($state);
+        $this->assertSame($shuffles, $state->shuffleCount);
 
+        // 把抽牌堆耗盡（牌全進棄牌堆），下一次補牌才從棄牌堆洗回來。
+        $state->discardPile = array_merge($state->discardPile, $state->drawPile);
+        $state->drawPile = [];
+        $state = $this->apply($state, new ActionRequest(
+            actionId: 'play-2',
+            expectedVersion: $state->version,
+            type: ActionType::Play,
+            cardId: $state->hand[0],
+        ))->state;
         $state = $this->reveal($state);
 
         $this->assertGreaterThan($shuffles, $state->shuffleCount);
-        $this->assertCount(5, $state->hand);
+        $this->assertCount($state->handSize, $state->hand);
         $this->assertSame(15, $this->totalCards($state));
     }
 

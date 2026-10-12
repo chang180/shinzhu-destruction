@@ -386,7 +386,6 @@ class BattleSimulator
             type: ActionType::from($choice['type'] ?? 'play'),
             cardId: $choice['card_id'] ?? null,
             fixedSkillId: $choice['fixed'] ?? null,
-            keep: $choice['keep'] ?? [],
         );
     }
 

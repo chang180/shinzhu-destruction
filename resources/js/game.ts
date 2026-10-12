@@ -12,8 +12,8 @@ export interface BattleState {
     cooldowns: Record<string, number>; shields: { element: string; amount: number }[];
     combo_chain: Element[]; breach_available: boolean; intent: Intent | null; outcome: Outcome;
     // 牌桌狀態。抽牌堆只送剩餘張數，未抽牌序留在伺服器。
-    deck: Record<string, string>; hand: string[]; kept_last_turn: string[]; discard_pile: string[]; draw_pile_count: number;
-    hand_size: number; max_keep: number; turn_phase: TurnPhase; deadline_at: string | null;
+    deck: Record<string, string>; hand: string[]; discard_pile: string[]; draw_pile_count: number;
+    hand_size: number; turn_phase: TurnPhase; deadline_at: string | null;
     swap_used: boolean; timeouts: number;
     // 關卡幕次（P10-1 起）。舊存檔沒有這個欄位時為 null，視為第一幕。
     level_phase_id: string | null;
@@ -97,20 +97,14 @@ export function cardGuide(card: Card): { target: string; timing: string; example
 }
 export function briefingTimingText(mode: RunMode): string {
     return mode === 'practice'
-        ? '進入戰鬥就會自動發牌；練習模式不限時，出牌演出後直接接下一手。'
-        : '進入戰鬥就會自動發牌並開始 30 秒倒數；出牌演出後直接接下一個 30 秒。';
+        ? '進入戰鬥就會自動發牌；練習模式不限時，出牌演出後直接補牌。'
+        : '進入戰鬥就會自動發牌並開始 30 秒倒數；出牌演出後直接補牌，接著下一個 30 秒。';
 }
 export function nextHandText(mode: RunMode): string {
-    return mode === 'practice' ? '正在發下一手；練習模式不限時。' : '正在發下一手，接著立即開始 30 秒。';
+    return mode === 'practice' ? '正在補牌；練習模式不限時。' : '正在補牌，接著立即開始 30 秒。';
 }
 export function shouldAutoReveal(run: Pick<Run, 'outcome' | 'compatible' | 'state'>): boolean {
     return run.compatible && run.outcome === 'in_progress' && run.state.turn_phase === 'awaiting_reveal';
-}
-export function keptCardsForPlay(keptCards: string[], playedCardId: string): string[] {
-    return keptCards.filter(cardId => cardId !== playedCardId);
-}
-export function canKeepCard(state: Pick<BattleState, 'kept_last_turn'>, cardId: string): boolean {
-    return !state.kept_last_turn.includes(cardId);
 }
 /** 簡報標題是設定檔裡的兩行字；不在前端硬寫任何一關的文案。 */
 export function briefingLines(level: Level | undefined): string[] {
@@ -240,6 +234,66 @@ function actLines(events: BattleEvent[], turns: number[]): string[] {
 export function soundStatusText(muted: boolean): string {
     return muted ? '目前靜音' : '目前有聲';
 }
+/** Presentation copy never decides mechanics; rules and objectives still come from the server. */
+export const levelPresentation: Record<string, { headline: string; task: string; quote: string; note: string; alt: string; ultimate: string; victory: string; defeat: string; acts: Record<string, string> }> = {
+    'noon-fold': {
+        headline: '折斷\n這一天。', task: '繞開護盾，把長晝折到盡頭。',
+        quote: '「它守得很認真。可惜，一次只守一邊。」', note: '晏沉撥開三片防禦色板，窗影恰好落在空著的那一格。',
+        alt: '晏沉側身操作城市模型上的防禦板，長晝窗影落在紫色袍袖上', ultimate: '折晝・長日斷章',
+        victory: '「守得住一邊，守不住整天。這堂課，通過。」', defeat: '「防線還站著。先看護盾，再看你想打哪張。」',
+        acts: { 'single-shield': '第一堂課：別向值班的盾問路。', 'shift-guard': '它開始換班。你也該換個方向。', 'crossed-windows': '盾與修復輪流上場，先處理眼前的預告。' },
+    },
+    'meter-feast': {
+        headline: '把帳\n結乾淨。', task: '留好手段，在需求窗口完成結算。',
+        quote: '「它總以為還有下一筆。你負責結帳。」', note: '晏沉攤開巨大的帳冊，把最後一個銅色標記推到你手邊。',
+        alt: '晏沉俯身檢查巨型帳冊，前景學員伸手放下銅色標記', ultimate: '饗表・無底結算',
+        victory: '「帳結清了。三門禁術，成績有效。」', defeat: '「帳還沒結完。看看惡意花在哪一回合。」',
+        acts: { 'ledger-prep': '先備妥下一筆，別急著清空手段。', 'demand-pulse': '需求在跳。讀預告，再決定出手。', 'peak-settlement': '窗口擠在一起了；每一手都要有去處。' },
+    },
+    'mirror-shade': {
+        headline: '讓它\n猜錯下一手。', task: '利用上一手留下的線索，換系進攻。',
+        quote: '「它學得會你的上一手。別把下一手也送給它。」', note: '晏沉背對你站在鏡前。鏡裡的手，卻指向另一側。',
+        alt: '晏沉背對學員站在鏡面前，倒影做出不同動作', ultimate: '鏡蔭・借影反照',
+        victory: '「學得再快，也只學到了上一手。」', defeat: '「鏡子還完整。翻開預告，看看哪一手能換個方向。」',
+        acts: { reflection: '先留一個它看得懂的線索。', 'borrowed-shadow': '看到反制，再走另一邊。', 'counter-exam': '排定修復仍優先；鏡子不是整份考卷。' },
+    },
+    'stored-night': {
+        headline: '別把結局\n留給它。', task: '面對最後重整，讓城市核心歸零。',
+        quote: '「它把希望留到最後。你也是。」', note: '觀測室只剩桌燈。晏沉推開沙漏，把城市留在你面前。',
+        alt: '夜間觀測室裡的晏沉、桌燈與沙漏，學員面向城市燈網', ultimate: '蓄夜・萬燈歸寂',
+        victory: '「城市核心歸零。這次，不必補考。」', defeat: '「夜還沒結束。先看最後幾回合，別急著責怪整副牌。」',
+        acts: { 'county-alert': '城市還亮著。替最後幾手留下位置。', 'overhaul-warning': '警報已響；按實際預告處理重整。', 'last-night': '重整已經有了結果。把這一局收好。' },
+    },
+};
+export const finaleFrames = ['advanced-finale-1-v2', 'advanced-finale-2-v2', 'advanced-finale-3-v2'];
+export const mainFinaleCopy = '三門禁術，成績有效。肯在成功時收手，也算一種專業。';
+export function presentationFor(levelId: string) { return levelPresentation[levelId]; }
+export function phaseLine(levelId: string, phaseId: string | null): string {
+    return phaseId ? levelPresentation[levelId]?.acts[phaseId] ?? '' : '';
+}
+export function rewardCopy(levelId: string, fallback: string): string {
+    return levelId === 'noon-fold' ? '挑一張。學院提供選修，不提供貪心。新牌替換既有試探，從下一局生效。'
+        : levelId === 'mirror-shade' ? '它只記得你的上一手。挑一個新手段，留給最後一夜。新牌從下一局生效。' : fallback;
+}
+export function professorReview(run: Pick<Run, 'level_id' | 'outcome' | 'history'>): string {
+    const copy = presentationFor(run.level_id);
+    const events = run.history.flatMap(entry => entry.events);
+    if (run.outcome !== 'player_victory') {
+        return copy?.defeat ?? '「城市還站著。看看是哪一回合。」';
+    }
+    if (run.level_id === 'stored-night') {
+        if (events.some(event => event.reason_code === 'overhaul_stopped')) return '「你拆掉了最後一次重整。這次，不必補考。」';
+        if (events.some(event => event.reason_code === 'overhaul_completed')) return '「它重整過，你仍然讓核心歸零。這次，不必補考。」';
+        if (events.some(event => event.reason_code === 'overhaul_started')) return '「它還在等重整完成，你已經交卷了。這次，不必補考。」';
+    }
+    return copy?.victory ?? '「你讓城市沒有下一次。這堂課，通過。」';
+}
+const p06AssetNames = new Set(['yan-chen-stern', 'yan-chen-pleased', 'student-silhouette', 'skill-water-2', 'skill-heat-2', 'skill-land-2', 'skill-ultimate', 'defense-success-1', 'defense-success-2', 'victory-2', 'victory-3', 'advanced-finale-1', 'advanced-finale-2', 'advanced-finale-3']);
+export function assetUrl(name: string): string {
+    const newAsset = Object.keys(levelPresentation).some(id => ['briefing', 'scene', 'ultimate', 'victory'].some(kind => name === `${kind}-${id}`)) || name === 'main-finale-v2' || finaleFrames.includes(name);
+    const directory = newAsset ? 'visual-v2' : name.startsWith('apostle-') || p06AssetNames.has(name) ? 'p06' : 'p04';
+    return `/assets/${directory}/${name}.webp`;
+}
 /** P06 資產只依既有穩定的關卡與事件 ID 選擇；圖片不參與戰鬥結算。 */
 export function sceneAsset(levelId: string): string {
     return levelId === 'empty-cup' ? 'city' : `scene-${levelId}`;
@@ -248,12 +302,11 @@ export function apostleAsset(levelId: string): string {
     return `apostle-${levelId}`;
 }
 export function briefingAsset(levelId: string): string {
-    return levelId === 'stored-night' ? 'yan-chen-pleased' : 'yan-chen-stern';
+    return levelPresentation[levelId] ? `briefing-${levelId}` : 'yan-chen-stern';
 }
 export function reportAsset(outcome: Outcome, levelId: string): string {
     if (outcome === 'city_held') return levelId === 'stored-night' ? 'defense-success-2' : 'defense-success-1';
-    if (levelId === 'stored-night') return 'victory-3';
-    return levelId === 'empty-cup' ? 'victory' : 'victory-2';
+    return levelPresentation[levelId] ? `victory-${levelId}` : 'victory';
 }
 export function skillName(id: string): string { const [kind, element] = id.split('.'); return (element ? `${elementNames[element as Element]}系・` : '') + (kindNames[kind] ?? kind); }
 export function unavailableText(choice: Choice | undefined, state: BattleState, card: Card): string {
@@ -291,7 +344,8 @@ export function eventText(event: BattleEvent): string {
 }
 export function cueImage(event: BattleEvent, levelId = 'empty-cup'): string {
     if (event.type === 'outcome') return reportAsset(event.after.outcome as Outcome, levelId);
-    if (event.cue_id.includes('ultimate')) return 'skill-ultimate';
+    if (event.cue_id.includes('ultimate')) return levelPresentation[levelId] ? `ultimate-${levelId}` : 'skill-ultimate';
+    if (event.type === 'level_phase_change') return sceneAsset(levelId);
     if (event.actor === 'city') return sceneAsset(levelId);
     if (event.target && levelId !== 'empty-cup') return `skill-${event.target}-2`;
     return event.target ?? apostleAsset(levelId);
@@ -299,13 +353,14 @@ export function cueImage(event: BattleEvent, levelId = 'empty-cup'): string {
 export function cueDuration(event: BattleEvent): number {
     if (event.type === 'outcome') return event.after.outcome === 'player_victory' ? 8000 : 3000;
     // 進入下一幕只要一個短提示；它在結算階段播，揭牌與 30 秒倒數都在它之後才開始。
-    if (event.type === 'level_phase_change') return 900;
+    if (event.type === 'level_phase_change' || event.type === 'phase_change') return 900;
+    if (event.type === 'action_accepted' && event.cue_id.includes('ultimate')) return 1050;
     if (event.cue_id.includes('ultimate')) return 2600;
     if (['interrupt', 'breach_opened', 'combo'].includes(event.type)) return 1200;
     return 700;
 }
 export function visibleEvents(events: BattleEvent[]): BattleEvent[] {
-    return events.filter(e => ['action_accepted', 'action_missed', 'impact', 'interrupt', 'interrupt_failed', 'breach_opened', 'combo', 'city_repair', 'city_shield', 'city_reinforce', 'level_phase_change', 'outcome'].includes(e.type));
+    return events.filter(e => ['action_accepted', 'action_missed', 'impact', 'interrupt', 'interrupt_failed', 'breach_opened', 'combo', 'city_repair', 'city_shield', 'city_reinforce', 'phase_change', 'level_phase_change', 'outcome'].includes(e.type));
 }
 export interface ReportFinding { turn: number | null; text: string }
 export interface ReportSummary { turn: number; initialCore: number | null; condition: string; finalMove: string; findings: ReportFinding[] }
@@ -368,9 +423,7 @@ export function reportFindings(run: Run): ReportFinding[] {
     const gathered = run.history.filter(entry => entry.input.fixed === 'gather').length;
     if (gathered) findings.push({ turn: null, text: `你用了 ${gathered} 回合蓄勢。它回復資源但不直接衝擊核心，城市仍照預告行動。${run.outcome === 'city_held' ? '下一次，把蓄起的惡意換成攻勢。' : ''}` });
     const missed = events.filter(event => event.type === 'action_missed');
-    if (missed.length) findings.push({ turn: missed[0]!.turn, text: `第 ${missed.map(event => event.turn).join('、')} 回合逾時，共 ${missed.length} 次。這些回合你沒有出手，城市照預告行動；${events.some(event => event.reason_code === 'missed_action_wasted_breach') ? '其中至少一次還讓已經開啟的破綻窗口過期。' : '手牌全部進了棄牌堆。'}` });
-    const kept = run.history.filter(entry => (entry.input.keep ?? []).length > 0);
-    if (kept.length) findings.push({ turn: kept[0]!.events[0]?.turn ?? null, text: `你留了 ${kept.reduce((sum, entry) => sum + (entry.input.keep ?? []).length, 0)} 張牌到下一回合，分佈在 ${kept.length} 個回合。留牌的代價是那幾回合少看到新牌。` });
+    if (missed.length) findings.push({ turn: missed[0]!.turn, text: `第 ${missed.map(event => event.turn).join('、')} 回合逾時，共 ${missed.length} 次。這些回合你沒有出手，城市照預告行動；${events.some(event => event.reason_code === 'missed_action_wasted_breach') ? '其中至少一次還讓已經開啟的破綻窗口過期。' : '手牌原封不動留在手上。'}` });
     const swaps = run.history.filter(entry => entry.input.type === 'swap');
     if (swaps.length) findings.push({ turn: swaps[0]!.events[0]?.turn ?? null, text: `你用掉 ${swaps.length} 次免費換牌。換掉的牌當回合離開可抽集合，所以換走的那一張不會立刻回到手上。` });
     return findings;
@@ -426,12 +479,12 @@ export class PendingAction {
                 && (input.keep === undefined || Array.isArray(input.keep))) this.value = value;
         } catch { this.value = null; }
     }
-    prepare(run: Run, choice: Pick<Choice, 'type' | 'card_id' | 'fixed'>, keep: string[] = []): ActionInput {
+    prepare(run: Run, choice: Pick<Choice, 'type' | 'card_id' | 'fixed'>): ActionInput {
         if (this.value) {
             if (this.value.runId !== run.run_id) throw new Error('另一局仍有待確認行動');
             return this.value.input;
         }
-        const input: ActionInput = { action_id: crypto.randomUUID(), expected_version: run.version, type: choice.type, card_id: choice.card_id, fixed: choice.fixed, keep };
+        const input: ActionInput = { action_id: crypto.randomUUID(), expected_version: run.version, type: choice.type, card_id: choice.card_id, fixed: choice.fixed };
         const value = { runId: run.run_id, input };
         try { this.storage.setItem('academy.pending', JSON.stringify(value)); }
         catch { throw new PendingStorageError('瀏覽器無法保存待確認行動，本次尚未送出。請允許此網站使用工作階段儲存後再試。'); }

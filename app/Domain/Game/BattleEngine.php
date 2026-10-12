@@ -84,11 +84,9 @@ class BattleEngine
             outcome: Outcome::InProgress,
             deck: $deck,
             hand: [],
-            keptLastTurn: [],
             drawPile: Deck::openingOrder($deck, $this->cards, $seed),
             discardPile: [],
             handSize: $hand['size'],
-            maxKeep: $hand['max_keep'],
             turnPhase: BattleState::PHASE_AWAITING_REVEAL,
             deadlineAt: null,
             swapUsed: false,
@@ -227,7 +225,6 @@ class BattleEngine
         }
 
         $next->comboChain = [];
-        $this->discardHand($next);
 
         $this->resolveCityResponse($next, $level, false);
         $this->maybeStartOverhaul($next, $level);
@@ -255,7 +252,6 @@ class BattleEngine
         }
 
         $skill = $this->resolvePlayedSkill($state, $action);
-        $this->validateKeep($state, $action);
         $this->validateSkill($state, $skill);
 
         $this->beginEvents($state);
@@ -415,31 +411,6 @@ class BattleEngine
         return $this->skills->get($action->fixedSkillId);
     }
 
-    private function validateKeep(BattleState $state, ActionRequest $action): void
-    {
-        if (count($action->keep) > $state->maxKeep) {
-            throw InvalidActionException::keepLimitExceeded($state->maxKeep, count($action->keep));
-        }
-
-        // 打出的那一張不能同時留下，所以它不在可留清單裡。
-        $keepable = array_values(array_filter(
-            $state->hand,
-            static fn (string $id): bool => $id !== $action->cardId,
-        ));
-
-        $unknown = array_values(array_diff($action->keep, $keepable));
-
-        if ($unknown !== []) {
-            throw InvalidActionException::keepNotInHand($unknown);
-        }
-
-        $keptAgain = array_values(array_intersect($action->keep, $state->keptLastTurn));
-
-        if ($keptAgain !== []) {
-            throw InvalidActionException::keepConsecutiveTurns($keptAgain);
-        }
-    }
-
     /**
      * 技能層級的驗證。只讀狀態，不改任何東西：任何一項不過就丟例外，
      * 回合與惡意都不消耗。
@@ -485,46 +456,25 @@ class BattleEngine
     }
 
     /**
-     * 出牌後整理手牌：打出的牌與未指定留下的牌都進棄牌堆，留牌繼續佔下回合手牌位置。
+     * 出牌後整理手牌：只有打出的那張進棄牌堆，其餘手牌全部留在手上，
+     * 下回合揭牌只補到手牌上限。固定行動（蓄勢、終招）不離手任何一張牌。
      */
     private function settleHand(BattleState $state, ActionRequest $action): void
     {
         $before = $state->hand;
-        $discarded = [];
-
-        foreach ($state->hand as $instanceId) {
-            if (! in_array($instanceId, $action->keep, true)) {
-                $discarded[] = $instanceId;
-            }
-        }
+        $played = $action->cardId;
+        $discarded = $played === null ? [] : [$played];
 
         $state->discardPile = array_merge($state->discardPile, $discarded);
-        $state->hand = array_values($action->keep);
-        $state->keptLastTurn = $state->hand;
+        $state->hand = array_values(array_filter(
+            $state->hand,
+            static fn (string $id): bool => $id !== $played,
+        ));
 
         $this->record($state, 'hand_settled', BattleEvent::PLAYER, null, 'played_and_discarded',
             ['hand' => $before],
             ['played' => $action->cardId ?? $action->fixedSkillId, 'discarded' => $discarded],
             ['kept' => $state->hand],
-            'cue.hand.settled',
-        );
-    }
-
-    private function discardHand(BattleState $state): void
-    {
-        if ($state->hand === []) {
-            return;
-        }
-
-        $before = $state->hand;
-        $state->discardPile = array_merge($state->discardPile, $state->hand);
-        $state->hand = [];
-        $state->keptLastTurn = [];
-
-        $this->record($state, 'hand_settled', BattleEvent::PLAYER, null, 'missed_action_discarded',
-            ['hand' => $before],
-            ['discarded' => $before],
-            ['kept' => []],
             'cue.hand.settled',
         );
     }

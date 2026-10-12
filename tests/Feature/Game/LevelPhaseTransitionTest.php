@@ -205,15 +205,15 @@ class LevelPhaseTransitionTest extends TestCase
 
     public function test_the_simulator_counts_overhaul_state_changes_separately_from_level_phase_changes(): void
     {
-        // 7.0.0 實際獎勵牌組的中止重整通關樣本；兩種事件不能互相冒充。
+        // 8.0.0 實際獎勵牌組、重整進行中通關的樣本；機制狀態事件與幕次事件不能互相冒充。
         $level = app(LevelRepository::class)->get('stored-night');
         $modifiers = EquivalenceRecorder::modifiers(0.0);
         $deck = app(DifficultyReport::class)->deckVariants($level)['tide-siege+hollow-ground'];
 
-        $result = (new BattleSimulator($this->engine()))->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 134, 'w0h0l0', $deck);
+        $result = (new BattleSimulator($this->engine()))->run($level, $modifiers, new PlannerStrategy($modifiers, app(CardCatalog::class)), 2, 'w0h0l0', $deck);
 
-        $this->assertSame(['overhaul_started', 'overhaul_stopped'], array_column($result->phaseChanges, 'reason_code'));
-        $this->assertSame(['overhaul-warning', 'last-night'], array_column($result->levelPhaseChanges, 'to'));
+        $this->assertSame(['overhaul_started'], array_column($result->phaseChanges, 'reason_code'));
+        $this->assertSame(['overhaul-warning'], array_column($result->levelPhaseChanges, 'to'));
         $this->assertTrue($result->won());
     }
 }

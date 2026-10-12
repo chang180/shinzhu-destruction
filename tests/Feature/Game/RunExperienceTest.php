@@ -77,8 +77,7 @@ class RunExperienceTest extends TestCase
         $run->forceFill(['rules_version' => '3.0.0', 'state' => $oldState])->save();
         $this->getJson("/api/v1/runs/{$id}")->assertOk()
             ->assertJsonPath('data.compatible', false)
-            ->assertJsonPath('data.available_actions', [])
-            ->assertJsonPath('data.state.kept_last_turn', []);
+            ->assertJsonPath('data.available_actions', []);
         $this->postJson("/api/v1/runs/{$id}/actions", $action)->assertOk()->assertJsonPath('data.replayed', true);
         $this->postJson("/api/v1/runs/{$id}/actions", ['action_id' => 'second', 'expected_version' => 2, 'type' => 'play', 'fixed' => 'gather'])
             ->assertConflict()->assertJsonPath('reason_code', 'rules_version_mismatch');
@@ -88,33 +87,25 @@ class RunExperienceTest extends TestCase
         $this->assertDatabaseCount('runs', 1);
     }
 
-    public function test_rekeeping_a_card_returns_422_without_changing_the_saved_run(): void
+    public function test_unplayed_cards_stay_in_hand_across_api_turns_and_old_keep_lists_are_ignored(): void
     {
         $id = $this->postJson('/api/v1/runs', ['level_id' => 'empty-cup'])->json('data.run_id');
         $this->postJson("/api/v1/runs/{$id}/actions", [
             'action_id' => 'reveal-first', 'expected_version' => 1, 'type' => 'reveal',
         ])->assertOk();
         $state = $this->state($id);
-        $keptCard = $state->hand[1];
+        $heldBefore = $state->hand;
 
         $this->postJson("/api/v1/runs/{$id}/actions", [
-            'action_id' => 'keep-first', 'expected_version' => $state->version,
-            'type' => 'play', 'fixed' => 'gather', 'keep' => [$keptCard],
+            'action_id' => 'gather-first', 'expected_version' => $state->version,
+            'type' => 'play', 'fixed' => 'gather', 'keep' => [$heldBefore[1]],
         ])->assertOk();
         $this->postJson("/api/v1/runs/{$id}/actions", [
             'action_id' => 'reveal-second', 'expected_version' => $this->state($id)->version, 'type' => 'reveal',
         ])->assertOk();
-        $before = Run::query()->where('public_id', $id)->firstOrFail();
 
-        $this->postJson("/api/v1/runs/{$id}/actions", [
-            'action_id' => 'keep-again', 'expected_version' => $before->version,
-            'type' => 'play', 'fixed' => 'gather', 'keep' => [$keptCard],
-        ])->assertUnprocessable()->assertJsonPath('reason_code', 'keep_consecutive_turns');
-
-        $after = $before->fresh();
-        $this->assertSame($before->version, $after->version);
-        $this->assertSame($before->state, $after->state);
-        $this->assertDatabaseCount('run_actions', 3);
+        $this->assertSame($heldBefore, $this->state($id)->hand);
+        $this->assertArrayNotHasKey('kept_last_turn', $this->getJson("/api/v1/runs/{$id}")->json('data.state'));
     }
 
     public function test_completed_demo_replay_keeps_source_quality_and_real_event_history(): void

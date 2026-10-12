@@ -60,7 +60,7 @@ class CounterfactualTest extends TestCase
             app(CardCatalog::class),
         );
 
-        for ($i = 1; $i <= $level->maxTurns * 2; $i++) {
+        for ($i = 1; $i <= $level->maxTurns * 3; $i++) {
             $state = $this->state($runId);
 
             if ($state->outcome->isFinished()) {
@@ -82,7 +82,7 @@ class CounterfactualTest extends TestCase
             $this->act($runId, [
                 'action_id' => 'win-'.$i,
                 'expected_version' => $state->version,
-                'type' => 'play',
+                'type' => $choice['type'],
                 'card_id' => $choice['card_id'],
                 'fixed' => $choice['fixed'],
                 'keep' => $choice['keep'] ?? [],

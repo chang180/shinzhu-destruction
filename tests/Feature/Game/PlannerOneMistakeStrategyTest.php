@@ -58,8 +58,8 @@ class PlannerOneMistakeStrategyTest extends TestCase
 
     public function test_attacking_into_a_same_element_shield_when_a_bypass_exists_is_a_mechanic_mistake(): void
     {
-        // noon-fold seed 1 第 3 回合：第一幕的熱盾（16）還站著，planner 最佳是打水系繞過它。
-        $report = $this->play('noon-fold', $this->strategy(), 1)->strategyReport;
+        // noon-fold seed 7 第 3 回合：第一幕的熱盾（16）還站著，planner 最佳是打水系繞過它。
+        $report = $this->play('noon-fold', $this->strategy(), 7)->strategyReport;
 
         $this->assertSame(PlannerOneMistakeStrategy::STATUS_INJECTED, $report['status']);
         $this->assertSame(PlannerOneMistakeStrategy::KIND_WALKED_INTO_SHIELD, $report['mistake_kind']);
@@ -145,8 +145,8 @@ class PlannerOneMistakeStrategyTest extends TestCase
 
     public function test_ignoring_an_interruptible_repair_the_player_could_stop_is_a_mechanic_mistake(): void
     {
-        // empty-cup seed 1 第 3 回合（斷補幕）：可打斷的水系修復 19，planner 最佳就是去打斷。
-        $report = $this->play('empty-cup', $this->strategy(), 1)->strategyReport;
+        // empty-cup seed 6 第 3 回合（斷補幕）：可打斷的水系修復 19，planner 最佳就是去打斷。
+        $report = $this->play('empty-cup', $this->strategy(), 6)->strategyReport;
 
         $this->assertSame(PlannerOneMistakeStrategy::STATUS_INJECTED, $report['status']);
         $this->assertSame(PlannerOneMistakeStrategy::KIND_MISSED_INTERRUPT, $report['mistake_kind']);
@@ -198,11 +198,14 @@ class PlannerOneMistakeStrategyTest extends TestCase
          */
         $low = $this->uniform(-0.15);
 
-        $mistake = $this->playIn('empty-cup', $low, $this->strategy(), 7, 'w-h-l-');
-        $planner = $this->playIn('empty-cup', $low, $this->planner(), 7, 'w-h-l-');
+        $mistake = $this->playIn('empty-cup', $low, $this->strategy(), 4, 'w-h-l-');
+        $planner = $this->playIn('empty-cup', $low, $this->planner(), 4, 'w-h-l-');
+
+        $lastAction = $planner->actions[array_key_last($planner->actions)];
 
         $this->assertSame(PlannerOneMistakeStrategy::STATUS_NO_ELIGIBLE, $mistake->strategyReport['status']);
-        $this->assertSame('gather', $planner->actions[7]['skill_id'], '第 8 回合 planner 應該蓄勢');
+        $this->assertSame(8, $lastAction['turn']);
+        $this->assertSame('gather', $lastAction['skill_id'], '第 8 回合 planner 應該蓄勢');
         $this->assertSame($planner->actions, $mistake->actions);
         $this->assertSame($planner->outcome, $mistake->outcome);
         $this->assertSame($planner->coreRemaining, $mistake->coreRemaining);

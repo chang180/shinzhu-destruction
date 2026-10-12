@@ -54,7 +54,7 @@ class LevelPhaseApiTest extends TestCase
         $level = app(LevelRepository::class)->get($this->runModel($runId)->level_id);
         $strategy = new PlannerStrategy(ScenarioModifiers::fromArray($this->runModel($runId)->scenario_modifiers), app(CardCatalog::class));
 
-        for ($i = 1; $i <= $level->maxTurns * 2; $i++) {
+        for ($i = 1; $i <= $level->maxTurns * 3; $i++) {
             $state = $this->runModel($runId)->battleState();
 
             if ($state->outcome->isFinished()) {
@@ -64,7 +64,7 @@ class LevelPhaseApiTest extends TestCase
             $body = $state->turnPhase === BattleState::PHASE_AWAITING_REVEAL
                 ? ['type' => 'reveal']
                 : (static function (array $choice): array {
-                    return ['type' => 'play', 'card_id' => $choice['card_id'], 'fixed' => $choice['fixed'], 'keep' => $choice['keep'] ?? []];
+                    return ['type' => $choice['type'], 'card_id' => $choice['card_id'], 'fixed' => $choice['fixed'], 'keep' => $choice['keep'] ?? []];
                 })($strategy->choose($state, app(BattleEngine::class), $level, new Randomizer));
 
             $this->postJson(route('api.v1.runs.actions.store', ['run' => $runId]), $body + [
