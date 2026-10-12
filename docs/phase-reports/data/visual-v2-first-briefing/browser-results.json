@@ -1,0 +1,709 @@
+{
+  "base": "local HTTPS shinzhu.test",
+  "briefing_geometry": [
+    {
+      "viewport": 2560,
+      "level": "empty-cup",
+      "width": 1278,
+      "height": 718.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-empty-cup-medium.webp"
+    },
+    {
+      "viewport": 2560,
+      "level": "noon-fold",
+      "width": 1278,
+      "height": 718.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-noon-fold-medium.webp"
+    },
+    {
+      "viewport": 2560,
+      "level": "meter-feast",
+      "width": 1278,
+      "height": 718.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-meter-feast-medium.webp"
+    },
+    {
+      "viewport": 2560,
+      "level": "mirror-shade",
+      "width": 1278,
+      "height": 718.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-mirror-shade-medium.webp"
+    },
+    {
+      "viewport": 2560,
+      "level": "stored-night",
+      "width": 1278,
+      "height": 718.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-stored-night-medium.webp"
+    },
+    {
+      "viewport": 1280,
+      "level": "empty-cup",
+      "width": 1198,
+      "height": 673.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-empty-cup-medium.webp"
+    },
+    {
+      "viewport": 1280,
+      "level": "noon-fold",
+      "width": 1198,
+      "height": 673.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-noon-fold-medium.webp"
+    },
+    {
+      "viewport": 1280,
+      "level": "meter-feast",
+      "width": 1198,
+      "height": 673.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-meter-feast-medium.webp"
+    },
+    {
+      "viewport": 1280,
+      "level": "mirror-shade",
+      "width": 1198,
+      "height": 673.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-mirror-shade-medium.webp"
+    },
+    {
+      "viewport": 1280,
+      "level": "stored-night",
+      "width": 1198,
+      "height": 673.875,
+      "naturalWidth": 1280,
+      "naturalHeight": 720,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-stored-night-medium.webp"
+    },
+    {
+      "viewport": 390,
+      "level": "empty-cup",
+      "width": 356,
+      "height": 200.25,
+      "naturalWidth": 390,
+      "naturalHeight": 219,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-empty-cup-small.webp"
+    },
+    {
+      "viewport": 390,
+      "level": "noon-fold",
+      "width": 356,
+      "height": 200.25,
+      "naturalWidth": 390,
+      "naturalHeight": 219,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-noon-fold-small.webp"
+    },
+    {
+      "viewport": 390,
+      "level": "meter-feast",
+      "width": 356,
+      "height": 200.25,
+      "naturalWidth": 390,
+      "naturalHeight": 219,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-meter-feast-small.webp"
+    },
+    {
+      "viewport": 390,
+      "level": "mirror-shade",
+      "width": 356,
+      "height": 200.25,
+      "naturalWidth": 390,
+      "naturalHeight": 219,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-mirror-shade-small.webp"
+    },
+    {
+      "viewport": 390,
+      "level": "stored-night",
+      "width": 356,
+      "height": 200.25,
+      "naturalWidth": 390,
+      "naturalHeight": 219,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-stored-night-small.webp"
+    },
+    {
+      "viewport": 320,
+      "level": "empty-cup",
+      "width": 286,
+      "height": 160.875,
+      "naturalWidth": 320,
+      "naturalHeight": 180,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-empty-cup-small.webp"
+    },
+    {
+      "viewport": 320,
+      "level": "noon-fold",
+      "width": 286,
+      "height": 160.875,
+      "naturalWidth": 320,
+      "naturalHeight": 180,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-noon-fold-small.webp"
+    },
+    {
+      "viewport": 320,
+      "level": "meter-feast",
+      "width": 286,
+      "height": 160.875,
+      "naturalWidth": 320,
+      "naturalHeight": 180,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-meter-feast-small.webp"
+    },
+    {
+      "viewport": 320,
+      "level": "mirror-shade",
+      "width": 286,
+      "height": 160.875,
+      "naturalWidth": 320,
+      "naturalHeight": 180,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-mirror-shade-small.webp"
+    },
+    {
+      "viewport": 320,
+      "level": "stored-night",
+      "width": 286,
+      "height": 160.875,
+      "naturalWidth": 320,
+      "naturalHeight": 180,
+      "fit": "contain",
+      "source": "/assets/visual-v2/briefing-stored-night-small.webp"
+    }
+  ],
+  "rules_version": "8.0.0",
+  "initial_screen_encoded_bytes": 952775,
+  "replay_escape": "passed",
+  "fixture_note": "Real PHP engine opening/win/loss histories; mocked campaign/API responses for UI coverage. No production or real-save changes.",
+  "viewports": [
+    2560,
+    1280,
+    390,
+    320
+  ],
+  "checks": [
+    "2560-empty-cup-briefing",
+    "2560-empty-cup-battle",
+    "2560-empty-cup-planner",
+    "2560-empty-cup-gather",
+    "2560-noon-fold-briefing",
+    "2560-noon-fold-battle",
+    "2560-noon-fold-planner",
+    "2560-noon-fold-gather",
+    "2560-meter-feast-briefing",
+    "2560-meter-feast-battle",
+    "2560-meter-feast-planner",
+    "2560-meter-feast-gather",
+    "2560-mirror-shade-briefing",
+    "2560-mirror-shade-battle",
+    "2560-mirror-shade-planner",
+    "2560-mirror-shade-gather",
+    "2560-stored-night-briefing",
+    "2560-stored-night-battle",
+    "2560-stored-night-planner",
+    "2560-stored-night-gather",
+    "2560-reward",
+    "1280-empty-cup-briefing",
+    "1280-empty-cup-battle",
+    "1280-empty-cup-planner",
+    "1280-empty-cup-gather",
+    "1280-noon-fold-briefing",
+    "1280-noon-fold-battle",
+    "1280-noon-fold-planner",
+    "1280-noon-fold-gather",
+    "1280-meter-feast-briefing",
+    "1280-meter-feast-battle",
+    "1280-meter-feast-planner",
+    "1280-meter-feast-gather",
+    "1280-mirror-shade-briefing",
+    "1280-mirror-shade-battle",
+    "1280-mirror-shade-planner",
+    "1280-mirror-shade-gather",
+    "1280-stored-night-briefing",
+    "1280-stored-night-battle",
+    "1280-stored-night-planner",
+    "1280-stored-night-gather",
+    "1280-reward",
+    "390-empty-cup-briefing",
+    "390-empty-cup-battle",
+    "390-empty-cup-planner",
+    "390-empty-cup-gather",
+    "390-noon-fold-briefing",
+    "390-noon-fold-battle",
+    "390-noon-fold-planner",
+    "390-noon-fold-gather",
+    "390-meter-feast-briefing",
+    "390-meter-feast-battle",
+    "390-meter-feast-planner",
+    "390-meter-feast-gather",
+    "390-mirror-shade-briefing",
+    "390-mirror-shade-battle",
+    "390-mirror-shade-planner",
+    "390-mirror-shade-gather",
+    "390-stored-night-briefing",
+    "390-stored-night-battle",
+    "390-stored-night-planner",
+    "390-stored-night-gather",
+    "390-reward",
+    "320-empty-cup-briefing",
+    "320-empty-cup-battle",
+    "320-empty-cup-planner",
+    "320-empty-cup-gather",
+    "320-noon-fold-briefing",
+    "320-noon-fold-battle",
+    "320-noon-fold-planner",
+    "320-noon-fold-gather",
+    "320-meter-feast-briefing",
+    "320-meter-feast-battle",
+    "320-meter-feast-planner",
+    "320-meter-feast-gather",
+    "320-mirror-shade-briefing",
+    "320-mirror-shade-battle",
+    "320-mirror-shade-planner",
+    "320-mirror-shade-gather",
+    "320-stored-night-briefing",
+    "320-stored-night-battle",
+    "320-stored-night-planner",
+    "320-stored-night-gather",
+    "320-reward"
+  ],
+  "loaded_assets": [
+    "/assets/visual-v2/briefing-empty-cup-medium.webp",
+    "/assets/visual-v2/scene-noon-fold.webp",
+    "/assets/visual-v2/briefing-noon-fold-medium.webp",
+    "/assets/visual-v2/scene-noon-fold-medium.webp",
+    "/assets/visual-v2/victory-noon-fold-medium.webp",
+    "/assets/visual-v2/scene-meter-feast.webp",
+    "/assets/visual-v2/briefing-meter-feast-medium.webp",
+    "/assets/visual-v2/scene-meter-feast-medium.webp",
+    "/assets/visual-v2/victory-meter-feast-medium.webp",
+    "/assets/visual-v2/main-finale-v2-medium.webp",
+    "/assets/visual-v2/scene-mirror-shade.webp",
+    "/assets/visual-v2/briefing-mirror-shade-medium.webp",
+    "/assets/visual-v2/scene-mirror-shade-medium.webp",
+    "/assets/visual-v2/victory-mirror-shade-medium.webp",
+    "/assets/visual-v2/scene-stored-night.webp",
+    "/assets/visual-v2/briefing-stored-night-medium.webp",
+    "/assets/visual-v2/scene-stored-night-medium.webp",
+    "/assets/visual-v2/victory-stored-night-medium.webp",
+    "/assets/visual-v2/advanced-finale-1-v2-medium.webp",
+    "/assets/visual-v2/advanced-finale-2-v2-medium.webp",
+    "/assets/visual-v2/advanced-finale-3-v2-medium.webp",
+    "/assets/visual-v2/audio/ambience-noon-fold.ogg",
+    "/assets/visual-v2/audio/ambience-meter-feast.ogg",
+    "/assets/visual-v2/audio/ambience-mirror-shade.ogg",
+    "/assets/visual-v2/audio/ambience-stored-night.ogg",
+    "/assets/visual-v2/briefing-empty-cup-small.webp",
+    "/assets/visual-v2/briefing-noon-fold-small.webp",
+    "/assets/visual-v2/scene-noon-fold-small.webp",
+    "/assets/visual-v2/victory-noon-fold-small.webp",
+    "/assets/visual-v2/briefing-meter-feast-small.webp",
+    "/assets/visual-v2/scene-meter-feast-small.webp",
+    "/assets/visual-v2/victory-meter-feast-small.webp",
+    "/assets/visual-v2/main-finale-v2-small.webp",
+    "/assets/visual-v2/briefing-mirror-shade-small.webp",
+    "/assets/visual-v2/scene-mirror-shade-small.webp",
+    "/assets/visual-v2/victory-mirror-shade-small.webp",
+    "/assets/visual-v2/briefing-stored-night-small.webp",
+    "/assets/visual-v2/scene-stored-night-small.webp",
+    "/assets/visual-v2/victory-stored-night-small.webp",
+    "/assets/visual-v2/advanced-finale-1-v2-small.webp",
+    "/assets/visual-v2/advanced-finale-2-v2-small.webp",
+    "/assets/visual-v2/advanced-finale-3-v2-small.webp",
+    "/assets/visual-v2/audio/ui-confirm.ogg",
+    "/assets/visual-v2/audio/ui-confirm.mp3",
+    "/assets/visual-v2/audio/ui-unable.ogg",
+    "/assets/visual-v2/audio/ui-unable.mp3",
+    "/assets/visual-v2/audio/ui-unlock.ogg",
+    "/assets/visual-v2/audio/ui-unlock.mp3",
+    "/assets/visual-v2/audio/ui-toggle.ogg",
+    "/assets/visual-v2/audio/ui-toggle.mp3",
+    "/assets/visual-v2/audio/cast-water.ogg",
+    "/assets/visual-v2/audio/cast-water.mp3",
+    "/assets/visual-v2/audio/cast-heat.ogg",
+    "/assets/visual-v2/audio/cast-heat.mp3",
+    "/assets/visual-v2/audio/cast-land.ogg",
+    "/assets/visual-v2/audio/cast-land.mp3",
+    "/assets/visual-v2/audio/impact.ogg",
+    "/assets/visual-v2/audio/impact.mp3",
+    "/assets/visual-v2/audio/shield.ogg",
+    "/assets/visual-v2/audio/shield.mp3",
+    "/assets/visual-v2/audio/breach.ogg",
+    "/assets/visual-v2/audio/breach.mp3",
+    "/assets/visual-v2/audio/interrupt.ogg",
+    "/assets/visual-v2/audio/interrupt.mp3",
+    "/assets/visual-v2/audio/repair.ogg",
+    "/assets/visual-v2/audio/repair.mp3",
+    "/assets/visual-v2/audio/combo.ogg",
+    "/assets/visual-v2/audio/combo.mp3",
+    "/assets/visual-v2/audio/ultimate-charge.ogg",
+    "/assets/visual-v2/audio/ultimate-charge.mp3",
+    "/assets/visual-v2/audio/ultimate-impact.ogg",
+    "/assets/visual-v2/audio/ultimate-impact.mp3",
+    "/assets/visual-v2/audio/ultimate-tail.ogg",
+    "/assets/visual-v2/audio/ultimate-tail.mp3",
+    "/assets/visual-v2/audio/mirror.ogg",
+    "/assets/visual-v2/audio/mirror.mp3",
+    "/assets/visual-v2/audio/overhaul.ogg",
+    "/assets/visual-v2/audio/overhaul.mp3",
+    "/assets/visual-v2/audio/ambience-noon-fold.mp3",
+    "/assets/visual-v2/audio/ambience-meter-feast.mp3",
+    "/assets/visual-v2/audio/ambience-mirror-shade.mp3",
+    "/assets/visual-v2/audio/ambience-stored-night.mp3",
+    "/assets/visual-v2/audio/ending-defeat.ogg",
+    "/assets/visual-v2/audio/ending-defeat.mp3",
+    "/assets/visual-v2/audio/ending-victory.ogg",
+    "/assets/visual-v2/audio/ending-victory.mp3",
+    "/assets/visual-v2/audio/ending-main.ogg",
+    "/assets/visual-v2/audio/ending-main.mp3",
+    "/assets/visual-v2/audio/ending-advanced.ogg",
+    "/assets/visual-v2/audio/ending-advanced.mp3"
+  ],
+  "decoded_audio": [
+    {
+      "key": "ui-confirm",
+      "ext": "ogg",
+      "duration": 0.323625,
+      "channels": 1
+    },
+    {
+      "key": "ui-confirm",
+      "ext": "mp3",
+      "duration": 0.36570833333333336,
+      "channels": 1
+    },
+    {
+      "key": "ui-unable",
+      "ext": "ogg",
+      "duration": 0.27427083333333335,
+      "channels": 1
+    },
+    {
+      "key": "ui-unable",
+      "ext": "mp3",
+      "duration": 0.28733333333333333,
+      "channels": 1
+    },
+    {
+      "key": "ui-unlock",
+      "ext": "ogg",
+      "duration": 1.1537291666666667,
+      "channels": 1
+    },
+    {
+      "key": "ui-unlock",
+      "ext": "mp3",
+      "duration": 1.201625,
+      "channels": 1
+    },
+    {
+      "key": "ui-toggle",
+      "ext": "ogg",
+      "duration": 0.18139583333333334,
+      "channels": 1
+    },
+    {
+      "key": "ui-toggle",
+      "ext": "mp3",
+      "duration": 0.20897916666666666,
+      "channels": 1
+    },
+    {
+      "key": "cast-water",
+      "ext": "ogg",
+      "duration": 0.6719166666666667,
+      "channels": 1
+    },
+    {
+      "key": "cast-water",
+      "ext": "mp3",
+      "duration": 0.6791666666666667,
+      "channels": 1
+    },
+    {
+      "key": "cast-heat",
+      "ext": "ogg",
+      "duration": 0.5529166666666666,
+      "channels": 1
+    },
+    {
+      "key": "cast-heat",
+      "ext": "mp3",
+      "duration": 0.6008125,
+      "channels": 1
+    },
+    {
+      "key": "cast-land",
+      "ext": "ogg",
+      "duration": 0.6980416666666667,
+      "channels": 1
+    },
+    {
+      "key": "cast-land",
+      "ext": "mp3",
+      "duration": 0.7314166666666667,
+      "channels": 1
+    },
+    {
+      "key": "impact",
+      "ext": "ogg",
+      "duration": 0.5529166666666666,
+      "channels": 1
+    },
+    {
+      "key": "impact",
+      "ext": "mp3",
+      "duration": 0.6008125,
+      "channels": 1
+    },
+    {
+      "key": "shield",
+      "ext": "ogg",
+      "duration": 0.6690208333333333,
+      "channels": 1
+    },
+    {
+      "key": "shield",
+      "ext": "mp3",
+      "duration": 0.6791666666666667,
+      "channels": 1
+    },
+    {
+      "key": "breach",
+      "ext": "ogg",
+      "duration": 1.0173125,
+      "channels": 1
+    },
+    {
+      "key": "breach",
+      "ext": "mp3",
+      "duration": 1.0448958333333334,
+      "channels": 1
+    },
+    {
+      "key": "interrupt",
+      "ext": "ogg",
+      "duration": 0.6690208333333333,
+      "channels": 1
+    },
+    {
+      "key": "interrupt",
+      "ext": "mp3",
+      "duration": 0.6791666666666667,
+      "channels": 1
+    },
+    {
+      "key": "repair",
+      "ext": "ogg",
+      "duration": 1.354,
+      "channels": 1
+    },
+    {
+      "key": "repair",
+      "ext": "mp3",
+      "duration": 1.3844791666666667,
+      "channels": 1
+    },
+    {
+      "key": "combo",
+      "ext": "ogg",
+      "duration": 0.9650625,
+      "channels": 1
+    },
+    {
+      "key": "combo",
+      "ext": "mp3",
+      "duration": 0.9926458333333333,
+      "channels": 1
+    },
+    {
+      "key": "ultimate-charge",
+      "ext": "ogg",
+      "duration": 1.0506875,
+      "channels": 1
+    },
+    {
+      "key": "ultimate-charge",
+      "ext": "mp3",
+      "duration": 1.097125,
+      "channels": 1
+    },
+    {
+      "key": "ultimate-impact",
+      "ext": "ogg",
+      "duration": 0.9012083333333333,
+      "channels": 1
+    },
+    {
+      "key": "ultimate-impact",
+      "ext": "mp3",
+      "duration": 0.9403958333333333,
+      "channels": 1
+    },
+    {
+      "key": "ultimate-tail",
+      "ext": "ogg",
+      "duration": 1.6210416666666667,
+      "channels": 1
+    },
+    {
+      "key": "ultimate-tail",
+      "ext": "mp3",
+      "duration": 1.6457083333333333,
+      "channels": 1
+    },
+    {
+      "key": "mirror",
+      "ext": "ogg",
+      "duration": 0.8547708333333334,
+      "channels": 1
+    },
+    {
+      "key": "mirror",
+      "ext": "mp3",
+      "duration": 0.8881458333333333,
+      "channels": 1
+    },
+    {
+      "key": "overhaul",
+      "ext": "ogg",
+      "duration": 1.2204791666666666,
+      "channels": 1
+    },
+    {
+      "key": "overhaul",
+      "ext": "mp3",
+      "duration": 1.22775,
+      "channels": 1
+    },
+    {
+      "key": "ambience-noon-fold",
+      "ext": "ogg",
+      "duration": 24.022479166666667,
+      "channels": 1
+    },
+    {
+      "key": "ambience-noon-fold",
+      "ext": "mp3",
+      "duration": 24.032645833333333,
+      "channels": 1
+    },
+    {
+      "key": "ambience-meter-feast",
+      "ext": "ogg",
+      "duration": 24.022479166666667,
+      "channels": 1
+    },
+    {
+      "key": "ambience-meter-feast",
+      "ext": "mp3",
+      "duration": 24.032645833333333,
+      "channels": 1
+    },
+    {
+      "key": "ambience-mirror-shade",
+      "ext": "ogg",
+      "duration": 24.022479166666667,
+      "channels": 1
+    },
+    {
+      "key": "ambience-mirror-shade",
+      "ext": "mp3",
+      "duration": 24.032645833333333,
+      "channels": 1
+    },
+    {
+      "key": "ambience-stored-night",
+      "ext": "ogg",
+      "duration": 24.022479166666667,
+      "channels": 1
+    },
+    {
+      "key": "ambience-stored-night",
+      "ext": "mp3",
+      "duration": 24.032645833333333,
+      "channels": 1
+    },
+    {
+      "key": "ending-defeat",
+      "ext": "ogg",
+      "duration": 3.6121458333333334,
+      "channels": 1
+    },
+    {
+      "key": "ending-defeat",
+      "ext": "mp3",
+      "duration": 3.631,
+      "channels": 1
+    },
+    {
+      "key": "ending-victory",
+      "ext": "ogg",
+      "duration": 4.401625,
+      "channels": 1
+    },
+    {
+      "key": "ending-victory",
+      "ext": "mp3",
+      "duration": 4.4408125,
+      "channels": 1
+    },
+    {
+      "key": "ending-main",
+      "ext": "ogg",
+      "duration": 5.818041666666667,
+      "channels": 1
+    },
+    {
+      "key": "ending-main",
+      "ext": "mp3",
+      "duration": 5.851416666666666,
+      "channels": 1
+    },
+    {
+      "key": "ending-advanced",
+      "ext": "ogg",
+      "duration": 7.211229166666667,
+      "channels": 1
+    },
+    {
+      "key": "ending-advanced",
+      "ext": "mp3",
+      "duration": 7.235916666666666,
+      "channels": 1
+    }
+  ],
+  "issues": [],
+  "pages": "browser loaded, no script errors; four entry files byte-identical throughout QA and Git-normalized content identical to abfbb3d (Windows CRLF checkout)"
+}

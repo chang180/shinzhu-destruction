@@ -37,7 +37,7 @@
         }
       ],
       "alt": "晏沉授課，折晝：長晝窗影與輪替防禦光帶",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "scene-noon-fold",
@@ -72,7 +72,7 @@
         }
       ],
       "alt": "虛構城市場景，折晝：長晝窗影與輪替防禦光帶",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "ultimate-noon-fold",
@@ -107,7 +107,7 @@
         }
       ],
       "alt": "專屬禁術，折晝：長晝窗影與輪替防禦光帶",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "victory-noon-fold",
@@ -142,7 +142,7 @@
         }
       ],
       "alt": "城市模型瓦解的勝利畫面，折晝：長晝窗影與輪替防禦光帶",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "briefing-meter-feast",
@@ -177,7 +177,7 @@
         }
       ],
       "alt": "晏沉授課，饗表：園區管線、巨大帳冊與計量光網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "scene-meter-feast",
@@ -212,7 +212,7 @@
         }
       ],
       "alt": "虛構城市場景，饗表：園區管線、巨大帳冊與計量光網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "ultimate-meter-feast",
@@ -247,7 +247,7 @@
         }
       ],
       "alt": "專屬禁術，饗表：園區管線、巨大帳冊與計量光網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "victory-meter-feast",
@@ -282,7 +282,7 @@
         }
       ],
       "alt": "城市模型瓦解的勝利畫面，饗表：園區管線、巨大帳冊與計量光網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "briefing-mirror-shade",
@@ -317,7 +317,7 @@
         }
       ],
       "alt": "晏沉授課，鏡蔭：丘陵街廓與錯位鏡面倒影",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "scene-mirror-shade",
@@ -352,7 +352,7 @@
         }
       ],
       "alt": "虛構城市場景，鏡蔭：丘陵街廓與錯位鏡面倒影",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "ultimate-mirror-shade",
@@ -387,7 +387,7 @@
         }
       ],
       "alt": "專屬禁術，鏡蔭：丘陵街廓與錯位鏡面倒影",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "victory-mirror-shade",
@@ -422,7 +422,7 @@
         }
       ],
       "alt": "城市模型瓦解的勝利畫面，鏡蔭：丘陵街廓與錯位鏡面倒影",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "briefing-stored-night",
@@ -457,7 +457,7 @@
         }
       ],
       "alt": "晏沉授課，蓄夜：夜間觀測室與城市分區燈網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "scene-stored-night",
@@ -492,7 +492,7 @@
         }
       ],
       "alt": "虛構城市場景，蓄夜：夜間觀測室與城市分區燈網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "ultimate-stored-night",
@@ -527,7 +527,7 @@
         }
       ],
       "alt": "專屬禁術，蓄夜：夜間觀測室與城市分區燈網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "victory-stored-night",
@@ -562,7 +562,7 @@
         }
       ],
       "alt": "城市模型瓦解的勝利畫面，蓄夜：夜間觀測室與城市分區燈網",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "main-finale-v2",
@@ -597,7 +597,7 @@
         }
       ],
       "alt": "主線結業：晏沉與學員在城市模型前收起課業",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "advanced-finale-1-v2",
@@ -632,7 +632,7 @@
         }
       ],
       "alt": "進階終幕第一幕：城市燈網最後收攏",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "advanced-finale-2-v2",
@@ -667,7 +667,7 @@
         }
       ],
       "alt": "進階終幕第二幕：學員與晏沉面對收束的城市模型",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
     },
     {
       "id": "advanced-finale-3-v2",
@@ -702,9 +702,45 @@
         }
       ],
       "alt": "進階終幕第三幕：課桌上的城市模型與茶杯",
-      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence"
+    },
+    {
+      "id": "briefing-empty-cup",
+      "prompt": "Create one original landscape 16:9 narrative game illustration. The reference fixes the identity of Yan Chen, middle-aged East Asian male professor, swept black hair with silver streak, sharp stern eyebrows, purple high-collar robe with copper trim and teal brooch. Match identity and hand drawn ink crosshatching, halftone parchment grain, deep ink purple and copper palette. LEVEL ONE EMPTY CUP / drought lesson: medium wide three-quarter view of professor at right, full head and both hands safely inside central 80% of frame, placing an empty ceramic cup on a desk beside a miniature fictional Taiwanese hillside town and visibly depleted reservoir. Arcade streets, corrugated awnings and dry contour lines in the city model at left. Academy classroom, cool teal reservoir traces, warm side lamp. Dryly stern expression, genuine teaching gesture, no frontal portrait enlargement. Compose natively landscape with complete face, hair and shoulders visible; no cropping of head. Maintain quiet lower-left space for separate UI. No text, letters, numbers, logos or watermark. No real facility landmarks, no explosions, no photorealism. Output one complete 16:9 image.",
+      "source": "assets/generated/visual-v2/briefing-empty-cup.png",
+      "alt": "晏沉在課桌前拿著空茶杯，旁邊是缺水水庫與丘陵城市模型",
+      "review": "contact-sheet inspected; all five briefing frames verified in Chromium at 2560/1280/390/320; see visual-v2-first-briefing evidence",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "eefa82f1dfe6f9f00f575349043451b3e7e6c64d09fbe7ee7e74a08252c11cba",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/briefing-empty-cup.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 368452,
+          "sha256": "62cbee595d3721f4c82f3bfd25b62385b6a6ee660c358de81b2330b526dec620"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-empty-cup-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 260892,
+          "sha256": "f2a423e204669153e3d5f9d1bd274b0df15f33fb3ae395bdc33dbcdf189fa3e9"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-empty-cup-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 106348,
+          "sha256": "58ae9c4d1a39d935eafb20d56dd17d2b746110039887d5418d0a8820d9d01d5c"
+        }
+      ]
     }
   ],
   "conversion": "Pillow WebP quality 80 method 6, proportional widths 1600/1280/768",
-  "provenance": "Original image_gen generation; existing Yan Chen image used only as identity reference. No text or third-party character references."
+  "provenance": "Original image_gen generation; existing Yan Chen image used only as identity reference. No text or third-party character references.",
+  "verification": "docs/phase-reports/data/visual-v2-first-briefing/browser-results.json"
 }

@@ -290,7 +290,7 @@ export function professorReview(run: Pick<Run, 'level_id' | 'outcome' | 'history
 }
 const p06AssetNames = new Set(['yan-chen-stern', 'yan-chen-pleased', 'student-silhouette', 'skill-water-2', 'skill-heat-2', 'skill-land-2', 'skill-ultimate', 'defense-success-1', 'defense-success-2', 'victory-2', 'victory-3', 'advanced-finale-1', 'advanced-finale-2', 'advanced-finale-3']);
 export function assetUrl(name: string): string {
-    const newAsset = Object.keys(levelPresentation).some(id => ['briefing', 'scene', 'ultimate', 'victory'].some(kind => name === `${kind}-${id}`)) || name === 'main-finale-v2' || finaleFrames.includes(name);
+    const newAsset = name === 'briefing-empty-cup' || Object.keys(levelPresentation).some(id => ['briefing', 'scene', 'ultimate', 'victory'].some(kind => name === `${kind}-${id}`)) || name === 'main-finale-v2' || finaleFrames.includes(name);
     const directory = newAsset ? 'visual-v2' : name.startsWith('apostle-') || p06AssetNames.has(name) ? 'p06' : 'p04';
     return `/assets/${directory}/${name}.webp`;
 }
@@ -306,7 +306,7 @@ export function apostleAsset(levelId: string): string {
     return `apostle-${levelId}`;
 }
 export function briefingAsset(levelId: string): string {
-    return levelPresentation[levelId] ? `briefing-${levelId}` : 'yan-chen-stern';
+    return levelId === 'empty-cup' || levelPresentation[levelId] ? `briefing-${levelId}` : 'yan-chen-stern';
 }
 export function reportAsset(outcome: Outcome, levelId: string): string {
     if (outcome === 'city_held') return levelId === 'stored-night' ? 'defense-success-2' : 'defense-success-1';

@@ -393,7 +393,7 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
             </template>
             <template v-else-if="run && state">
                 <section v-if="page === 'briefing'" class="briefing content-width">
-                    <div class="briefing-art"><img :src="asset(briefingAsset(run.level_id))" :srcset="assetSrcSet(briefingAsset(run.level_id))" sizes="(max-width: 760px) 100vw, 1100px" :alt="narrative?.alt ?? '枯潮教授晏沉'"><span>枯潮教授 / 晏沉</span></div>
+                    <div class="briefing-art"><img :src="asset(briefingAsset(run.level_id))" :srcset="assetSrcSet(briefingAsset(run.level_id))" sizes="(max-width: 760px) 100vw, 1280px" :alt="narrative?.alt ?? '晏沉拿著空杯，向學員展示缺水水庫與丘陵城市模型'"><span>枯潮教授 / 晏沉</span></div>
                     <div><p class="eyebrow">作戰簡報 · 第 {{ level?.sequence }} 關 {{ level?.name }}｜{{ mode === 'practice' ? '不限時練習' : '限時挑戰' }}</p>
                         <h1 tabindex="-1"><template v-for="(line, index) in briefingTitle" :key="index">{{ line }}<br v-if="index < briefingTitle.length - 1"></template></h1>
                         <blockquote class="professor-quote">{{ narrative?.quote ?? level?.briefing?.quote }}<small>{{ narrative?.note ?? level?.briefing?.quote_note }}</small></blockquote>

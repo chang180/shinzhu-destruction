@@ -8,7 +8,7 @@ const http = require('node:http');
 const assert = require('node:assert/strict');
 
 const base = process.env.VISUAL_QA_URL || 'http://127.0.0.1:8000';
-const evidence = 'docs/phase-reports/data/visual-v2';
+const evidence = process.env.VISUAL_QA_EVIDENCE || 'docs/phase-reports/data/visual-v2';
 const pagesFiles = ['index.html', 'app.js', 'game.js', 'style.css'];
 const originalPages = Object.fromEntries(pagesFiles.map(file => [file, fs.readFileSync('docs/' + file)]));
 fs.mkdirSync(evidence, { recursive: true });
@@ -45,13 +45,13 @@ const fixtures = JSON.parse(execFileSync('php', ['-r', imports + php], { maxBuff
 
 (async () => {
   const browser = await chromium.launch({ headless: true, ...(process.env.VISUAL_QA_BROWSER ? { executablePath: process.env.VISUAL_QA_BROWSER } : {}) });
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, ignoreHTTPSErrors: base === 'https://shinzhu.test' });
   const catalogResponse = await context.request.get(base + '/api/v1/levels');
   assert.equal(catalogResponse.status(), 200);
   const original = await catalogResponse.json();
   assert.equal(original.rules_version, '8.0.0');
   let selected = 'noon-fold', view = 'opening', reward = false;
-  const issues = [], requests = [], checks = [];
+  const issues = [], requests = [], checks = [], briefingGeometry = [];
   let initialBytes = null;
   const page = await context.newPage();
   page.on('pageerror', error => issues.push(error.message));
@@ -102,11 +102,22 @@ const fixtures = JSON.parse(execFileSync('php', ['-r', imports + php], { maxBuff
     await page.locator(view === 'opening' ? '.briefing' : '.report').waitFor({ state: 'visible' });
   }
   try {
-    for (const width of [1280, 390, 320]) {
+    for (const width of [2560, 1280, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
-      for (const id of ['noon-fold', 'meter-feast', 'mirror-shade', 'stored-night']) {
+      for (const id of ['empty-cup', 'noon-fold', 'meter-feast', 'mirror-shade', 'stored-night']) {
         selected = id; view = 'opening'; reward = false;
         await open(); await inspect(`${width}-${id}-briefing`);
+        const geometry = await page.locator('.briefing-art img').evaluate(img => {
+          const bounds = img.getBoundingClientRect();
+          return { width: bounds.width, height: bounds.height, naturalWidth: img.naturalWidth, naturalHeight: img.naturalHeight, fit: getComputedStyle(img).objectFit, source: new URL(img.currentSrc).pathname };
+        });
+        assert.equal(geometry.fit, 'contain', `${id}: illustration must not be cropped`);
+        assert.ok(Math.abs(geometry.width / geometry.height - 16 / 9) < 0.01, `${id}: inconsistent frame`);
+        assert.ok(Math.abs(geometry.naturalWidth / geometry.naturalHeight - 16 / 9) < 0.01, `${id}: portrait source in landscape frame`);
+        assert.match(geometry.source, new RegExp(`/visual-v2/briefing-${id}`));
+        const previous = briefingGeometry.find(frame => frame.viewport === width);
+        if (previous) assert.ok(Math.abs(previous.width - geometry.width) < 1 && Math.abs(previous.height - geometry.height) < 1, 'all five briefing frames must have equal dimensions');
+        briefingGeometry.push({ viewport: width, level: id, ...geometry });
         await page.getByRole('button', { name: '明白了，開始連續試煉' }).click();
         await page.locator('.battle').waitFor({ state: 'visible' });
         await inspect(`${width}-${id}-battle`);
@@ -167,7 +178,7 @@ const fixtures = JSON.parse(execFileSync('php', ['-r', imports + php], { maxBuff
       assert.equal(current, committed);
     }
     assert.equal(issues.length, 0, JSON.stringify(issues));
-    fs.writeFileSync(`${evidence}/browser-results.json`, JSON.stringify({ base: 'local Laravel shell', rules_version: original.rules_version, initial_screen_encoded_bytes: initialBytes, replay_escape: 'passed', fixture_note: 'Real PHP engine opening/win/loss histories; mocked campaign/API responses for UI coverage. No production or real-save changes.', viewports: [1280, 390, 320], checks, loaded_assets: [...new Set(requests)], decoded_audio: audio, issues, pages: 'browser loaded, no script errors; four entry files byte-identical throughout QA and Git-normalized content identical to abfbb3d (Windows CRLF checkout)' }, null, 2));
+    fs.writeFileSync(`${evidence}/browser-results.json`, JSON.stringify({ base: base === 'https://shinzhu.test' ? 'local HTTPS shinzhu.test' : 'local Laravel shell', briefing_geometry: briefingGeometry, rules_version: original.rules_version, initial_screen_encoded_bytes: initialBytes, replay_escape: 'passed', fixture_note: 'Real PHP engine opening/win/loss histories; mocked campaign/API responses for UI coverage. No production or real-save changes.', viewports: [2560, 1280, 390, 320], checks, loaded_assets: [...new Set(requests)], decoded_audio: audio, issues, pages: 'browser loaded, no script errors; four entry files byte-identical throughout QA and Git-normalized content identical to abfbb3d (Windows CRLF checkout)' }, null, 2));
     console.log(JSON.stringify({ screens: checks.length, sounds_decoded: audio.length, issues, pages: 'passed' }));
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

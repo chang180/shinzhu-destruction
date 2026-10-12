@@ -8,6 +8,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | docs/** | .ai/rules/docs.md |
 | app/Domain/Game/** | .ai/rules/game.md |
 | app/Services/OpenData/** | .ai/rules/open-data.md |
+| resources/** | .ai/rules/resources.md |
 | app/Services/Game/** | .ai/rules/services-game.md |
 | app/Domain/Game/Solver/**, app/Console/Commands/SolveLevelsCommand.php | .ai/rules/solver.md |
 | tests/** | .ai/rules/tests.md |

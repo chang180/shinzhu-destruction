@@ -212,7 +212,7 @@ small,.small,.eyebrow,summary,.settings,.settings summary,.mode-picker legend,.m
 
 /* Narrative frames preserve their full composition; state accents use saved server state. */
 .briefing{display:block}.briefing-art{width:100%;max-width:none;height:auto;margin:0 0 28px;position:relative}
-.briefing-art img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.briefing-art img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;background:#171321}
 .briefing>div:last-child{max-width:780px;margin:0 auto}.briefing-task{font-size:1.2rem;color:var(--copper);margin:0 0 20px}
 .act-voice{font-size:1rem;color:var(--paper);line-height:1.8;margin:0 0 10px}
 .report-review{margin:20px 0;padding:14px 18px;border-left:2px solid var(--copper);font-size:1rem;line-height:1.8}

@@ -387,11 +387,11 @@ test('both finale cues are independent of ordinary victory and defeat', async ()
   assert.match(h.clips[2].src, /ending-defeat/); h.audio.stop();
 });
 
-test('all 20 visual assets and 26 sound units have readable hashed delivery files', () => {
+test('all 21 visual assets and 26 sound units have readable hashed delivery files', () => {
   const crypto = require('node:crypto');
   const images = JSON.parse(fs.readFileSync('assets/visual-v2-generation.json', 'utf8')).assets;
   const sounds = JSON.parse(fs.readFileSync('assets/visual-v2-audio.json', 'utf8')).assets;
-  assert.equal(images.length, 20); assert.equal(sounds.length, 26);
+  assert.equal(images.length, 21); assert.equal(sounds.length, 26);
   for (const item of [...images, ...sounds]) {
     for (const output of item.outputs) {
       const bytes = fs.readFileSync(output.file);
@@ -412,6 +412,18 @@ test('all four level presentations resolve distinct assets without changing card
   assert.match(phaseLine('noon-fold', 'shift-guard'), /換班/);
   assert.equal(phaseLine('stored-night', 'not-entered'), '');
   assert.equal(assetSrcSet('city'), undefined);
+});
+
+test('the first briefing uses a native landscape image with the same delivery sizes as later levels', () => {
+  const { assetUrl, assetSrcSet } = context.exports;
+  assert.equal(briefingAsset('empty-cup'), 'briefing-empty-cup');
+  assert.equal(assetUrl(briefingAsset('empty-cup')), '/assets/visual-v2/briefing-empty-cup.webp');
+  assert.match(assetSrcSet(briefingAsset('empty-cup')), /768w.*1280w.*1600w/);
+  const images = JSON.parse(fs.readFileSync('assets/visual-v2-generation.json', 'utf8')).assets;
+  for (const id of ['empty-cup', 'noon-fold', 'meter-feast', 'mirror-shade', 'stored-night']) {
+    const frame = images.find(image => image.id === `briefing-${id}`);
+    assert.ok(Math.abs(frame.raw_dimensions[0] / frame.raw_dimensions[1] - 16 / 9) < 0.01);
+  }
 });
 
 test('final professor reviews use recorded overhaul outcomes, including neutral old saves', () => {

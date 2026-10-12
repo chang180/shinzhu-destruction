@@ -17,7 +17,7 @@ delivery = ROOT / 'public/assets/visual-v2'
 evidence = ROOT / 'docs/phase-reports/data/visual-v2'
 for directory in [originals, delivery, evidence]:
     directory.mkdir(parents=True, exist_ok=True)
-sheet = Image.new('RGB', (1280, 5 * 210), '#171321')
+sheet = Image.new('RGB', (1280, ((len(manifest['assets']) + 3) // 4) * 210), '#171321')
 draw = ImageDraw.Draw(sheet)
 for i, item in enumerate(sorted(manifest['assets'], key=lambda item: item['id'])):
     key = item['id']
@@ -40,7 +40,9 @@ for i, item in enumerate(sorted(manifest['assets'], key=lambda item: item['id'])
     sheet.paste(preview, (x, y))
     draw.text((x + 8, y + 184), key, fill='#eadac5')
     item.pop('hint', None)
-    item.update(source=original.relative_to(ROOT).as_posix(), raw_dimensions=[image.width, image.height], raw_sha256=hashlib.sha256(original.read_bytes()).hexdigest(), outputs=outputs, alt=key.replace('-', ' '), review='pending-visual-inspection')
+    item.update(source=original.relative_to(ROOT).as_posix(), raw_dimensions=[image.width, image.height], raw_sha256=hashlib.sha256(original.read_bytes()).hexdigest(), outputs=outputs)
+    item.setdefault('alt', key.replace('-', ' '))
+    item['review'] = 'pending-visual-inspection'
 sheet.save(evidence / 'contact-sheet.jpg', quality=90)
 manifest.update(status='packaged-review-pending', conversion='Pillow WebP quality 80 method 6, proportional widths 1600/1280/768', provenance='Original image_gen generation; existing Yan Chen image used only as identity reference. No text or third-party character references.')
 manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
