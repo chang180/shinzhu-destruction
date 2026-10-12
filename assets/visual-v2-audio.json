@@ -1,0 +1,659 @@
+{
+  "date": "2026-10-12",
+  "tool": "Original deterministic numpy synthesis; soundfile 0.13.1 Vorbis / lameenc 1.8.1 MP3",
+  "source_script": "scripts/build-visual-v2-audio.py",
+  "provenance": "Original procedural recordings and original short compositions; no third-party samples",
+  "assets": [
+    {
+      "key": "ui-confirm",
+      "description": "兩次短陶片敲擊",
+      "duration_seconds": 0.32,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -18.92,
+      "source": "assets/generated/visual-v2/audio/ui-confirm.wav",
+      "source_sha256": "2d49683e5e7c2424dc7baf132b72297a341a3c9e168b965f7f010ed075ebe9f5",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ui-confirm.ogg",
+          "bytes": 5498,
+          "sha256": "6c3a77e0ecb5097590cde1dd139bd7ae77248112c3dc890eb7d7e352642e2093"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ui-confirm.mp3",
+          "bytes": 4389,
+          "sha256": "a2baf6267a0e238d8edfef07aae249ad6144d11e69b5252194844aca4146dd76"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ui-unable",
+      "description": "低沉紙面擦響",
+      "duration_seconds": 0.26,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -18.92,
+      "source": "assets/generated/visual-v2/audio/ui-unable.wav",
+      "source_sha256": "6991f18366ca8eebb14edabf7391854d1bce6e3d801c14ee2f652d60b400b2ba",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ui-unable.ogg",
+          "bytes": 5847,
+          "sha256": "86e969e6cf50ee30e0b29aebb24c6b7f889b0f5d2f9776d7b807382190b8e799"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ui-unable.mp3",
+          "bytes": 3448,
+          "sha256": "96631ec2e3bd1d289076d3fbbabe7e930d1c41ea380e458f89a29e012dfcc973"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ui-unlock",
+      "description": "銅片上行三音",
+      "duration_seconds": 1.15,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -20.95,
+      "source": "assets/generated/visual-v2/audio/ui-unlock.wav",
+      "source_sha256": "f8012326f25be3c822c81478a1922659ceaf6f43bf45aeab957b911762ebe500",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ui-unlock.ogg",
+          "bytes": 7814,
+          "sha256": "ea9004884c87f7b82305c09a735351b340d04f57d1b8cfbad252a0289e4b58ad"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ui-unlock.mp3",
+          "bytes": 14420,
+          "sha256": "dd0aa2e8b03574928e9c014f3ca5040a2ee3bf7476cf34b974dd1f14214d097b"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ui-toggle",
+      "description": "乾淨短開關",
+      "duration_seconds": 0.16,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -20.16,
+      "source": "assets/generated/visual-v2/audio/ui-toggle.wav",
+      "source_sha256": "1edef2188de4002aaab21ff1f1d20b2352363dc0d96d23692960d01e57074e5c",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ui-toggle.ogg",
+          "bytes": 5196,
+          "sha256": "8b9cf9c9baf44c5c13da5134d768ca9f55a8af461d937de47f35435bf5bab65e"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ui-toggle.mp3",
+          "bytes": 2508,
+          "sha256": "e6432425ed1acbf53b5724bc3aee5fbff9fb077f92e8bee4329df9b8519d1650"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "cast-water",
+      "description": "陶腔水滴與下滑流聲",
+      "duration_seconds": 0.65,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -16.14,
+      "source": "assets/generated/visual-v2/audio/cast-water.wav",
+      "source_sha256": "917c5d3117ebbcd60744cedf7bc8c719c391e75ae9c613e0c294727b86d60663",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/cast-water.ogg",
+          "bytes": 7666,
+          "sha256": "e7dbc78d1d971e9261e1879906a6e9b08fa976f8fdbe7fc5c18b425f9360c78b"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/cast-water.mp3",
+          "bytes": 8150,
+          "sha256": "85755882b52c45e25587073fdd2db9a670655a0fbb8c32ba6a419114315a1c6f"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "cast-heat",
+      "description": "乾裂脈衝與上揚熱氣",
+      "duration_seconds": 0.55,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -15.14,
+      "source": "assets/generated/visual-v2/audio/cast-heat.wav",
+      "source_sha256": "e6de57f72c89ea548c9034ba644f45247559bf5c2c229d6955bcc0d13b23c882",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/cast-heat.ogg",
+          "bytes": 8436,
+          "sha256": "e8d8a5f7a13ad63d53d6c266a550f98c0570f2d4e59bc1eebd9d184405874be8"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/cast-heat.mp3",
+          "bytes": 7210,
+          "sha256": "4971ad25d2986d5964305d19c3266370f7fe5a36b626257f3326c49c762dfc35"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "cast-land",
+      "description": "低頻土塊與顆粒崩裂",
+      "duration_seconds": 0.68,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -15.02,
+      "source": "assets/generated/visual-v2/audio/cast-land.wav",
+      "source_sha256": "4b387c74534d3c088a9a46add5e37fa4eac11d030a21bc814290b482cef705e7",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/cast-land.ogg",
+          "bytes": 6544,
+          "sha256": "9ea2acc15437aa222654b028db3a92e7b26286087f77ebf098f327785f4b0a81"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/cast-land.mp3",
+          "bytes": 8777,
+          "sha256": "0b48de5386a48f44d7dc10b5c456b709552b3f7b4269d92e8f630ae31699196b"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "impact",
+      "description": "短促低頻衝擊",
+      "duration_seconds": 0.55,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -16.85,
+      "source": "assets/generated/visual-v2/audio/impact.wav",
+      "source_sha256": "a99268bc5b2924b4f887c1370d3061032a3365d2eadda06a3e0ebdc450134bc9",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/impact.ogg",
+          "bytes": 8248,
+          "sha256": "6f3d390a1e07b94adb3d1993229e95d51615fc8a11c5812b1ef3b53497383897"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/impact.mp3",
+          "bytes": 7210,
+          "sha256": "ec1327111a542aaefffcc289edcb705aeaef23719298e8a59cf7e57fbe349d1e"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "shield",
+      "description": "有阻力的悶金屬共鳴",
+      "duration_seconds": 0.65,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -15.13,
+      "source": "assets/generated/visual-v2/audio/shield.wav",
+      "source_sha256": "a3314993b78c8a9ddddb3907b2f1f2d3fff775f2ac4cda5633ec40351987aa85",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/shield.ogg",
+          "bytes": 5884,
+          "sha256": "cc42cf8d7416215ed2d6c63b9b23105e5c99465af57241f053a59310cbbe872d"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/shield.mp3",
+          "bytes": 8150,
+          "sha256": "e026b9a5d8f558dcb6c25f38469cff7abbb13b7ad38759abca14a631671799eb"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "breach",
+      "description": "高頻盾紋裂開",
+      "duration_seconds": 1.0,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -17.64,
+      "source": "assets/generated/visual-v2/audio/breach.wav",
+      "source_sha256": "79cb00f266029fc7a4215778be2cdb5f7394b6001fbc3f11cb0a43aeaecedcdf",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/breach.ogg",
+          "bytes": 11095,
+          "sha256": "a0d860131075e86bd7860e32e94d871f1c2ca9cf9c6014925aa1636e80768bd1"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/breach.mp3",
+          "bytes": 12539,
+          "sha256": "42e5a9e8c1abad7c4c9673aeb6e6cd645ae8084495358603feb3fc0d9a73040c"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "interrupt",
+      "description": "斷弦般下降截斷",
+      "duration_seconds": 0.65,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -15.95,
+      "source": "assets/generated/visual-v2/audio/interrupt.wav",
+      "source_sha256": "eec6458d86e0f0793a079ff5d2ef1571e921105d662cb06c16269b3eddab8d57",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/interrupt.ogg",
+          "bytes": 6257,
+          "sha256": "ddeb4d85c6ea117731a0844202b96801bbda1718b38665016acf6b38e5f4a504"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/interrupt.mp3",
+          "bytes": 8150,
+          "sha256": "461700e3d732f83413aaaa5499b75cb543c34b89111f781552033e529486a036"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "repair",
+      "description": "溫暖陶鐘逐層重組",
+      "duration_seconds": 1.35,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -16.33,
+      "source": "assets/generated/visual-v2/audio/repair.wav",
+      "source_sha256": "650ebc5d1783a338e483e45ae11a803a7e5711874e50156ca29761dd1d0d18dd",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/repair.ogg",
+          "bytes": 8865,
+          "sha256": "d305945ff8e8d36d5bcdc587a95010a6b5466363d907df90fbc76b24a1d0ab1b"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/repair.mp3",
+          "bytes": 16614,
+          "sha256": "02df2605e0964c13631bf86977b95be69ebacd71d20a0eae8e1ba071338edbd5"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "combo",
+      "description": "三種材質交接形成和弦",
+      "duration_seconds": 0.95,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -15.8,
+      "source": "assets/generated/visual-v2/audio/combo.wav",
+      "source_sha256": "24bb54efe4c1f54ade5876e5644a4e013d67b205f6712b246e58b3f200eb14ab",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/combo.ogg",
+          "bytes": 7225,
+          "sha256": "9ec4caa44bb095af4390f5904f74cb5f1099b50ffef68b4af3a92fb185857725"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/combo.mp3",
+          "bytes": 11912,
+          "sha256": "d7f8a416711545dd400f42f0b52fc6ad0c0287238a56b75ce88a88c0a8b85e27"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ultimate-charge",
+      "description": "顆粒與低頻逐步聚集",
+      "duration_seconds": 1.05,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -11.73,
+      "source": "assets/generated/visual-v2/audio/ultimate-charge.wav",
+      "source_sha256": "036776a756cb59522e5d3f00cfa08005687554e425f01762b5ac8b78a2b9f9df",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ultimate-charge.ogg",
+          "bytes": 11680,
+          "sha256": "53549aff0e72322165b0e28d25d6d7e966bd045b5c486840c08306fca57fb8ee"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ultimate-charge.mp3",
+          "bytes": 13166,
+          "sha256": "c5d45e7cc319d9a7772d997cd9ae3ab9c40a5f309b89c3a8fb10b733e4e6ac8e"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ultimate-impact",
+      "description": "低頻重擊與玻璃碎屑",
+      "duration_seconds": 0.9,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -18.68,
+      "source": "assets/generated/visual-v2/audio/ultimate-impact.wav",
+      "source_sha256": "77f2648ae3310204ba0f795a48142d4e2fa32d1e7fc7719ac3cc5bba2002c5a8",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ultimate-impact.ogg",
+          "bytes": 10528,
+          "sha256": "8c7a2349f99e49c563fdf026620bc6e0c2e21fe0aa94b3e6d1b91b4eba352671"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ultimate-impact.mp3",
+          "bytes": 11285,
+          "sha256": "68b9f4d747e7cec3b6efaf1f80bb06f8c06ee7db49c2dee17bcbb3217f9bd9ca"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ultimate-tail",
+      "description": "稀疏碎片與消散餘韻",
+      "duration_seconds": 1.6,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -17.65,
+      "source": "assets/generated/visual-v2/audio/ultimate-tail.wav",
+      "source_sha256": "5dd8bd9aa68e5f39a4b44dd8d70be84e84b12b95187a655073b142cb29fe1550",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ultimate-tail.ogg",
+          "bytes": 10785,
+          "sha256": "e01d877b9ce69b25783f0894443aee3eff19a1594e074935fb0065ab0c6a4514"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ultimate-tail.mp3",
+          "bytes": 19749,
+          "sha256": "be3fcc85c6931dde59d966e24c8d117f14acf641f1a240327817a2d2284f4a57"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "mirror",
+      "description": "對稱反向玻璃回聲",
+      "duration_seconds": 0.85,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -14.57,
+      "source": "assets/generated/visual-v2/audio/mirror.wav",
+      "source_sha256": "3645335c21e8e09cbd4877b4432769cc8f7396b05c321fc5ac3c161b0e9c4755",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/mirror.ogg",
+          "bytes": 6698,
+          "sha256": "6b0b3a88031a47aafeffc27bbde4edc67de0c3a1c9ff67f56cd7029147828945"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/mirror.mp3",
+          "bytes": 10658,
+          "sha256": "f7fa5f292afd7976bcf2f12eb908eed9de5b887a89ab9ee35e0089f2643ffd13"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "overhaul",
+      "description": "雙重低音警報與機械張力",
+      "duration_seconds": 1.2,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -15.24,
+      "source": "assets/generated/visual-v2/audio/overhaul.wav",
+      "source_sha256": "18d4205fb3f701381c7c6e032556976720c47c1c321c78cb2c3c86b7be8f55b7",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/overhaul.ogg",
+          "bytes": 5841,
+          "sha256": "55c1b87733e9bd2e72b1a9816a29d491fc8db491f68d38f9829f8d81647fb069"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/overhaul.mp3",
+          "bytes": 14733,
+          "sha256": "ff8588411ff8eb046a3a90971e5ff6365fc9005e662b60cc288d4ead9e5e5dc6"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ambience-noon-fold",
+      "description": "長晝乾燥風聲與遠處金屬鳴響",
+      "duration_seconds": 24,
+      "loop": true,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -11.06,
+      "rms_dbfs": -21.71,
+      "source": "assets/generated/visual-v2/audio/ambience-noon-fold.wav",
+      "source_sha256": "8d4245677af9c0f532725f9e73019ba747744783596f72c236bd7dfd598e4abc",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ambience-noon-fold.ogg",
+          "bytes": 98947,
+          "sha256": "ced3090eb7f134633ede4f6d45ff103703af2d80e79d4ef3e726b61597d47173"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ambience-noon-fold.mp3",
+          "bytes": 288392,
+          "sha256": "784ecf1d00e445fa2a7c793e77ff8ffb804e72a07671610e16a366de6cb666ba"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ambience-meter-feast",
+      "description": "低調機械脈動與園區供應聲",
+      "duration_seconds": 24,
+      "loop": true,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -11.06,
+      "rms_dbfs": -20.75,
+      "source": "assets/generated/visual-v2/audio/ambience-meter-feast.wav",
+      "source_sha256": "5729f0542320eee5349b52a865cfd4b6ab741e6faa2050b23762315122ab84ef",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ambience-meter-feast.ogg",
+          "bytes": 78536,
+          "sha256": "242ee3193b34640f553fc3e3bc301be369555e790278a7334d41bb7ea32186ca"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ambience-meter-feast.mp3",
+          "bytes": 288392,
+          "sha256": "97daf37889a2da56e4e6f08ad5782fe8bb9a384135f556408f35c90178ef0e67"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ambience-mirror-shade",
+      "description": "稀疏玻璃回聲與丘陵風聲",
+      "duration_seconds": 24,
+      "loop": true,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -11.06,
+      "rms_dbfs": -22.74,
+      "source": "assets/generated/visual-v2/audio/ambience-mirror-shade.wav",
+      "source_sha256": "29a142c84005d3f823f12e2f12dd82fcfc9027c78d6dd93a514b119e236b785b",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ambience-mirror-shade.ogg",
+          "bytes": 127752,
+          "sha256": "fbf36b7bfc5e9d05abee4d2287d4ce7d068eb5bf5aba13679e425f9a5327d2e8"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ambience-mirror-shade.mp3",
+          "bytes": 288392,
+          "sha256": "73399788e40957c6dedeae3d3d903b3e851d6edea5192f48607c8643bc08fa4c"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ambience-stored-night",
+      "description": "夜間低頻張力與慢速脈衝",
+      "duration_seconds": 24,
+      "loop": true,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -11.06,
+      "rms_dbfs": -21.93,
+      "source": "assets/generated/visual-v2/audio/ambience-stored-night.wav",
+      "source_sha256": "74bc3ae06ef533a2ed064a85b74a53775552615104fdd430452b933fdbc81cf8",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ambience-stored-night.ogg",
+          "bytes": 68462,
+          "sha256": "ec6d14336835f11391b71a514356bb593995edf9da9c6e386d04c97fbdf1467f"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ambience-stored-night.mp3",
+          "bytes": 288392,
+          "sha256": "f6d3831d3de049285242d10d34f74e040ce1868b4cc777e12b637354f984d2ef"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ending-defeat",
+      "description": "平靜惋惜的三段落句",
+      "duration_seconds": 3.6,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -17.16,
+      "source": "assets/generated/visual-v2/audio/ending-defeat.wav",
+      "source_sha256": "a854898f37091a73b6b198c166a15c8cd757d892fd73b593aa429ef9ad8b6618",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ending-defeat.ogg",
+          "bytes": 13815,
+          "sha256": "437f530c8cfd1741071b98356ff308f5be11e9f5fbb415cacbb85b1b4d4f7d35"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ending-defeat.mp3",
+          "bytes": 43572,
+          "sha256": "7375ddc831a82e7598dcc0b7c7a1af3aa1e51b5cfbe1ee8a16a8584a0caf0d67"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ending-victory",
+      "description": "銅器與紙面節奏的單關慶祝",
+      "duration_seconds": 4.4,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -20.44,
+      "source": "assets/generated/visual-v2/audio/ending-victory.wav",
+      "source_sha256": "ede03f13be89136ff32b4a16fcdad1518e54e289542b39ce5d68ca081fc22c98",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ending-victory.ogg",
+          "bytes": 16020,
+          "sha256": "296e9bd3a2846dec922c01a373b959f10d0ab899d008b21ede7c31c4e5e2a3e1"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ending-victory.mp3",
+          "bytes": 53290,
+          "sha256": "0e479790ce9bd240ecaf90e78497741827e86b0fd82b05df4370a3b7a732a6b6"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ending-main",
+      "description": "完整結業樂句、溫暖收束",
+      "duration_seconds": 5.8,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -21.38,
+      "source": "assets/generated/visual-v2/audio/ending-main.wav",
+      "source_sha256": "e3a7708045d15d05be25ef150c242c1fe0eec61bd4574a2225c3afb8c10be2ca",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ending-main.ogg",
+          "bytes": 19156,
+          "sha256": "fdfb5a828e768f58f98592d3d9a4aaf74c98ae0aaebb78b2c52fb09711604742"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ending-main.mp3",
+          "bytes": 70217,
+          "sha256": "eff18160ae94bfe120088f6299027eaa01a06c7d5e8b2a2613731fc39db9ceb8"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    },
+    {
+      "key": "ending-advanced",
+      "description": "五門禁術畢業慶典、明確終止",
+      "duration_seconds": 7.2,
+      "loop": false,
+      "sample_rate": 44100,
+      "channels": 1,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -20.9,
+      "source": "assets/generated/visual-v2/audio/ending-advanced.wav",
+      "source_sha256": "685cdc3d0514d35fc05d4c3deab261330fbc72cf2c51a8381e414f648afe27cf",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/audio/ending-advanced.ogg",
+          "bytes": 22707,
+          "sha256": "cbbbc0de7df14b86a4b66c3c330e938bddf94797517955345be3a08a9a925cab"
+        },
+        {
+          "file": "public/assets/visual-v2/audio/ending-advanced.mp3",
+          "bytes": 86831,
+          "sha256": "eb75c6c043e3710c0c2afb2ee2f11e3c5fd61bf079c38525676624cb24fa8c1f"
+        }
+      ],
+      "review": "OGG and MP3 decoded in Chromium; subjective listening and hardware verification pending"
+    }
+  ],
+  "verification": "docs/phase-reports/data/visual-v2/browser-results.json"
+}

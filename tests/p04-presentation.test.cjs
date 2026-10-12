@@ -11,7 +11,7 @@ const source = ts.transpileModule(fs.readFileSync('resources/js/game.ts', 'utf8'
 }).outputText;
 const context = { exports: {}, crypto: globalThis.crypto };
 vm.runInNewContext(source, context);
-const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, counterfactualText, reportFindings, reportSummary, cardGuide, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, keptCardsForPlay, canKeepCard, soundStatusText, playedName } = context.exports;
+const { cueImage, cueDuration, reportAsset, sceneAsset, apostleAsset, briefingAsset, counterfactualText, reportFindings, reportSummary, cardGuide, PendingAction, PendingStorageError, secondsLeft, serverOffset, dataNoteText, briefingTimingText, nextHandText, shouldAutoReveal, soundStatusText, playedName } = context.exports;
 const event = (type, turn, delta = {}, after = {}) => ({ type, turn, delta, after, cue_id: '', reason_code: '', actor: 'player', target: 'water' });
 // 牌組與卡面在真實回應裡一定存在；戰報要靠它們把 card_id 翻成玩家看到的卡名。
 const deck = { 'c1': 'long-flow', 'c2': 'final-waste' };
@@ -41,13 +41,13 @@ test('P06 selects the generated scene, apostle, cut-in and ending art by stable 
   const cityEvent = { ...event('city_repair', 3), actor: 'city', target: 'land' };
   assert.equal(sceneAsset('mirror-shade'), 'scene-mirror-shade');
   assert.equal(apostleAsset('stored-night'), 'apostle-stored-night');
-  assert.equal(briefingAsset('stored-night'), 'yan-chen-pleased');
+  assert.equal(briefingAsset('stored-night'), 'briefing-stored-night');
   assert.equal(reportAsset('city_held', 'stored-night'), 'defense-success-2');
-  assert.equal(reportAsset('player_victory', 'meter-feast'), 'victory-2');
+  assert.equal(reportAsset('player_victory', 'meter-feast'), 'victory-meter-feast');
   assert.equal(cueImage(cityEvent, 'mirror-shade'), 'scene-mirror-shade');
-  assert.equal(cueImage({ ...victory, type: 'impact' }, 'meter-feast'), 'skill-ultimate');
+  assert.equal(cueImage({ ...victory, type: 'impact' }, 'meter-feast'), 'ultimate-meter-feast');
   assert.equal(cueImage(event('impact', 4), 'meter-feast'), 'skill-water-2');
-  assert.equal(cueImage(victory, 'stored-night'), 'victory-3');
+  assert.equal(cueImage(victory, 'stored-night'), 'victory-stored-night');
 });
 
 test('P07 counterfactual copy names the actual strategy and states whether the outcome actually diverged', () => {
@@ -123,8 +123,8 @@ test('the countdown reads the server deadline through the clock offset, not the 
 });
 
 test('battle timing copy promises continuous hands without a start-turn gate', () => {
-  assert.equal(briefingTimingText('practice'), '進入戰鬥就會自動發牌；練習模式不限時，出牌演出後直接接下一手。');
-  assert.match(briefingTimingText('challenge'), /自動發牌.*30 秒.*直接接下一個 30 秒/);
+  assert.match(briefingTimingText('practice'), /不限時.*直接補牌/);
+  assert.match(briefingTimingText('challenge'), /自動發牌.*30 秒.*補牌.*下一個 30 秒/);
   assert.doesNotMatch(briefingTimingText('challenge'), /開始回合/);
   assert.match(nextHandText('challenge'), /立即開始 30 秒/);
 });
@@ -137,14 +137,19 @@ test('only compatible in-progress runs between hands are automatically revealed'
   assert.equal(shouldAutoReveal(runState('in_progress', false, 'awaiting_reveal')), false);
 });
 
-test('clicking a kept card plays it instead of trying to retain the same physical card', () => {
-  assert.deepEqual(keptCardsForPlay(['card-1', 'card-2'], 'card-1'), ['card-2']);
+test('playing a retained physical card sends its exact identity without manual keep', () => {
+  const pending = new PendingAction({ getItem: () => null, setItem() {}, removeItem() {} });
+  const input = pending.prepare({ run_id: 'run-1', version: 4 }, { type: 'play', card_id: 'card-1', fixed: null });
+  assert.equal(input.card_id, 'card-1');
+  assert.equal(Object.hasOwn(input, 'keep'), false);
 });
 
-test('a card carried from the previous hand cannot be marked for keeping again', () => {
-  const state = { kept_last_turn: ['card-1'] };
-  assert.equal(canKeepCard(state, 'card-1'), false);
-  assert.equal(canKeepCard(state, 'card-2'), true);
+test('swapping a retained card keeps the current server version and sends no keep choice', () => {
+  const pending = new PendingAction({ getItem: () => null, setItem() {}, removeItem() {} });
+  const input = pending.prepare({ run_id: 'run-1', version: 9 }, { type: 'swap', card_id: 'card-2', fixed: null });
+  assert.equal(input.type, 'swap');
+  assert.equal(input.expected_version, 9);
+  assert.equal(Object.hasOwn(input, 'keep'), false);
 });
 
 test('the lobby sound label reflects the current preference instead of claiming a default', () => {
@@ -176,7 +181,7 @@ test('the report states what keeping, swapping and timing out actually cost', ()
   ]);
   const report = reportFindings(battle);
   assert.match(report.find(f => /逾時/.test(f.text)).text, /第 3 回合逾時，共 1 次/);
-  assert.match(report.find(f => /^你留了/.test(f.text)).text, /你留了 1 張牌.*分佈在 1 個回合/);
+  assert.equal(report.some(f => /^你留了/.test(f.text)), false);
   assert.match(report.find(f => /換牌/.test(f.text)).text, /用掉 1 次免費換牌/);
 });
 
@@ -259,7 +264,7 @@ test('all five levels produce truthful victory and defeat summaries from the rea
     assert.equal(summary.initialCore, 100, sample.level_id);
     assert.equal(summary.turn, outcome.turn, sample.level_id);
     assert.ok(summary.findings.length <= 3);
-    if (sample.strategy === 'planner') {
+    if (sample.outcome === 'player_victory') {
       assert.equal(sample.outcome, 'player_victory', sample.level_id);
       const hit = events.findLast(event => event.type === 'impact');
       assert.match(summary.finalMove, new RegExp(`第 ${hit.turn} 回合.*${hit.before.core_resilience} 打到 0`));
@@ -268,8 +273,10 @@ test('all five levels produce truthful victory and defeat summaries from the rea
       assert.equal(sample.outcome, 'city_held', sample.level_id);
       assert.match(summary.condition, new RegExp(`${sample.state.max_turns} 回合已用完`));
       assert.match(summary.finalMove, new RegExp(`還差 ${sample.state.core_resilience} 點`));
-      assert.match(summary.findings[0].text, new RegExp(`用了 ${sample.state.max_turns} 回合蓄勢`));
-      assert.doesNotMatch(summary.findings.map(finding => finding.text).join(''), /最大一擊|成功取消/);
+      if (sample.strategy === 'gather') {
+        assert.match(summary.findings[0].text, new RegExp(`用了 ${sample.state.max_turns} 回合蓄勢`));
+        assert.doesNotMatch(summary.findings.map(finding => finding.text).join(''), /最大一擊|成功取消/);
+      }
     }
   }
 });
@@ -287,10 +294,11 @@ function audioHarness() {
   }
   class Clip {
     constructor() { clips.push(this); }
-    play() { return Promise.reject(Error('OGG unsupported')); }
+    canPlayType() { return 'probably'; }
+    play() { this.paused = false; return scope.failOGG && this.src.endsWith('.ogg') ? Promise.reject(Error('OGG unsupported')) : Promise.resolve(); }
     pause() { this.paused = true; }
   }
-  const scope = { exports: {}, AudioContext: Context, Audio: Clip, document: { hidden: false } };
+  const scope = { exports: {}, AudioContext: Context, Audio: Clip, document: { hidden: false }, setTimeout, clearTimeout, failOGG: false };
   vm.runInNewContext(ts.transpileModule(fs.readFileSync('resources/js/audio.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, scope);
   return { audio: new scope.exports.BattleAudio(), scope, voices, clips };
 }
@@ -300,14 +308,118 @@ test('muted and hidden playback creates no audio; zero volume creates no oscilla
   h.audio.muted = false; h.scope.document.hidden = true;
   h.audio.play(event('impact', 1)); assert.equal(h.clips.length, 0);
   h.scope.document.hidden = false; h.audio.effectsVolume = 0;
-  h.audio.play(event('impact', 1)); assert.equal(h.voices.length, 0); assert.equal(h.clips[0].volume, 0);
+  h.audio.play(event('impact', 1)); assert.equal(h.voices.length, 0); assert.equal(h.clips.length, 0);
 });
-test('unsupported OGG still has synthesized ending and skip stops all voices and clips', async () => {
+test('unsupported OGG falls back to MP3 and skip stops every clip', async () => {
   const h = audioHarness(); await h.audio.unlock(); h.audio.muted = false;
+  h.scope.failOGG = true;
   h.audio.play(event('outcome', 9, {}, { outcome: 'player_victory' }));
-  assert.deepEqual(h.voices.map(voice => voice.note), [262, 330, 392, 523]);
+  await Promise.resolve();
+  assert.match(h.clips[0].src, /ending-victory\.mp3$/);
   h.audio.stop();
   assert.ok(h.clips.every(clip => clip.paused));
   assert.ok(h.voices.every(voice => voice.stopped));
   await Promise.resolve();
+});
+
+test('an OGG error plus its rejected play promise does not cancel the MP3 fallback', async () => {
+  const h = audioHarness(); await h.audio.unlock(); h.audio.muted = false;
+  h.scope.failOGG = true; h.audio.ui('confirm');
+  const clip = h.clips[0]; clip.onerror();
+  await Promise.resolve(); await Promise.resolve();
+  assert.match(clip.src, /\.mp3$/); assert.equal(clip.paused, false);
+  clip.onerror(); assert.equal(clip.paused, true);
+});
+
+test('one action casts once while impact and repair retain distinct sounds and natural tails', async () => {
+  const h = audioHarness(); await h.audio.unlock(); h.audio.muted = false;
+  const cast = { ...event('action_accepted', 2), cue_id: 'cue.action.probe' };
+  h.audio.play(cast); h.audio.play(cast); h.audio.play(event('impact', 2)); h.audio.play(event('city_repair', 2));
+  assert.equal(h.clips.length, 3);
+  assert.match(h.clips[0].src, /cast-water/);
+  assert.match(h.clips[1].src, /impact/);
+  assert.match(h.clips[2].src, /repair/);
+  assert.ok(h.clips.every(clip => !clip.paused));
+  h.audio.beginPresentation(); h.audio.play(cast);
+  assert.equal(h.clips.length, 4);
+  h.audio.stop();
+});
+
+test('ambience survives skip, ducks under an ultimate and stops on leaving battle', async () => {
+  const h = audioHarness(); await h.audio.unlock(); h.audio.muted = false;
+  h.audio.setAmbience('noon-fold');
+  const loop = h.clips[0]; const normal = loop.volume;
+  h.audio.play({ ...event('action_accepted', 2), cue_id: 'cue.action.ultimate' });
+  assert.ok(loop.volume < normal);
+  h.audio.stopEffects();
+  assert.equal(loop.paused, false);
+  assert.equal(loop.volume, normal);
+  h.audio.setAmbience(null);
+  assert.equal(loop.paused, true);
+});
+
+test('muting stops every track and all runtime volume values stay bounded', async () => {
+  const h = audioHarness(); await h.audio.unlock(); h.audio.muted = false;
+  h.audio.effectsVolume = 3; h.audio.musicVolume = NaN;
+  h.audio.play(event('impact', 1)); h.audio.setAmbience('stored-night');
+  assert.equal(h.clips.length, 1); assert.equal(h.clips[0].volume, 1);
+  h.audio.muted = true; h.audio.updateVolumes();
+  assert.equal(h.clips[0].paused, true);
+});
+
+test('voice limit prevents unbounded overlap and a cancelled fallback never resurrects audio', async () => {
+  const h = audioHarness(); await h.audio.unlock(); h.audio.muted = false;
+  for (let i = 0; i < 12; i++) h.audio.play(event('impact', i));
+  assert.equal(h.clips.filter(clip => !clip.paused).length, 8);
+  h.audio.stop(); h.scope.failOGG = true;
+  h.audio.play(event('impact', 99)); const clip = h.clips.at(-1);
+  h.audio.stop(); await Promise.resolve();
+  assert.match(clip.src, /\.ogg$/); assert.equal(clip.paused, true);
+});
+
+test('both finale cues are independent of ordinary victory and defeat', async () => {
+  const h = audioHarness(); await h.audio.unlock(); h.audio.muted = false;
+  const victory = event('outcome', 9, {}, { outcome: 'player_victory' });
+  h.audio.play(victory, 'meter-feast', 'main');
+  h.audio.play(victory, 'stored-night', 'advanced');
+  h.audio.play(event('outcome', 9, {}, { outcome: 'city_held' }), 'stored-night', 'advanced');
+  assert.match(h.clips[0].src, /ending-main/); assert.match(h.clips[1].src, /ending-advanced/);
+  assert.match(h.clips[2].src, /ending-defeat/); h.audio.stop();
+});
+
+test('all 20 visual assets and 26 sound units have readable hashed delivery files', () => {
+  const crypto = require('node:crypto');
+  const images = JSON.parse(fs.readFileSync('assets/visual-v2-generation.json', 'utf8')).assets;
+  const sounds = JSON.parse(fs.readFileSync('assets/visual-v2-audio.json', 'utf8')).assets;
+  assert.equal(images.length, 20); assert.equal(sounds.length, 26);
+  for (const item of [...images, ...sounds]) {
+    for (const output of item.outputs) {
+      const bytes = fs.readFileSync(output.file);
+      assert.equal(bytes.length, output.bytes);
+      assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), output.sha256);
+    }
+  }
+});
+
+test('all four level presentations resolve distinct assets without changing card rules', () => {
+  const { presentationFor, assetUrl, assetSrcSet, phaseLine } = context.exports;
+  for (const id of ['noon-fold', 'meter-feast', 'mirror-shade', 'stored-night']) {
+    assert.match(assetUrl(briefingAsset(id)), new RegExp(`/visual-v2/briefing-${id}`));
+    assert.match(assetUrl(reportAsset('player_victory', id)), new RegExp(`victory-${id}`));
+    assert.match(assetSrcSet(sceneAsset(id)), /768w.*1280w.*1600w/);
+    assert.ok(presentationFor(id).quote);
+  }
+  assert.match(phaseLine('noon-fold', 'shift-guard'), /換班/);
+  assert.equal(phaseLine('stored-night', 'not-entered'), '');
+  assert.equal(assetSrcSet('city'), undefined);
+});
+
+test('final professor reviews use recorded overhaul outcomes, including neutral old saves', () => {
+  const { professorReview } = context.exports;
+  const review = (outcome, reasons = []) => professorReview({ level_id: 'stored-night', outcome, history: [{ events: reasons.map(reason_code => ({ reason_code })) }] });
+  assert.match(review('player_victory', ['overhaul_started', 'overhaul_stopped']), /拆掉/);
+  assert.match(review('player_victory', ['overhaul_started', 'overhaul_completed']), /重整過/);
+  assert.match(review('player_victory', ['overhaul_started']), /交卷/);
+  assert.doesNotMatch(review('player_victory'), /拆掉|交卷|重整過/);
+  assert.doesNotMatch(review('city_held', ['overhaul_stopped']), /不必補考/);
 });

@@ -1,5 +1,7 @@
 # 免費開放素材來源與下載紀錄
 
+2026-10-12 新視聽包全部原創：20 張 image_gen 原稿以既有晏沉肖像固定身份；26 個聲音單元為原創合成與短樂句，未使用第三方錄音。提示詞、來源、轉檔及 SHA-256 見 [`visual-v2-generation.json`](../assets/visual-v2-generation.json)、[`visual-v2-audio.json`](../assets/visual-v2-audio.json)，驗證見 [VISUAL-V2](phase-reports/VISUAL-V2.md)。以下開放素材紀錄保留供歷史版本查證。
+
 更新：2026-09-08。使用者已同意在搜尋階段下載適合的免費開源／開放授權素材；本次已取得 **4 張特效圖、4 個音效** 作為後續製作候選，保留兩份原始授權與逐檔 hash。檔案及紀錄合計約 **277 KiB**，未修改現有遊戲或接入正式演出。
 
 ## 已下載

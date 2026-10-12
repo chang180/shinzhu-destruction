@@ -294,6 +294,10 @@ export function assetUrl(name: string): string {
     const directory = newAsset ? 'visual-v2' : name.startsWith('apostle-') || p06AssetNames.has(name) ? 'p06' : 'p04';
     return `/assets/${directory}/${name}.webp`;
 }
+export function assetSrcSet(name: string): string | undefined {
+    const url = assetUrl(name);
+    return url.includes('/visual-v2/') ? `${url.replace('.webp', '-small.webp')} 768w, ${url.replace('.webp', '-medium.webp')} 1280w, ${url} 1600w` : undefined;
+}
 /** P06 資產只依既有穩定的關卡與事件 ID 選擇；圖片不參與戰鬥結算。 */
 export function sceneAsset(levelId: string): string {
     return levelId === 'empty-cup' ? 'city' : `scene-${levelId}`;

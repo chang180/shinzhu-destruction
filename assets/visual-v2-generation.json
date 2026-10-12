@@ -1,0 +1,710 @@
+{
+  "date": "2026-10-12",
+  "tool": "OpenAI image_gen built-in",
+  "reference": "assets/generated/p06/yan-chen-stern.png",
+  "status": "packaged-local-review",
+  "assets": [
+    {
+      "id": "briefing-noon-fold",
+      "prompt": "Create one original landscape 16:9 game narrative illustration, no text letters numbers logos or watermarks. Reference image fixes the identity of Yan Chen: East Asian middle aged professor with swept black hair and silver streak, stern eyebrows, deep purple high collar robe with copper trim and teal brooch. Maintain his face and costume, but entirely new pose and composition. Hand drawn ink crosshatching, restrained halftone paper grain, editorial graphic novel, ink purple parchment copper palette with amber sunlight. LEVEL TWO NOON FOLD BRIEFING: side-on medium shot of Yan Chen at right in a Taiwanese academy classroom, manipulating three translucent cyan amber jade defensive panels over a miniature fictional Taiwanese arcade street. Hard afternoon sunlight through venetian blinds crosses his sleeve. A dry subtly amused expression. Not a frontal portrait. The scene must have a readable single focal subject and cinematic depth. Lower left leave calm dark space for separately rendered UI. Preserve recognizable hands. Not photorealistic, no recognizable existing fictional characters.",
+      "source": "assets/generated/visual-v2/briefing-noon-fold.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "d29ea6285d14727ea917e48127dc1fba3607a437dede1647cbc5c898cd06a273",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/briefing-noon-fold.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 333274,
+          "sha256": "abf29119ca8cfb8f09285f689866e82e962187b4aaa4f68b231eb044c70843ff"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-noon-fold-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 234688,
+          "sha256": "51fa36650f5357c8dd23b54f172de6f36017ca3f7e3cf6e72e400d6d78fea6d0"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-noon-fold-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 90132,
+          "sha256": "860ba2741de43958e4c4cbb9bba40c98679af61a166e4c089f2f97d147e67b39"
+        }
+      ],
+      "alt": "晏沉授課，折晝：長晝窗影與輪替防禦光帶",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "scene-noon-fold",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with amber afternoon light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level two noon-fold intact city battlefield: street-level view down a sun-baked contemporary arcade street. Sunlight bends into layered translucent planes above the roofs, subtle cyan amber jade defensive bands rotate far above buildings. Empty street, immense long afternoon, buildings remain intact. Highly distinct amber, geometric composition.",
+      "source": "assets/generated/visual-v2/scene-noon-fold.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "f24a8654b72e54b79c8471faaaf06a35bd6cf6ca06c2fd3ec292a7152c9a4d07",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/scene-noon-fold.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 361646,
+          "sha256": "93ff8ecf8102cf4eccfee0c985cc6456edcaf5547f9448097d0e50c8f9bd7e40"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-noon-fold-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 249460,
+          "sha256": "fcc943aa780a46e02b0c0b590d8cf1c35fcce658e355d4521c9887bdca5eac62"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-noon-fold-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 91740,
+          "sha256": "aec6cbdbf2d81acfbef05a69edc92e971ee04aa4a6c86424fa869fb8386978bb"
+        }
+      ],
+      "alt": "虛構城市場景，折晝：長晝窗影與輪替防禦光帶",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "ultimate-noon-fold",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with amber afternoon light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level two noon-fold ultimate attack: huge amber noon sun folds like an accordion of luminous paper across a modern Taiwanese city model, layered shadows sliding sideways, tiny city caught in staggered luminous planes. Dynamic diagonal close low angle, magical abstraction not physical actionable destruction. No professor. Strong directional action.",
+      "source": "assets/generated/visual-v2/ultimate-noon-fold.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "faeb8485c04a9dd6dc3d3842d3d788a6b9db7bb7339975ee3431e52fed7f4f28",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/ultimate-noon-fold.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 286600,
+          "sha256": "631044787d3552defdbbd2641ae4fd8dbdc75e868d8ba3c0fd5cf52ab1eba333"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-noon-fold-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 203580,
+          "sha256": "ff8acaabd839a298311d10589adc406c4cbe0ea277463282084255d38a7be8d5"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-noon-fold-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 81986,
+          "sha256": "47e3e5566b990858367d70990ac53f749e8f3b1ea3400e8ad9031bd8e2cc52e5"
+        }
+      ],
+      "alt": "專屬禁術，折晝：長晝窗影與輪替防禦光帶",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "victory-noon-fold",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with amber afternoon light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level two noon-fold victory: overhead three-quarter view of the miniature contemporary Taiwanese arcade city as its disconnected defense ribbons peel away and the city model separates into neatly folded paper layers, amber dust and copper sparks. Beautiful triumphant fictional simulation dissolution, no explosion or casualties. Clear unique folding silhouette.",
+      "source": "assets/generated/visual-v2/victory-noon-fold.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "678bb4462f37d6f6fc618286382794efbf78e2d567d77ec15a836fef8eb8623c",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/victory-noon-fold.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 333634,
+          "sha256": "633588a101086962533a9a8277c58d1132f6a89c49d3a239de6ffc32850e9535"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-noon-fold-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 227736,
+          "sha256": "422e0777d98736c85ab011a9fe9b0c2ca071863499a3f0cdc418541049e230c4"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-noon-fold-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 84282,
+          "sha256": "b20edac42cac26d840ee7e3ce65821c61ab7b89d5c4311339d5c26e3b64ae81b"
+        }
+      ],
+      "alt": "城市模型瓦解的勝利畫面，折晝：長晝窗影與輪替防禦光帶",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "briefing-meter-feast",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool teal machinery light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Yan Chen same identity as reference, swept black and silver hair, deep purple copper-trim robe teal brooch, bending over an enormous blank ledger on a worktable; anonymous student's gloved hand in foreground places a copper marker on a line-free chart. Modern industrial city model beyond window, teal machinery light, dramatic overhead three-quarter angle. No written glyphs on ledger.",
+      "source": "assets/generated/visual-v2/briefing-meter-feast.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "ee236042b9bc4c45500c3d80ed0d739e67d55d174045122e7541a0f75a5d2606",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/briefing-meter-feast.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 316842,
+          "sha256": "4eddae42e81269a3e1d9bfa0055b5b06a7a9713116893d1ef039819fd912db83"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-meter-feast-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 226358,
+          "sha256": "43420e31a84bfdc3a326accfba6d54f13998b8888c403301283244d21035f69d"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-meter-feast-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 88756,
+          "sha256": "ec3a37af494afdcc07411a86a2aece3d499b29801450af71109d7b04215a1b07"
+        }
+      ],
+      "alt": "晏沉授課，饗表：園區管線、巨大帳冊與計量光網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "scene-meter-feast",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool teal machinery light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level three meter-feast intact fictional science park: elevated view of modern industrial buildings, service pipes, rooftop tanks and rounded meters without numbers, cyan supply light streams and copper ducts converge toward a central abstract gauge. Hills on horizon, overcast parchment sky, imposing scale. No professor.",
+      "source": "assets/generated/visual-v2/scene-meter-feast.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "65848bf2b9bcadc80574180504037c2892333a77ebdc76d6c4f98991483c24a7",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/scene-meter-feast.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 341446,
+          "sha256": "764295e9b6708d9e75c668b386385f6ab069a25509bb14638405448bdbb0657e"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-meter-feast-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 236612,
+          "sha256": "76c813fc59a6de8ee31889afd1eec52afdbc852b9e55f20b402115f9f5ed9530"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-meter-feast-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 88934,
+          "sha256": "2ae48b3f60c761857b46149cf5b23c0e72cc5a497e6176eff8eb314cd41259cb"
+        }
+      ],
+      "alt": "虛構城市場景，饗表：園區管線、巨大帳冊與計量光網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "ultimate-meter-feast",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool teal machinery light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level three meter-feast ultimate: a colossal nonhuman spiral mouth made of blank ledger pages, brass gauge arcs and cyan supply streams coils over a contemporary industrial park model, sucking light out of the pipes. Broad overhead spiral composition, graphic ink drama, no teeth or gore.",
+      "source": "assets/generated/visual-v2/ultimate-meter-feast.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "1004761b70a658105a734c3e19f32a919e356fbaae9d98f40ed50e9dda05743e",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/ultimate-meter-feast.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 382652,
+          "sha256": "5bb3489bb28cf290d0a76c838d0a3b2ef57a441739d9e71ffdb20e80a329b092"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-meter-feast-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 267204,
+          "sha256": "eb94e46e8c3d1b9c39ac959b1527cb49aa390cf64d084607359dd831192e634b"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-meter-feast-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 100848,
+          "sha256": "8f6929db962cc503da6ead41d575b42f52319570f5fa8a64341ee2de13de8006"
+        }
+      ],
+      "alt": "專屬禁術，饗表：園區管線、巨大帳冊與計量光網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "victory-meter-feast",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool teal machinery light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level three meter-feast victory: close wide view across a fictional industrial park miniature, gauge hands frozen, the supply light network darkens from near to far, buildings dissolve into tiny paper squares suspended over the ledger surface. Copper ceremonial glints, restrained triumphant completion, no casualties.",
+      "source": "assets/generated/visual-v2/victory-meter-feast.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "e57525b47845077a56e831aae17405816472338a0a07897c431b0960be41eece",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/victory-meter-feast.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 328418,
+          "sha256": "39f59737ef5bff6cbf2c939bae1889c7721a625d6c15738c66446b22bb6c7d7d"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-meter-feast-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 229268,
+          "sha256": "b2806972a76461e237c24dcb4c8222eb462615104f86dafce06d8aabad8d9ff1"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-meter-feast-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 88760,
+          "sha256": "a7c4204e7978ab8caa92fea4169a5ad920a763105a0f6ca1dc39bdeb284a0cb2"
+        }
+      ],
+      "alt": "城市模型瓦解的勝利畫面，饗表：園區管線、巨大帳冊與計量光網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "briefing-mirror-shade",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool jade and silver reflected light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Yan Chen same identity and costume as reference, viewed from behind three-quarter, deep purple robe copper embroidery, silver hair streak. He faces a tall fractured mirror in a hillside academy corridor; mirror reflection shows his arm pointing in the opposite direction. Outside: contemporary Taiwanese apartments and green hills. Deliberately impossible reflection, quiet tactical tension. No writing.",
+      "source": "assets/generated/visual-v2/briefing-mirror-shade.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "10f69c9861aaf9f7b4034ef50cfa67540e85dd7afb1805aa5e1a2ff95bcedac2",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/briefing-mirror-shade.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 378962,
+          "sha256": "c5ea47f5f7073d233b10a0dde78ad5aa3a5ad59fa719eb92cf11229c90931940"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-mirror-shade-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 260136,
+          "sha256": "5f9eec929d4ec183f27476e2085c5d590203cb6b7d9c39006db3113ad42dc573"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-mirror-shade-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 94170,
+          "sha256": "e98919ad326b68ed7a820347da32b8552b1b885ce3bd06cce136ac24bdd25b33"
+        }
+      ],
+      "alt": "晏沉授課，鏡蔭：丘陵街廓與錯位鏡面倒影",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "scene-mirror-shade",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool jade and silver reflected light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level four mirror-shade intact battlefield: contemporary hillside Taiwanese concrete city and elevated roads reflected in large suspended silver glass curtains. Stairways, rooftop tanks and metal awnings. One half of city offset from its reflection, jade green hill shapes and ink purple shadows. No professor, no destruction, no literal playing cards.",
+      "source": "assets/generated/visual-v2/scene-mirror-shade.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "5d639cd27a6f0b143d45ab0d1e7484637db1da8df7b5d973153b459cb12692f2",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/scene-mirror-shade.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 314776,
+          "sha256": "c175bcbd87940f198a424f9317b92de126b30adb0f760352628693ae905bed08"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-mirror-shade-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 223736,
+          "sha256": "12c5e1dd88692cfdf4533910131f70172a6d1d34346536e3b022b5e82e34888b"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-mirror-shade-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 88044,
+          "sha256": "7f1ae774a1f560bf9aa80198c55946d34f50e13543494aca2d1ab128d6089e10"
+        }
+      ],
+      "alt": "虛構城市場景，鏡蔭：丘陵街廓與錯位鏡面倒影",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "ultimate-mirror-shade",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool jade and silver reflected light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level four ultimate: a huge nonhuman shadow separates from a copper glass ring above a modern hillside Taiwanese city model and slices through its own mirror from the opposite side. Asymmetric split composition, reflective shards, intense jade light and silver charcoal ink. No humanoid franchise creature, no professor.",
+      "source": "assets/generated/visual-v2/ultimate-mirror-shade.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "60606293b0778fb8c09a08e519382c4ab9cdb61aa7f4103042cd85e8fc983cc0",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/ultimate-mirror-shade.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 329226,
+          "sha256": "52af55956e40662b4f0998373c4f0076f77d4f1e66046db9cade61b6321eb772"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-mirror-shade-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 234280,
+          "sha256": "76a7bd7162b0195c5ff1cdb1644ab72e1c6cdc1caa03db6dfc8e9c189933224a"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-mirror-shade-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 92070,
+          "sha256": "0311c4b12897470fc985f98836fe5b8eb8956b365d89985f7734011103357c53"
+        }
+      ],
+      "alt": "專屬禁術，鏡蔭：丘陵街廓與錯位鏡面倒影",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "victory-mirror-shade",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with cool jade and silver reflected light. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level four victory: the inverted reflection of a modern Taiwanese hillside miniature city breaks into silver paper shards before the real model dissolves; inverted shadow foreground, still-intact roofs far behind. Low shoreline perspective with impossibly reflected rooftops and jade hills. Controlled elegant illusion, no ancient ruins.",
+      "source": "assets/generated/visual-v2/victory-mirror-shade.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "3b7428d4f2526506f13bfeb0151f486a1ee719203355fdc0fc7f6967a6755546",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/victory-mirror-shade.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 261704,
+          "sha256": "4e3a499e716fc8aa0f936e90a53bb42b24bf6886b433e47a883feb5d34d5e8b7"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-mirror-shade-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 182926,
+          "sha256": "157221090fd03ed3296faab5082c4a9bb671b4b0dda6c19012708675350bfd6c"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-mirror-shade-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 71704,
+          "sha256": "108caa531425bff49c921cdf70411007b0c61ada393778af8c006da55ca3e445"
+        }
+      ],
+      "alt": "城市模型瓦解的勝利畫面，鏡蔭：丘陵街廓與錯位鏡面倒影",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "briefing-stored-night",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with midnight ink violet, deep blue and small copper city lights. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Yan Chen same identity as reference stands at left in a dark modern academy observation room, professor's silver hair streak and purple copper-trim sleeve visible in lamplight. Small hourglass and single copper desk lamp on a table. Anonymous villain student silhouette at right faces a broad window overlooking a contemporary Taiwanese city light grid and distant hills. Wide cinematic shot, focus shifts away from professor toward student and city. No candles or text.",
+      "source": "assets/generated/visual-v2/briefing-stored-night.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "44153c03ebaaabac7cdfee753916c8d69067b1a5ae06ee6ba7f8fe6a06251f0f",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/briefing-stored-night.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 263168,
+          "sha256": "a621402cb8a222dc93d31945d57d41e04cd29662d211f55ce18870c72fe95368"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-stored-night-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 182028,
+          "sha256": "ab23442b795633e7e8eeae91cddce64b0e0fa1dda9e06d83be94c805451b7eaf"
+        },
+        {
+          "file": "public/assets/visual-v2/briefing-stored-night-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 68242,
+          "sha256": "2604197b0393c6a5ec730db6a187c5b27cb96ed37ec34daffa49ca238924578a"
+        }
+      ],
+      "alt": "晏沉授課，蓄夜：夜間觀測室與城市分區燈網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "scene-stored-night",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with midnight ink violet, deep blue and small copper city lights. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level five intact battlefield: wide aerial view of contemporary fictional Taiwanese city at night among hills, districts connected by a subtle copper light network, rooftop tanks and mixed concrete buildings. A huge unmarked circular mechanism of fine light suspended around the city, dark negative sky. Tense quiet night, no destruction and no countdown digits.",
+      "source": "assets/generated/visual-v2/scene-stored-night.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "f48e1d2fefd516250e5b9a565693817ace47b31f22778fb0851bd99d116bdc73",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/scene-stored-night.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 279888,
+          "sha256": "552691ba2906451b53ca71bd1a8cb93a07333b24472c0321a1470a431e72675a"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-stored-night-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 192990,
+          "sha256": "11c5ba907c28667fd1c78001ca65e8fb5d9bfca45054ab59740fe45355c3a479"
+        },
+        {
+          "file": "public/assets/visual-v2/scene-stored-night-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 69504,
+          "sha256": "e21e7c360eaae47cc56d1865509b66522059a960785d702bb5f81d68986101b3"
+        }
+      ],
+      "alt": "虛構城市場景，蓄夜：夜間觀測室與城市分區燈網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "ultimate-stored-night",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with midnight ink violet, deep blue and small copper city lights. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level five ultimate: a colossal curtain of ink night folds inward over a modern Taiwanese city miniature, thousands of copper lights gathered into a narrow stream under an immense hollow ceramic ring. The force is darkness and light contraction rather than an explosion. Powerful clean silhouette, dark violet, copper specks, hillside outline.",
+      "source": "assets/generated/visual-v2/ultimate-stored-night.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "9e2beb33480d907edaa55295b8cf7fa6cc8634f6a5c47d796c789a7c4b0359c3",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/ultimate-stored-night.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 257598,
+          "sha256": "4b04115366d553b58f8d7790b5b72102a22986e3689c0a1d024e9ec4398639e6"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-stored-night-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 176746,
+          "sha256": "c002e09e13c0a9c73a176599a846687bb5f6b3b9772697b026be749d774f45f6"
+        },
+        {
+          "file": "public/assets/visual-v2/ultimate-stored-night-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 66962,
+          "sha256": "b1d14d6b4a133265ff458336f86f0f36348536c9d8f6a1cdfe5a23516e393541"
+        }
+      ],
+      "alt": "專屬禁術，蓄夜：夜間觀測室與城市分區燈網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "victory-stored-night",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with midnight ink violet, deep blue and small copper city lights. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Level five victory: low wide view across a contemporary Taiwanese city simulation after its final light grid dissolves into hovering copper paper fragments; lamp dots drift upward, hills remain as ink silhouettes. An unmarked circular reconstruction mechanism lies separated into gentle arcs above city, no text no casualties no classical ruins. Quiet grand victory.",
+      "source": "assets/generated/visual-v2/victory-stored-night.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "8bc1499c0fb7de61a98205b128053a9d7202d6d97ee5f06e9719376ccca1144f",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/victory-stored-night.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 336408,
+          "sha256": "6c9832cfd3ecf8f19146757d86cdf0fba077013b7ef9d7aa9c64469c9ebe3897"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-stored-night-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 238448,
+          "sha256": "7e584191e65b5a00631cf39ede943300008796ff8f5bd1b26f7e120a41c22a6e"
+        },
+        {
+          "file": "public/assets/visual-v2/victory-stored-night-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 93072,
+          "sha256": "1a2ee1461e831c3464c5066ce1214ebe6b1d0e02961b4ba45986c6a4f49a9521"
+        }
+      ],
+      "alt": "城市模型瓦解的勝利畫面，蓄夜：夜間觀測室與城市分區燈網",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "main-finale-v2",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with warm copper ceremony light balanced with ink purple shadows. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Main campaign graduation, complete satisfying ending distinct from advanced: close three-quarter view of Yan Chen same identity and purple copper-trim robe as reference, pressing an unmarked copper seal onto a completely blank parchment certificate; three abstract floating sigil rings glow above the desk. Anonymous student glove receives the parchment. Through the modern academy window, contemporary Taiwanese city model dissolves into paper flakes, celebratory but restrained. No writing anywhere.",
+      "source": "assets/generated/visual-v2/main-finale-v2.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "42d348f4b6e308b66e7ca17ddb8314c29614eb2ef4ce146437211f6cd0004ab0",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/main-finale-v2.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 270304,
+          "sha256": "3db8de2816c7edb4e543cd7d637ba71161e7026e3d951483651c9b0a0cee164f"
+        },
+        {
+          "file": "public/assets/visual-v2/main-finale-v2-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 186880,
+          "sha256": "0a9c40920724564e9f81585e30a94a1b225bc05e2ce671af50f78d82c72337bd"
+        },
+        {
+          "file": "public/assets/visual-v2/main-finale-v2-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 72432,
+          "sha256": "287bff44e4db3bd38e4f364e13f5bfbe3811d3cc623584dd5e775c8243ce3166"
+        }
+      ],
+      "alt": "主線結業：晏沉與學員在城市模型前收起課業",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "advanced-finale-1-v2",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with warm copper ceremony light balanced with ink purple shadows. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Advanced campaign finale frame one: grand wide aerial shot of a contemporary fictional Taiwanese city miniature with arcade streets, metal awnings and hill silhouettes. Five different abstract unmarked sigil rings converge overhead, its entire light network gently dissolves into copper confetti and ivory paper. No ancient ruins, no professor, no text. Beautiful final achievement.",
+      "source": "assets/generated/visual-v2/advanced-finale-1-v2.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "6cebc877c7af2f1efbf72e3881ea42d1a72c634b9a7e456c431b898d1c606920",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/advanced-finale-1-v2.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 331228,
+          "sha256": "150679b241635c75538e0c3d3af868c02b76961d3e724ff1577a7ba40c057382"
+        },
+        {
+          "file": "public/assets/visual-v2/advanced-finale-1-v2-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 228412,
+          "sha256": "62e1ca701b8beb94be46f2d55fcfbca0cd9aacfd959fdacb4553497519e05d43"
+        },
+        {
+          "file": "public/assets/visual-v2/advanced-finale-1-v2-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 85692,
+          "sha256": "9c677a2e78e6e80bd83c7dcc6b3760495bdec045fe0a6d55aebac5a35cef4b15"
+        }
+      ],
+      "alt": "進階終幕第一幕：城市燈網最後收攏",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "advanced-finale-2-v2",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with warm copper ceremony light balanced with ink purple shadows. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Advanced campaign finale frame two: in the academy observation room, Yan Chen same identity and purple copper-trim costume as reference slides an unmarked copper graduation badge across a desk to an anonymous villain student seen from behind. Five abstract seals faintly reflected in glass. A simple ceramic empty cup upside down near the badge. Intimate cinematic medium two-shot, quiet approval, no written words.",
+      "source": "assets/generated/visual-v2/advanced-finale-2-v2.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "b959027d26f4d03de9853fb6374aafc29a6e9250a94abc2962c48b5c4bc59384",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/advanced-finale-2-v2.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 272256,
+          "sha256": "e64f64814f04684b420ceb233bf17e91902259505a7bbc1e8d52213ef3b9247a"
+        },
+        {
+          "file": "public/assets/visual-v2/advanced-finale-2-v2-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 192394,
+          "sha256": "cd125127fc1f8451ba8b38736c48d9adccce89c822c724c710640ceae3bf63c3"
+        },
+        {
+          "file": "public/assets/visual-v2/advanced-finale-2-v2-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 75784,
+          "sha256": "0c86688c11a533ea3ab2fb78a66bf35bd7baa381e0f5983252878b987b67b833"
+        }
+      ],
+      "alt": "進階終幕第二幕：學員與晏沉面對收束的城市模型",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    },
+    {
+      "id": "advanced-finale-3-v2",
+      "prompt": "One original landscape 16:9 illustration for a fictional villain academy strategy game. Hand drawn ink crosshatching, halftone textured paper, editorial graphic novel; ink purple, parchment and copper with warm copper ceremony light balanced with ink purple shadows. Contemporary fictional Taiwanese city: concrete apartment blocks, arcade sidewalks, metal awnings, rooftop water tanks, industrial park volumes and hills; NOT ancient China, no palaces temples or western classical ruins. No text letters digits logos watermarks, no real recognizable landmarks, no humans injured. Cinematic composition, bold negative space in lower quarter for UI. Advanced campaign finale frame three: dawn light enters a modern academy window and illuminates the empty miniature base of a contemporary Taiwanese city simulation, a few final paper fragments hovering above the base; hills outside, a closed blank ledger, an upside-down empty ceramic cup and the student's copper badge in foreground. Wide contemplative still life, no people, no classical ruins or palaces. Clear warm final cadence, no text.",
+      "source": "assets/generated/visual-v2/advanced-finale-3-v2.png",
+      "raw_dimensions": [
+        1672,
+        941
+      ],
+      "raw_sha256": "e3dab9df5638db3c6987070bdd53ae66c8e7ca786b6f5218734c891aa7fb8212",
+      "outputs": [
+        {
+          "file": "public/assets/visual-v2/advanced-finale-3-v2.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 320586,
+          "sha256": "e14635269904b5167bd708a536b540e2153a78de3f320dbee392c005818dbda7"
+        },
+        {
+          "file": "public/assets/visual-v2/advanced-finale-3-v2-medium.webp",
+          "width": 1280,
+          "height": 720,
+          "bytes": 219914,
+          "sha256": "0ac5ba81770dbafb590815cb507f4b79ceb5809394c3fec6487a635dfd31ed22"
+        },
+        {
+          "file": "public/assets/visual-v2/advanced-finale-3-v2-small.webp",
+          "width": 768,
+          "height": 432,
+          "bytes": 78986,
+          "sha256": "75a2affd4937626ea11c31c7ad3b1711d61677cbd4004d05faf4416ae167daf3"
+        }
+      ],
+      "alt": "進階終幕第三幕：課桌上的城市模型與茶杯",
+      "review": "contact-sheet visually inspected; browser viewport verification recorded separately"
+    }
+  ],
+  "conversion": "Pillow WebP quality 80 method 6, proportional widths 1600/1280/768",
+  "provenance": "Original image_gen generation; existing Yan Chen image used only as identity reference. No text or third-party character references."
+}

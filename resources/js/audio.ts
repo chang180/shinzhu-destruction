@@ -34,7 +34,7 @@ export class BattleAudio {
         voice.clip.onerror = null;
         this.active.delete(voice);
         if (this.ambience === voice) { this.ambience = null; this.ambienceKey = null; }
-        this.updateVolumes();
+        if (this.allowed()) this.updateVolumes();
     }
     updateVolumes(): void {
         if (!this.allowed()) { this.stop(); return; }
@@ -57,17 +57,19 @@ export class BattleAudio {
         if (loop) { this.ambience = voice; this.ambienceKey = key; }
         else this.active.add(voice);
         let fallback = false;
-        const fail = (): void => {
+        const fail = (attempt = 0): void => {
             if (voice.cancelled) return;
+            if (attempt === 0 && fallback) return;
             if (ogg && !fallback && this.allowed()) {
                 fallback = true;
                 clip.src = `/assets/visual-v2/audio/${key}.mp3`;
-                void clip.play().catch(() => this.finish(voice));
+                clip.onerror = () => fail(1);
+                try { void clip.play().catch(() => fail(1)); } catch { fail(1); }
             } else this.finish(voice);
         };
         clip.onended = () => this.finish(voice);
-        clip.onerror = fail;
-        void clip.play().catch(fail);
+        clip.onerror = () => fail();
+        try { void clip.play().catch(() => fail()); } catch { fail(); }
         this.updateVolumes();
         return voice;
     }
