@@ -102,6 +102,53 @@ const fixtures = JSON.parse(execFileSync('php', ['-r', imports + php], { maxBuff
     await page.locator(view === 'opening' ? '.briefing' : '.report').waitFor({ state: 'visible' });
   }
   try {
+    if (process.env.VISUAL_QA_SOURCES_ONLY === '1') {
+      const sourceChecks = [];
+      for (const width of [2560, 1280, 390, 320]) {
+        await page.setViewportSize({ width, height: 900 });
+        for (const screen of ['lobby', 'briefing', 'battle', 'report', 'reward']) {
+          selected = 'empty-cup'; view = ['report', 'reward'].includes(screen) ? 'planner' : 'opening'; reward = screen === 'reward';
+          if (screen === 'reward') selected = 'noon-fold';
+          if (screen === 'lobby') await page.goto(base, { waitUntil: 'networkidle' });
+          else await open();
+          if (screen === 'battle') {
+            await page.getByRole('button', { name: '明白了，開始連續試煉' }).click();
+            await page.locator('.battle').waitFor();
+          }
+          if (screen === 'reward') await page.getByRole('button', { name: '挑選新禁術' }).click();
+          const trigger = page.getByRole('button', { name: '素材來源', exact: true });
+          await trigger.scrollIntoViewIfNeeded();
+          const before = await page.evaluate(() => ({ scroll: scrollY, url: location.href }));
+          await trigger.click();
+          const dialog = page.getByRole('dialog', { name: '素材來源', exact: true });
+          await dialog.waitFor();
+          assert.match(await dialog.innerText(), /OpenAI image_gen/);
+          assert.match(await dialog.innerText(), /原創聲音合成/);
+          assert.match(await dialog.innerText(), /Kenney[\s\S]*CC0/);
+          assert.equal(await dialog.locator('dt').count(), 3);
+          const bounds = await dialog.boundingBox();
+          assert.ok(bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= width + 1 && bounds.y + bounds.height <= 901, 'source dialog must be in the current viewport');
+          const close = dialog.getByRole('button', { name: '關閉', exact: true });
+          await close.focus();
+          await trigger.evaluate(el => el.focus());
+          assert.equal(await dialog.evaluate(el => el.contains(document.activeElement)), true, 'background controls must not receive focus while the modal is open');
+          await page.screenshot({ path: `${evidence}/${width}-${screen}-sources.png` });
+          await close.click(); await dialog.waitFor({ state: 'hidden' });
+          assert.equal(await trigger.evaluate(el => el === document.activeElement), true);
+          await page.keyboard.press('Enter'); await dialog.waitFor();
+          await page.keyboard.press('Escape'); await dialog.waitFor({ state: 'hidden' });
+          assert.equal(await trigger.evaluate(el => el === document.activeElement), true);
+          const after = await page.evaluate(() => ({ scroll: scrollY, url: location.href }));
+          assert.equal(after.url, before.url); assert.ok(Math.abs(after.scroll - before.scroll) < 2, 'closing must retain the footer position');
+          assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
+          sourceChecks.push({ width, screen, bounds, close_button: true, keyboard_open: true, escape: true, focus_restored: true, scroll_preserved: true });
+        }
+      }
+      assert.deepEqual(issues, []);
+      fs.writeFileSync(`${evidence}/source-results.json`, JSON.stringify({ site: 'local HTTPS shell; actual engine UI fixtures', checks: sourceChecks, issues }, null, 2));
+      console.log(JSON.stringify({ source_dialog_checks: sourceChecks.length, issues }));
+      return;
+    }
     for (const width of [2560, 1280, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
       for (const id of ['empty-cup', 'noon-fold', 'meter-feast', 'mirror-shade', 'stored-night']) {

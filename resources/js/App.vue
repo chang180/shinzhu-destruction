@@ -16,6 +16,7 @@ const busy = ref(false);
 const playing = ref(false);
 const error = ref('');
 const notice = ref('');
+const sourcesDialog = ref<HTMLDialogElement>();
 const mode = ref<RunMode>('challenge');
 const previewedCard = ref<Card>();
 const currentEvent = ref<BattleEvent>();
@@ -303,6 +304,7 @@ function onVisibility(): void {
     else if (page.value === 'battle') audio.setAmbience(run.value?.level_id ?? null);
 }
 function onKey(event: KeyboardEvent): void {
+    if (sourcesDialog.value?.open) return;
     if (!playing.value) return;
     if (event.key === 'Escape') skip();
     if (event.key === 'Tab') { event.preventDefault(); document.querySelector<HTMLButtonElement>('.cutscene > button')?.focus(); }
@@ -539,7 +541,16 @@ onUnmounted(() => { skip(); if (ticker) clearInterval(ticker); document.removeEv
                 </article></details></section>
             </template>
         </main>
-        <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><a href="/docs/ASSET-SOURCES.md" @click.prevent="notice = '圖片：OpenAI image_gen 原創生成。新版音訊：原創聲音合成與短樂句。既有素材：Kenney（CC0）。來源與提示詞見 assets/visual-v2-generation.json、assets/visual-v2-audio.json 與既有素材 manifest。'">素材來源</a></footer>
+        <footer><span>世外高人 / 智慧沙盒創新計畫</span><span>虛構策略遊戲。城市被毀滅，是玩家勝利。</span><button type="button" class="source-link" aria-haspopup="dialog" @click="sourcesDialog?.showModal()">素材來源</button></footer>
+        <dialog ref="sourcesDialog" class="sources-dialog" aria-labelledby="sources-title">
+            <h2 id="sources-title">素材來源</h2>
+            <dl>
+                <dt>原創圖片</dt><dd>角色、城市與授課插畫由 OpenAI image_gen 原創生成。晏沉沿用同一角色設定，城市為台灣街廓元素的虛構組合。</dd>
+                <dt>原創音訊</dt><dd>目前的介面、戰鬥、氛圍與結局音訊為原創聲音合成及短樂句，未使用配音或第三方錄音。</dd>
+                <dt>既有開放素材</dt><dd>早期版本使用 Kenney 的 Particle Pack 與 Impact Sounds，授權為 CC0。相關來源與授權紀錄持續保留。</dd>
+            </dl>
+            <form method="dialog"><button type="submit" class="primary" autofocus>關閉</button></form>
+        </dialog>
         </div>
         <div v-if="currentEvent" class="cutscene" :class="{ ultimate: currentEvent.cue_id.includes('ultimate'), triumph: currentEvent.after.outcome === 'player_victory' }" role="dialog" aria-modal="true" aria-label="戰鬥演出"><img :src="asset(cueImage(currentEvent, run?.level_id))" :srcset="assetSrcSet(cueImage(currentEvent, run?.level_id))" sizes="(max-width: 760px) 100vw, 1100px" :alt="eventText(currentEvent)"><div class="cutscene-copy"><p class="eyebrow">第 {{ currentEvent.turn }} 回合 / {{ currentEvent.target ? elementNames[currentEvent.target] + '系' : (level?.name ?? '') }}</p><h2>{{ currentEvent.cue_id.includes('ultimate') && currentEvent.type !== 'outcome' ? (narrative?.ultimate ?? '揮霍無度・新竹歸寂') : eventText(currentEvent) }}</h2><p v-if="currentEvent.type === 'outcome'">{{ currentEvent.after.outcome === 'player_victory' ? `${level?.name ?? '本關'}修習通過。城市核心已歸零。` : '城市尚存韌性。回到課堂，檢查這次的決策。' }}</p><p v-if="currentEvent.type === 'action_missed'">決策時間用完了。這一回合你沒有出手，城市照預告行動。</p><p v-if="currentEvent.type === 'impact'">護盾吸收 {{ currentEvent.delta.absorbed }} · 命中前有效防線 {{ currentEvent.delta.effective_defense }}</p></div><button @click="skip">跳過演出 · Esc</button></div>
     </div>

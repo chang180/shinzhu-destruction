@@ -1,0 +1,306 @@
+{
+  "site": "local HTTPS shell; actual engine UI fixtures",
+  "checks": [
+    {
+      "width": 2560,
+      "screen": "lobby",
+      "bounds": {
+        "x": 980,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 2560,
+      "screen": "briefing",
+      "bounds": {
+        "x": 980,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 2560,
+      "screen": "battle",
+      "bounds": {
+        "x": 980,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 2560,
+      "screen": "report",
+      "bounds": {
+        "x": 980,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 2560,
+      "screen": "reward",
+      "bounds": {
+        "x": 980,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 1280,
+      "screen": "lobby",
+      "bounds": {
+        "x": 340,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 1280,
+      "screen": "briefing",
+      "bounds": {
+        "x": 340,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 1280,
+      "screen": "battle",
+      "bounds": {
+        "x": 340,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 1280,
+      "screen": "report",
+      "bounds": {
+        "x": 340,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 1280,
+      "screen": "reward",
+      "bounds": {
+        "x": 340,
+        "y": 196.984375,
+        "width": 600,
+        "height": 506.015625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 390,
+      "screen": "lobby",
+      "bounds": {
+        "x": 19,
+        "y": 153.796875,
+        "width": 352,
+        "height": 592.40625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 390,
+      "screen": "briefing",
+      "bounds": {
+        "x": 19,
+        "y": 153.796875,
+        "width": 352,
+        "height": 592.40625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 390,
+      "screen": "battle",
+      "bounds": {
+        "x": 19,
+        "y": 153.796875,
+        "width": 352,
+        "height": 592.40625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 390,
+      "screen": "report",
+      "bounds": {
+        "x": 19,
+        "y": 153.796875,
+        "width": 352,
+        "height": 592.40625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 390,
+      "screen": "reward",
+      "bounds": {
+        "x": 19,
+        "y": 153.796875,
+        "width": 352,
+        "height": 592.40625
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 320,
+      "screen": "lobby",
+      "bounds": {
+        "x": 19,
+        "y": 125,
+        "width": 282,
+        "height": 650
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 320,
+      "screen": "briefing",
+      "bounds": {
+        "x": 19,
+        "y": 125,
+        "width": 282,
+        "height": 650
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 320,
+      "screen": "battle",
+      "bounds": {
+        "x": 19,
+        "y": 125,
+        "width": 282,
+        "height": 650
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 320,
+      "screen": "report",
+      "bounds": {
+        "x": 19,
+        "y": 125,
+        "width": 282,
+        "height": 650
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    },
+    {
+      "width": 320,
+      "screen": "reward",
+      "bounds": {
+        "x": 19,
+        "y": 125,
+        "width": 282,
+        "height": 650
+      },
+      "close_button": true,
+      "keyboard_open": true,
+      "escape": true,
+      "focus_restored": true,
+      "scroll_preserved": true
+    }
+  ],
+  "issues": []
+}

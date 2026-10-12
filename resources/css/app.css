@@ -211,6 +211,9 @@ small,.small,.eyebrow,summary,.settings,.settings summary,.mode-picker legend,.m
 @media(max-width:760px){.acts{padding:14px}.acts>ol,.report-acts>ol{grid-template-columns:1fr}}
 
 /* Narrative frames preserve their full composition; state accents use saved server state. */
+.source-link{border:0;padding:0;color:var(--copper);text-decoration:underline;font-size:inherit;white-space:nowrap}
+.sources-dialog{width:min(600px,calc(100% - 32px));max-height:calc(100dvh - 48px);overflow:auto;padding:28px;color:var(--paper);background:#241d30;border:1px solid var(--copper);box-shadow:0 20px 80px #0008}
+.sources-dialog::backdrop{background:#100c19c9}.sources-dialog h2{font-size:1.6rem}.sources-dialog dt{color:var(--copper);font-weight:700;margin-top:20px}.sources-dialog dd{margin:8px 0 20px;line-height:1.8;font-size:1rem}.sources-dialog form{margin-top:24px;display:flex;justify-content:flex-end}
 .briefing{display:block}.briefing-art{width:100%;max-width:none;height:auto;margin:0 0 28px;position:relative}
 .briefing-art img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;background:#171321}
 .briefing>div:last-child{max-width:780px;margin:0 auto}.briefing-task{font-size:1.2rem;color:var(--copper);margin:0 0 20px}
