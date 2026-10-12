@@ -20,9 +20,9 @@ use Tests\TestCase;
  */
 class DifficultyProgressionTest extends TestCase
 {
-    private const REPORT = 'docs/phase-reports/data/p10-7/release-full-300.json';
+    private const REPORT = 'docs/phase-reports/data/p10-8/release-full-300.json';
 
-    private const SOLVER = 'docs/phase-reports/data/p10-7/solver-full-300.txt';
+    private const SOLVER = 'docs/phase-reports/data/p10-8/solver-full-300.txt';
 
     /**
      * 唯一一項已知且已揭露的未達門檻：第 1 關的失誤恢復率高於目標上限。
